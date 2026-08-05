@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Ciudad Segura - Registro Web</title>
+        <meta charset="UTF-8">
+    </head>
+    <body>
+        <h2>Registro de Usuario - Módulo Web (EV02)</h2>
+        <form action="UsuarioServlet" method="POST">
+            <label>Nombre:</label><br>
+            <input type="text" name="txtNombre" required><br><br>
+
+            <label>Correo:</label><br>
+            <input type="email" name="txtCorreo" required><br><br>
+
+            <label>Teléfono:</label><br>
+            <input type="text" name="txtTelefono" required><br><br>
+
+            <label>Rol:</label><br>
+            <input type="text" name="txtRol" required><br><br>
+
+            <input type="submit" value="Registrar en la Web">
+        </form>
+        <br>
+        <a href="listarUsuarios.jsp">Ver lista de usuarios registrados</a>
+    </body>
+</html>
