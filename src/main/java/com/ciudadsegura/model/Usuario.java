@@ -1,10 +1,17 @@
 package com.ciudadsegura.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 /**
  * Entidad que representa a un ciudadano registrado en el sistema.
- * Cada usuario puede crear múltiples reportes de incidentes.
+ * Cada usuario puede crear multiples reportes de incidentes.
+ *
+ * Las anotaciones de Bean Validation (@NotBlank, @Email, @Size) permiten
+ * que Spring valide automaticamente los datos recibidos en el servicio
+ * de registro antes de que lleguen a la logica de negocio.
  */
 @Entity
 @Table(name = "usuarios")
@@ -14,19 +21,24 @@ public class Usuario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "El nombre es obligatorio")
     @Column(nullable = false, length = 100)
     private String nombre;
 
+    @NotBlank(message = "El correo electronico es obligatorio")
+    @Email(message = "El correo electronico no tiene un formato valido")
     @Column(nullable = false, unique = true, length = 100)
     private String email;
 
+    @NotBlank(message = "La contrasena es obligatoria")
+    @Size(min = 6, message = "La contrasena debe tener al menos 6 caracteres")
     @Column(nullable = false)
     private String password;
 
     @Column(length = 20)
     private String telefono;
 
-    // Constructor vacío requerido por JPA
+    // Constructor vacio requerido por JPA
     public Usuario() {
     }
 

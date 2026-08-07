@@ -1,16 +1,24 @@
 package com.ciudadsegura.controller;
 
+import com.ciudadsegura.dto.UsuarioResponse;
 import com.ciudadsegura.model.Usuario;
 import com.ciudadsegura.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
- * Controlador REST para gestionar los usuarios (ciudadanos) del sistema.
- * Expone endpoints CRUD sobre el recurso /api/usuarios.
+ * Controlador REST administrativo para consultar y eliminar usuarios.
+ *
+ * El registro y el inicio de sesion NO se manejan aqui: para eso existe
+ * el servicio dedicado AuthController (/api/auth/registro y
+ * /api/auth/login), que valida los datos y cifra la contrasena con
+ * BCrypt. Este controlador solo expone operaciones de consulta y
+ * administracion, y nunca devuelve la contrasena del usuario.
  */
 @RestController
 @RequestMapping("/api/usuarios")
@@ -19,38 +27,20 @@ public class UsuarioController {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    // GET /api/usuarios -> lista todos los usuarios
+    // GET /api/usuarios -> lista todos los usuarios (sin exponer la contrasena)
     @GetMapping
-    public List<Usuario> listarUsuarios() {
-        return usuarioRepository.findAll();
+    public List<UsuarioResponse> listarUsuarios() {
+        return usuarioRepository.findAll().stream()
+                .map(UsuarioResponse::new)
+                .collect(Collectors.toList());
     }
 
-    // GET /api/usuarios/{id} -> obtiene un usuario por id
+    // GET /api/usuarios/{id} -> obtiene un usuario por id (sin la contrasena)
     @GetMapping("/{id}")
-    public ResponseEntity<Usuario> obtenerUsuario(@PathVariable Long id) {
+    public ResponseEntity<UsuarioResponse> obtenerUsuario(@PathVariable Long id) {
         Optional<Usuario> usuario = usuarioRepository.findById(id);
-        return usuario.map(ResponseEntity::ok)
+        return usuario.map(u -> ResponseEntity.ok(new UsuarioResponse(u)))
                        .orElse(ResponseEntity.notFound().build());
-    }
-
-    // POST /api/usuarios -> crea un nuevo usuario
-    @PostMapping
-    public Usuario crearUsuario(@RequestBody Usuario usuario) {
-        return usuarioRepository.save(usuario);
-    }
-
-    // PUT /api/usuarios/{id} -> actualiza un usuario existente
-    @PutMapping("/{id}")
-    public ResponseEntity<Usuario> actualizarUsuario(@PathVariable Long id,
-                                                       @RequestBody Usuario datosActualizados) {
-        return usuarioRepository.findById(id).map(usuario -> {
-            usuario.setNombre(datosActualizados.getNombre());
-            usuario.setEmail(datosActualizados.getEmail());
-            usuario.setPassword(datosActualizados.getPassword());
-            usuario.setTelefono(datosActualizados.getTelefono());
-            Usuario actualizado = usuarioRepository.save(usuario);
-            return ResponseEntity.ok(actualizado);
-        }).orElse(ResponseEntity.notFound().build());
     }
 
     // DELETE /api/usuarios/{id} -> elimina un usuario
