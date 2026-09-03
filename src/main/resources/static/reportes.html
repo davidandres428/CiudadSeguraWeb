@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ciudad Segura — Reportes</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header class="topbar">
+        <h1>🛡️ Ciudad Segura</h1>
+        <nav class="menu">
+            <a href="/index.html">Inicio</a>
+            <a href="/reportes.html" class="activo">Reportes</a>
+            <a href="/zonas.html">Zonas de riesgo</a>
+            <a href="/alertas.html">Alertas</a>
+            <a href="/usuarios.html">Usuarios</a>
+        </nav>
+        <div id="usuario-activo"></div>
+    </header>
+
+    <main>
+        <div class="tarjeta" id="tarjeta-form">
+            <h2>Nuevo reporte de incidente</h2>
+            <div id="msg-form" class="mensaje oculto"></div>
+            <div id="aviso-sesion" class="mensaje error oculto">Debes <a href="/login.html">iniciar sesión</a> para registrar un reporte.</div>
+            <form class="formulario" id="form-reporte">
+                <input type="hidden" id="reporte-id">
+                <div>
+                    <label>Título</label>
+                    <input type="text" id="reporte-titulo" required>
+                </div>
+                <div>
+                    <label>Descripción</label>
+                    <textarea id="reporte-descripcion" rows="3" required></textarea>
+                </div>
+                <div class="fila-form">
+                    <div>
+                        <label>Tipo</label>
+                        <select id="reporte-tipo" required>
+                            <option value="ROBO">Robo</option>
+                            <option value="VANDALISMO">Vandalismo</option>
+                            <option value="ACCIDENTE">Accidente</option>
+                            <option value="DISTURBIO">Disturbio</option>
+                        </select>
+                    </div>
+                    <div id="grupo-estado" class="oculto">
+                        <label>Estado</label>
+                        <select id="reporte-estado">
+                            <option value="PENDIENTE">Pendiente</option>
+                            <option value="EN_REVISION">En revisión</option>
+                            <option value="RESUELTO">Resuelto</option>
+                            <option value="DESCARTADO">Descartado</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="fila-form">
+                    <div>
+                        <label>Latitud</label>
+                        <input type="number" step="any" id="reporte-lat" required>
+                    </div>
+                    <div>
+                        <label>Longitud</label>
+                        <input type="number" step="any" id="reporte-lng" required>
+                    </div>
+                </div>
+                <div class="botones">
+                    <button type="submit" id="btn-reporte">Registrar reporte</button>
+                    <button type="button" class="secundario oculto" id="btn-cancelar-reporte" onclick="cancelarEdicionReporte()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="tarjeta">
+            <h2>Reportes registrados</h2>
+            <div class="fila-form" style="margin-bottom: 14px;">
+                <div>
+                    <label>Filtrar por estado</label>
+                    <select id="filtro-estado" onchange="cargarReportes()">
+                        <option value="">Todos</option>
+                        <option value="PENDIENTE">Pendiente</option>
+                        <option value="EN_REVISION">En revisión</option>
+                        <option value="RESUELTO">Resuelto</option>
+                        <option value="DESCARTADO">Descartado</option>
+                    </select>
+                </div>
+            </div>
+            <div id="msg-lista" class="mensaje oculto"></div>
+            <table>
+                <thead>
+                    <tr><th>ID</th><th>Título</th><th>Tipo</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr>
+                </thead>
+                <tbody id="tabla-reportes"></tbody>
+            </table>
+        </div>
+    </main>
+
+    <script src="/js/api.js"></script>
+    <script>
+        const usuario = Sesion.obtener();
+        if (!usuario) {
+            document.getElementById("aviso-sesion").classList.remove("oculto");
+            document.getElementById("form-reporte").classList.add("oculto");
+        }
+
+        async function cargarReportes() {
+            const estado = document.getElementById("filtro-estado").value;
+            const query = estado ? `?estado=${estado}` : "";
+            try {
+                const reportes = await CiudadSeguraAPI.listarReportes(query);
+                const tbody = document.getElementById("tabla-reportes");
+                tbody.innerHTML = reportes.map(r => `
+                    <tr>
+                        <td>${r.id}</td>
+                        <td>${r.titulo}</td>
+                        <td><span class="badge ${r.tipo}">${r.tipo}</span></td>
+                        <td><span class="badge ${r.estado}">${r.estado}</span></td>
+                        <td>${formatearFecha(r.fechaReporte)}</td>
+                        <td class="acciones-fila">
+                            <button onclick='editarReporte(${JSON.stringify(r)})'>Editar</button>
+                            <button class="peligro" onclick="eliminarReporte(${r.id})">Eliminar</button>
+                        </td>
+                    </tr>`).join("") || `<tr><td colspan="6">No hay reportes.</td></tr>`;
+            } catch (err) {
+                mostrarMensaje("msg-lista", err.message);
+            }
+        }
+
+        function editarReporte(r) {
+            document.getElementById("reporte-id").value = r.id;
+            document.getElementById("reporte-titulo").value = r.titulo;
+            document.getElementById("reporte-descripcion").value = r.descripcion;
+            document.getElementById("reporte-tipo").value = r.tipo;
+            document.getElementById("reporte-estado").value = r.estado;
+            document.getElementById("reporte-lat").value = r.latitud;
+            document.getElementById("reporte-lng").value = r.longitud;
+            document.getElementById("grupo-estado").classList.remove("oculto");
+            document.getElementById("btn-reporte").textContent = "Guardar cambios";
+            document.getElementById("btn-cancelar-reporte").classList.remove("oculto");
+            document.getElementById("form-reporte").classList.remove("oculto");
+            document.getElementById("aviso-sesion").classList.add("oculto");
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        function cancelarEdicionReporte() {
+            document.getElementById("form-reporte").reset();
+            document.getElementById("reporte-id").value = "";
+            document.getElementById("grupo-estado").classList.add("oculto");
+            document.getElementById("btn-reporte").textContent = "Registrar reporte";
+            document.getElementById("btn-cancelar-reporte").classList.add("oculto");
+        }
+
+        document.getElementById("form-reporte").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            ocultarMensaje("msg-form");
+            const id = document.getElementById("reporte-id").value;
+            const datos = {
+                titulo: document.getElementById("reporte-titulo").value,
+                descripcion: document.getElementById("reporte-descripcion").value,
+                tipo: document.getElementById("reporte-tipo").value,
+                estado: document.getElementById("reporte-estado").value,
+                latitud: parseFloat(document.getElementById("reporte-lat").value),
+                longitud: parseFloat(document.getElementById("reporte-lng").value),
+            };
+            try {
+                if (id) {
+                    await CiudadSeguraAPI.actualizarReporte(id, datos);
+                } else {
+                    await CiudadSeguraAPI.crearReporte(datos, usuario.id);
+                }
+                cancelarEdicionReporte();
+                cargarReportes();
+            } catch (err) {
+                mostrarMensaje("msg-form", err.message);
+            }
+        });
+
+        async function eliminarReporte(id) {
+            if (!confirm("¿Eliminar este reporte?")) return;
+            try {
+                await CiudadSeguraAPI.eliminarReporte(id);
+                cargarReportes();
+            } catch (err) {
+                mostrarMensaje("msg-lista", err.message);
+            }
+        }
+
+        cargarReportes();
+    </script>
+</body>
+</html>

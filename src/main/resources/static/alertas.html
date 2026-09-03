@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ciudad Segura — Alertas</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header class="topbar">
+        <h1>🛡️ Ciudad Segura</h1>
+        <nav class="menu">
+            <a href="/index.html">Inicio</a>
+            <a href="/reportes.html">Reportes</a>
+            <a href="/zonas.html">Zonas de riesgo</a>
+            <a href="/alertas.html" class="activo">Alertas</a>
+            <a href="/usuarios.html">Usuarios</a>
+        </nav>
+        <div id="usuario-activo"></div>
+    </header>
+
+    <main>
+        <div class="tarjeta">
+            <h2 id="titulo-form">Nueva alerta</h2>
+            <div id="msg-form" class="mensaje oculto"></div>
+            <form class="formulario" id="form-alerta">
+                <input type="hidden" id="alerta-id">
+                <div>
+                    <label>Título</label>
+                    <input type="text" id="alerta-titulo" required>
+                </div>
+                <div>
+                    <label>Mensaje</label>
+                    <textarea id="alerta-mensaje" rows="3" required></textarea>
+                </div>
+                <div class="fila-form">
+                    <div>
+                        <label>Tipo</label>
+                        <input type="text" id="alerta-tipo" placeholder="Ej: SEGURIDAD" required>
+                    </div>
+                    <div>
+                        <label>Zona de riesgo (opcional)</label>
+                        <select id="alerta-zona">
+                            <option value="">Ninguna</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Activa</label>
+                        <select id="alerta-activa">
+                            <option value="true">Sí</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="botones">
+                    <button type="submit" id="btn-alerta">Registrar alerta</button>
+                    <button type="button" class="secundario oculto" id="btn-cancelar-alerta" onclick="cancelarEdicionAlerta()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="tarjeta">
+            <h2>Alertas registradas</h2>
+            <div class="fila-form" style="margin-bottom: 14px;">
+                <div>
+                    <label>Mostrar</label>
+                    <select id="filtro-activas" onchange="cargarAlertas()">
+                        <option value="">Todas</option>
+                        <option value="true">Solo activas</option>
+                    </select>
+                </div>
+            </div>
+            <div id="msg-lista" class="mensaje oculto"></div>
+            <table>
+                <thead>
+                    <tr><th>ID</th><th>Título</th><th>Tipo</th><th>Zona</th><th>Activa</th><th>Fecha</th><th>Acciones</th></tr>
+                </thead>
+                <tbody id="tabla-alertas"></tbody>
+            </table>
+        </div>
+    </main>
+
+    <script src="/js/api.js"></script>
+    <script>
+        let zonasCache = [];
+
+        async function cargarZonasSelect() {
+            try {
+                zonasCache = await CiudadSeguraAPI.listarZonas();
+                const select = document.getElementById("alerta-zona");
+                select.innerHTML = `<option value="">Ninguna</option>` +
+                    zonasCache.map(z => `<option value="${z.id}">${z.nombre} (${z.nivelRiesgo})</option>`).join("");
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function cargarAlertas() {
+            const activas = document.getElementById("filtro-activas").value;
+            const query = activas ? `?activas=${activas}` : "";
+            try {
+                const alertas = await CiudadSeguraAPI.listarAlertas(query);
+                const tbody = document.getElementById("tabla-alertas");
+                tbody.innerHTML = alertas.map(a => `
+                    <tr>
+                        <td>${a.id}</td>
+                        <td>${a.titulo}</td>
+                        <td>${a.tipo}</td>
+                        <td>${a.zonaRiesgo ? a.zonaRiesgo.nombre : "-"}</td>
+                        <td>${a.activa ? "Sí" : "No"}</td>
+                        <td>${formatearFecha(a.fechaCreacion)}</td>
+                        <td class="acciones-fila">
+                            <button onclick='editarAlerta(${JSON.stringify(a)})'>Editar</button>
+                            <button class="peligro" onclick="eliminarAlerta(${a.id})">Eliminar</button>
+                        </td>
+                    </tr>`).join("") || `<tr><td colspan="7">No hay alertas.</td></tr>`;
+            } catch (err) {
+                mostrarMensaje("msg-lista", err.message);
+            }
+        }
+
+        function editarAlerta(a) {
+            document.getElementById("alerta-id").value = a.id;
+            document.getElementById("alerta-titulo").value = a.titulo;
+            document.getElementById("alerta-mensaje").value = a.mensaje;
+            document.getElementById("alerta-tipo").value = a.tipo;
+            document.getElementById("alerta-zona").value = a.zonaRiesgo ? a.zonaRiesgo.id : "";
+            document.getElementById("alerta-activa").value = String(a.activa);
+            document.getElementById("titulo-form").textContent = "Editar alerta";
+            document.getElementById("btn-alerta").textContent = "Guardar cambios";
+            document.getElementById("btn-cancelar-alerta").classList.remove("oculto");
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        function cancelarEdicionAlerta() {
+            document.getElementById("form-alerta").reset();
+            document.getElementById("alerta-id").value = "";
+            document.getElementById("titulo-form").textContent = "Nueva alerta";
+            document.getElementById("btn-alerta").textContent = "Registrar alerta";
+            document.getElementById("btn-cancelar-alerta").classList.add("oculto");
+        }
+
+        document.getElementById("form-alerta").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            ocultarMensaje("msg-form");
+            const id = document.getElementById("alerta-id").value;
+            const zonaId = document.getElementById("alerta-zona").value || null;
+            const datos = {
+                titulo: document.getElementById("alerta-titulo").value,
+                mensaje: document.getElementById("alerta-mensaje").value,
+                tipo: document.getElementById("alerta-tipo").value,
+                activa: document.getElementById("alerta-activa").value === "true",
+            };
+            try {
+                if (id) {
+                    await CiudadSeguraAPI.actualizarAlerta(id, datos, zonaId);
+                } else {
+                    await CiudadSeguraAPI.crearAlerta(datos, zonaId);
+                }
+                cancelarEdicionAlerta();
+                cargarAlertas();
+            } catch (err) {
+                mostrarMensaje("msg-form", err.message);
+            }
+        });
+
+        async function eliminarAlerta(id) {
+            if (!confirm("¿Eliminar esta alerta?")) return;
+            try {
+                await CiudadSeguraAPI.eliminarAlerta(id);
+                cargarAlertas();
+            } catch (err) {
+                mostrarMensaje("msg-lista", err.message);
+            }
+        }
+
+        cargarZonasSelect();
+        cargarAlertas();
+    </script>
+</body>
+</html>

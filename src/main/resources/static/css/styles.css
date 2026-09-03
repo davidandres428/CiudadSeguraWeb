@@ -1,0 +1,201 @@
+:root {
+    --azul: #1e3a5f;
+    --azul-claro: #2c5282;
+    --rojo: #c0392b;
+    --verde: #2e7d32;
+    --amarillo: #b7791f;
+    --fondo: #f4f6f8;
+    --borde: #dde3ea;
+    --texto: #263238;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: var(--fondo);
+    color: var(--texto);
+}
+
+header.topbar {
+    background: var(--azul);
+    color: #fff;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+header.topbar h1 {
+    font-size: 1.25rem;
+    margin: 0;
+}
+
+nav.menu {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+nav.menu a {
+    color: #fff;
+    text-decoration: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    background: rgba(255,255,255,0.08);
+    transition: background 0.15s;
+}
+
+nav.menu a:hover, nav.menu a.activo {
+    background: var(--azul-claro);
+}
+
+main {
+    max-width: 1000px;
+    margin: 24px auto;
+    padding: 0 20px 40px;
+}
+
+.tarjeta {
+    background: #fff;
+    border: 1px solid var(--borde);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+h2 { margin-top: 0; }
+
+.grid-modulos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.modulo {
+    display: block;
+    padding: 22px;
+    border-radius: 10px;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.05rem;
+}
+
+.modulo p {
+    font-weight: 400;
+    font-size: 0.85rem;
+    margin: 8px 0 0;
+    opacity: 0.9;
+}
+
+.modulo.usuarios { background: var(--azul-claro); }
+.modulo.reportes { background: var(--rojo); }
+.modulo.zonas { background: var(--amarillo); }
+.modulo.alertas { background: var(--verde); }
+
+form.formulario {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+form.formulario label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 4px;
+}
+
+form.formulario input,
+form.formulario select,
+form.formulario textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--borde);
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.fila-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.botones {
+    display: flex;
+    gap: 10px;
+}
+
+button, .boton {
+    cursor: pointer;
+    border: none;
+    padding: 9px 16px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    background: var(--azul);
+    color: #fff;
+}
+
+button.secundario { background: #90a4ae; }
+button.peligro { background: var(--rojo); }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+
+th, td {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--borde);
+}
+
+th { background: #eef1f4; }
+
+tr:hover td { background: #fafbfc; }
+
+.badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    color: #fff;
+}
+
+.badge.ALTO, .badge.ROBO, .badge.DISTURBIO { background: var(--rojo); }
+.badge.MEDIO, .badge.VANDALISMO, .badge.EN_REVISION { background: var(--amarillo); }
+.badge.BAJO, .badge.RESUELTO { background: var(--verde); }
+.badge.ACCIDENTE, .badge.PENDIENTE { background: #78909c; }
+.badge.DESCARTADO { background: #616161; }
+
+.mensaje {
+    padding: 10px 14px;
+    border-radius: 6px;
+    margin-bottom: 14px;
+    font-size: 0.88rem;
+}
+
+.mensaje.error { background: #fdecea; color: var(--rojo); border: 1px solid #f5c6c0; }
+.mensaje.exito { background: #eaf6ea; color: var(--verde); border: 1px solid #bfe3bf; }
+
+.acciones-fila { display: flex; gap: 6px; }
+.acciones-fila button { padding: 4px 10px; font-size: 0.78rem; }
+
+.oculto { display: none !important; }
+
+.usuario-activo {
+    color: #fff;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}

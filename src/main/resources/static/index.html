@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ciudad Segura</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header class="topbar">
+        <h1>🛡️ Ciudad Segura</h1>
+        <nav class="menu">
+            <a href="/index.html" class="activo">Inicio</a>
+            <a href="/reportes.html">Reportes</a>
+            <a href="/zonas.html">Zonas de riesgo</a>
+            <a href="/alertas.html">Alertas</a>
+            <a href="/usuarios.html">Usuarios</a>
+        </nav>
+        <div id="usuario-activo"></div>
+    </header>
+
+    <main>
+        <div class="tarjeta">
+            <h2>Menú principal</h2>
+            <p>Ciudad Segura integra en una sola aplicación los módulos de <strong>usuarios</strong>,
+               <strong>reportes de incidentes</strong>, <strong>zonas de riesgo</strong> y <strong>alertas</strong>,
+               todos conectados al mismo back-end (Spring Boot) y a la misma base de datos (MySQL).</p>
+        </div>
+
+        <div class="grid-modulos">
+            <a href="/reportes.html" class="modulo reportes">
+                📢 Reportes de incidentes
+                <p>Registra y consulta hechos de inseguridad reportados por los ciudadanos.</p>
+            </a>
+            <a href="/zonas.html" class="modulo zonas">
+                🗺️ Zonas de riesgo
+                <p>Consulta y administra zonas geográficas clasificadas por nivel de riesgo.</p>
+            </a>
+            <a href="/alertas.html" class="modulo alertas">
+                🚨 Alertas
+                <p>Emite y consulta alertas de seguridad, asociadas o no a una zona de riesgo.</p>
+            </a>
+            <a href="/usuarios.html" class="modulo usuarios">
+                👥 Usuarios
+                <p>Consulta, actualiza y elimina los ciudadanos registrados en el sistema.</p>
+            </a>
+        </div>
+    </main>
+
+    <script src="/js/api.js"></script>
+</body>
+</html>
