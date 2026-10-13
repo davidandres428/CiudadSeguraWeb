@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ciudad Segura · Reportes ciudadanos</title>
+  <meta name="description" content="Reporta y consulta incidentes de seguridad en tu ciudad." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <a class="marca" href="/">
+      <span class="marca-icono" aria-hidden="true">◆</span> Ciudad<b>Segura</b>
+    </a>
+    <nav class="sesion" id="sesion">
+      <button class="btn btn-fantasma" data-abrir="login">Iniciar sesión</button>
+      <button class="btn btn-primario" data-abrir="registro">Crear cuenta</button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <p class="sobretitulo">Red ciudadana de seguridad</p>
+      <h1>Lo que ves en tu barrio,<br /><em>todos lo sabemos.</em></h1>
+      <p class="lead">Reporta robos, vandalismo, accidentes o situaciones sospechosas y consulta en tiempo real lo que otros ciudadanos están reportando.</p>
+      <div class="hero-acciones">
+        <button class="btn btn-primario btn-grande" id="btn-nuevo">+ Nuevo reporte</button>
+        <a class="btn btn-fantasma btn-grande" href="#reportes">Ver reportes</a>
+      </div>
+      <dl class="contadores" id="contadores">
+        <div><dt>Total</dt><dd data-cont="total">–</dd></div>
+        <div><dt>Pendientes</dt><dd data-cont="pendiente">–</dd></div>
+        <div><dt>En revisión</dt><dd data-cont="en_revision">–</dd></div>
+        <div><dt>Resueltos</dt><dd data-cont="resuelto">–</dd></div>
+      </dl>
+    </section>
+
+    <section class="reportes" id="reportes">
+      <div class="reportes-cabecera">
+        <h2>Reportes recientes</h2>
+        <div class="filtros">
+          <label>Categoría
+            <select id="filtro-categoria">
+              <option value="">Todas</option>
+              <option value="robo">Robo</option>
+              <option value="vandalismo">Vandalismo</option>
+              <option value="accidente">Accidente</option>
+              <option value="sospechoso">Sospechoso</option>
+              <option value="otro">Otro</option>
+            </select>
+          </label>
+          <label>Estado
+            <select id="filtro-estado">
+              <option value="">Todos</option>
+              <option value="pendiente">Pendiente</option>
+              <option value="en_revision">En revisión</option>
+              <option value="resuelto">Resuelto</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <div class="lista" id="lista" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <footer class="pie">
+    <p>Ciudad Segura · Proyecto ciudadano. En caso de emergencia llama al <b>123</b>.</p>
+    <p class="estado-api" id="estado-api">Comprobando servidor…</p>
+  </footer>
+
+  <!-- Inicio de sesión -->
+  <dialog id="dlg-login" class="dialogo">
+    <form method="dialog" class="form" id="form-login" novalidate>
+      <h3>Iniciar sesión</h3>
+      <label>Correo electrónico<input name="email" type="email" required autocomplete="email" /></label>
+      <label>Contraseña<input name="password" type="password" required autocomplete="current-password" /></label>
+      <p class="error" role="alert"></p>
+      <div class="form-acciones">
+        <button type="button" class="btn btn-fantasma" data-cerrar>Cancelar</button>
+        <button type="submit" class="btn btn-primario">Entrar</button>
+      </div>
+      <p class="cambio">¿No tienes cuenta? <a href="#" data-abrir="registro">Regístrate</a></p>
+    </form>
+  </dialog>
+
+  <!-- Registro -->
+  <dialog id="dlg-registro" class="dialogo">
+    <form method="dialog" class="form" id="form-registro" novalidate>
+      <h3>Crear cuenta</h3>
+      <label>Nombre completo<input name="nombre" required maxlength="100" autocomplete="name" /></label>
+      <label>Correo electrónico<input name="email" type="email" required maxlength="100" autocomplete="email" /></label>
+      <label>Teléfono <span class="opcional">(opcional)</span><input name="telefono" type="tel" maxlength="20" autocomplete="tel" /></label>
+      <label>Contraseña<input name="password" type="password" required minlength="6" autocomplete="new-password" /></label>
+      <p class="error" role="alert"></p>
+      <div class="form-acciones">
+        <button type="button" class="btn btn-fantasma" data-cerrar>Cancelar</button>
+        <button type="submit" class="btn btn-primario">Registrarme</button>
+      </div>
+      <p class="cambio">¿Ya tienes cuenta? <a href="#" data-abrir="login">Inicia sesión</a></p>
+    </form>
+  </dialog>
+
+  <!-- Crear / editar reporte -->
+  <dialog id="dlg-reporte" class="dialogo">
+    <form method="dialog" class="form" id="form-reporte" novalidate>
+      <h3 data-titulo>Nuevo reporte</h3>
+      <input type="hidden" name="id" />
+      <label>Título<input name="titulo" required maxlength="150" placeholder="Ej. Robo de celular en el parque" /></label>
+      <label>Categoría
+        <select name="categoria" required>
+          <option value="robo">Robo</option>
+          <option value="vandalismo">Vandalismo</option>
+          <option value="accidente">Accidente</option>
+          <option value="sospechoso">Sospechoso</option>
+          <option value="otro">Otro</option>
+        </select>
+      </label>
+      <label>Ubicación<input name="ubicacion" required maxlength="200" placeholder="Barrio, calle o punto de referencia" /></label>
+      <label>Descripción<textarea name="descripcion" required maxlength="1000" rows="4" placeholder="¿Qué pasó? ¿Cuándo?"></textarea></label>
+      <label class="solo-editar">Estado
+        <select name="estado">
+          <option value="pendiente">Pendiente</option>
+          <option value="en_revision">En revisión</option>
+          <option value="resuelto">Resuelto</option>
+        </select>
+      </label>
+      <p class="error" role="alert"></p>
+      <div class="form-acciones">
+        <button type="button" class="btn btn-fantasma" data-cerrar>Cancelar</button>
+        <button type="submit" class="btn btn-primario">Guardar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="aviso" id="aviso" role="status"></div>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

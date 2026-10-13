@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Node / Netlify ###
+node_modules/
+.netlify/*
+!.netlify/results.md

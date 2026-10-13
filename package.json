@@ -1,0 +1,21 @@
+{
+  "name": "ciudad-segura-web",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Ciudad Segura: frontend estático + API en Netlify Functions con Netlify Database",
+  "scripts": {
+    "db:generate": "drizzle-kit generate"
+  },
+  "dependencies": {
+    "@netlify/database": "^2.0.1",
+    "bcryptjs": "^3.0.3",
+    "drizzle-orm": "^1.0.0-beta.22"
+  },
+  "devDependencies": {
+    "@netlify/functions": "^6.0.2",
+    "@types/node": "^26.6.5",
+    "drizzle-kit": "^1.0.0-beta.22",
+    "typescript": "^7.0.2"
+  }
+}

@@ -1,0 +1,8 @@
+[build]
+  # El frontend estático vive en /frontend; el backend Java no se despliega en Netlify
+  publish = "frontend"
+  command = ""
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
