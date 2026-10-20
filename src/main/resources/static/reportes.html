@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ciudad Segura — Reportes</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
@@ -70,11 +72,11 @@
                 <div class="fila-form">
                     <div>
                         <label>Latitud</label>
-                        <input type="number" step="any" id="reporte-lat">
+                        <input type="number" step="any" min="-90" max="90" id="reporte-lat">
                     </div>
                     <div>
                         <label>Longitud</label>
-                        <input type="number" step="any" id="reporte-lng">
+                        <input type="number" step="any" min="-180" max="180" id="reporte-lng">
                     </div>
                 </div>
                 <div class="botones">
@@ -86,6 +88,7 @@
 
         <div class="tarjeta">
             <h2>Reportes registrados</h2>
+            <p>Haz clic en el mapa para seleccionar la ubicación del reporte; haz clic en un marcador para consultar sus detalles.</p>
             <div class="fila-form" style="margin-bottom: 14px;">
                 <div>
                     <label>Filtrar por estado</label>
@@ -99,6 +102,7 @@
                 </div>
             </div>
             <div id="msg-lista" class="mensaje oculto"></div>
+            <div id="mapa-reportes" class="mapa" aria-label="Mapa de reportes de incidentes"></div>
             <table>
                 <thead>
                     <tr><th>ID</th><th>Título</th><th>Tipo</th><th>Prioridad</th><th>Dirección</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr>
@@ -110,9 +114,13 @@
 
     <script src="/js/api-config.js"></script>
     <script src="/js/api.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="/js/mapa-ciudad-segura.js"></script>
     <script>
         const usuario = Sesion.obtener();
         const reportesPorId = new Map();
+        let mapaReportes;
 
         function escaparHtml(valor) {
             return String(valor ?? "").replace(/[&<>"']/g, (caracter) => ({
@@ -135,6 +143,7 @@
             try {
                 const reportes = await CiudadSeguraAPI.listarReportes(query);
                 const tbody = document.getElementById("tabla-reportes");
+                mapaReportes.mostrarReportes(reportes, true);
                 reportesPorId.clear();
                 reportes.forEach(reporte => reportesPorId.set(String(reporte.id), reporte));
                 tbody.innerHTML = reportes.map(r => `
@@ -172,6 +181,9 @@
             document.getElementById("reporte-estado").value = r.estado;
             document.getElementById("reporte-lat").value = r.latitud;
             document.getElementById("reporte-lng").value = r.longitud;
+            if (r.latitud !== null && r.longitud !== null) {
+                mapaReportes.seleccionarCoordenadas(r.latitud, r.longitud);
+            }
             document.getElementById("grupo-estado").classList.remove("oculto");
             document.getElementById("btn-reporte").textContent = "Guardar cambios";
             document.getElementById("btn-cancelar-reporte").classList.remove("oculto");
@@ -227,6 +239,10 @@
             }
         }
 
+        mapaReportes = MapaCiudadSegura.crear("mapa-reportes", (latitud, longitud) => {
+            document.getElementById("reporte-lat").value = latitud.toFixed(6);
+            document.getElementById("reporte-lng").value = longitud.toFixed(6);
+        });
         cargarReportes();
     </script>
 </body>
