@@ -43,6 +43,13 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- PostgreSQL (perfil prod en Railway) -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
         <!-- Validaciones de campos -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
