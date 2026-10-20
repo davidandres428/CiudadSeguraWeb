@@ -45,6 +45,17 @@
                     <label>Email</label>
                     <input type="email" id="edit-email" required>
                 </div>
+                <div>
+                    <label>Rol</label>
+                    <select id="edit-rol">
+                        <option value="CIUDADANO">Ciudadano</option>
+                        <option value="ADMINISTRADOR">Administrador</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Nueva contraseña (opcional)</label>
+                    <input type="password" id="edit-password" minlength="6" autocomplete="new-password">
+                </div>
                 <div class="botones">
                     <button type="submit">Guardar cambios</button>
                     <button type="button" class="secundario" onclick="cancelarEdicion()">Cancelar</button>
@@ -59,6 +70,7 @@
         async function cargarUsuarios() {
             try {
                 const usuarios = await CiudadSeguraAPI.listarUsuarios();
+                usuariosCache = usuarios;
                 const tbody = document.getElementById("tabla-usuarios");
                 tbody.innerHTML = usuarios.map(u => `
                     <tr>
@@ -68,7 +80,7 @@
                         <td>${u.rol}</td>
                         <td>${formatearFecha(u.fechaRegistro)}</td>
                         <td class="acciones-fila">
-                            <button onclick="editar(${u.id}, '${u.nombre.replace(/'/g, "\\'")}', '${u.email}')">Editar</button>
+                            <button onclick="editar(${u.id})">Editar</button>
                             <button class="peligro" onclick="eliminar(${u.id})">Eliminar</button>
                         </td>
                     </tr>`).join("") || `<tr><td colspan="6">No hay usuarios registrados.</td></tr>`;
@@ -77,10 +89,15 @@
             }
         }
 
-        function editar(id, nombre, email) {
+        let usuariosCache = [];
+
+        function editar(id) {
+            const u = usuariosCache.find(x => x.id === id);
             document.getElementById("edit-id").value = id;
-            document.getElementById("edit-nombre").value = nombre;
-            document.getElementById("edit-email").value = email;
+            document.getElementById("edit-nombre").value = u.nombre;
+            document.getElementById("edit-email").value = u.email;
+            document.getElementById("edit-rol").value = u.rol;
+            document.getElementById("edit-password").value = "";
             document.getElementById("tarjeta-editar").classList.remove("oculto");
             window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
         }
@@ -96,6 +113,8 @@
                 await CiudadSeguraAPI.actualizarUsuario(id, {
                     nombre: document.getElementById("edit-nombre").value,
                     email: document.getElementById("edit-email").value,
+                    rol: document.getElementById("edit-rol").value,
+                    password: document.getElementById("edit-password").value || null,
                 });
                 cancelarEdicion();
                 cargarUsuarios();

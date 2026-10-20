@@ -63,6 +63,36 @@ class UsuarioServiceTest {
     }
 
     @Test
+    void actualizar_conRolYPassword_debeCambiarRolYEncriptar() {
+        UsuarioUpdateRequest datos = new UsuarioUpdateRequest();
+        datos.setNombre(usuario.getNombre());
+        datos.setEmail(usuario.getEmail());
+        datos.setRol(com.ciudadsegura.model.enums.RolUsuario.ADMINISTRADOR);
+        datos.setPassword("nueva123");
+
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.save(any(Usuario.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Usuario actualizado = usuarioService.actualizar(1L, datos);
+
+        assertEquals(com.ciudadsegura.model.enums.RolUsuario.ADMINISTRADOR, actualizado.getRol());
+        assertTrue(actualizado.getPassword().startsWith("$2"));
+    }
+
+    @Test
+    void actualizar_conEmailDeOtroUsuario_debeLanzarExcepcion() {
+        UsuarioUpdateRequest datos = new UsuarioUpdateRequest();
+        datos.setNombre("Ana");
+        datos.setEmail("otro@example.com");
+
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.existsByEmail("otro@example.com")).thenReturn(true);
+
+        assertThrows(com.ciudadsegura.exception.EmailDuplicadoException.class,
+                () -> usuarioService.actualizar(1L, datos));
+    }
+
+    @Test
     void actualizar_debeModificarNombreYEmail() {
         UsuarioUpdateRequest datos = new UsuarioUpdateRequest();
         datos.setNombre("Ana María Torres");

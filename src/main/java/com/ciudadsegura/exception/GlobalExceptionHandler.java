@@ -48,6 +48,12 @@ public class GlobalExceptionHandler {
         return construirError(HttpStatus.BAD_REQUEST, "Datos de entrada inválidos", ex.getMessage());
     }
 
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, String>> manejarIntegridad(org.springframework.dao.DataIntegrityViolationException ex) {
+        return construirError(HttpStatus.CONFLICT, "Operación no permitida",
+                "El registro tiene datos asociados (por ejemplo reportes) o viola una restricción de la base de datos");
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> manejarGeneral(Exception ex) {
         return construir(HttpStatus.INTERNAL_SERVER_ERROR, "Ocurrió un error inesperado: " + ex.getMessage());

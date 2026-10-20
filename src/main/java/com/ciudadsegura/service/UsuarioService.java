@@ -1,7 +1,9 @@
 package com.ciudadsegura.service;
 
 import com.ciudadsegura.dto.UsuarioUpdateRequest;
+import com.ciudadsegura.exception.EmailDuplicadoException;
 import com.ciudadsegura.exception.RecursoNoEncontradoException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import com.ciudadsegura.model.Usuario;
 import com.ciudadsegura.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
@@ -12,6 +14,7 @@ import java.util.List;
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public UsuarioService(UsuarioRepository usuarioRepository) {
         this.usuarioRepository = usuarioRepository;
@@ -29,7 +32,17 @@ public class UsuarioService {
     public Usuario actualizar(Long id, UsuarioUpdateRequest datos) {
         Usuario usuario = buscarPorId(id);
         usuario.setNombre(datos.getNombre());
+        if (!usuario.getEmail().equalsIgnoreCase(datos.getEmail())
+                && usuarioRepository.existsByEmail(datos.getEmail())) {
+            throw new EmailDuplicadoException("Ya existe un usuario registrado con el email " + datos.getEmail());
+        }
         usuario.setEmail(datos.getEmail());
+        if (datos.getRol() != null) {
+            usuario.setRol(datos.getRol());
+        }
+        if (datos.getPassword() != null && !datos.getPassword().isBlank()) {
+            usuario.setPassword(passwordEncoder.encode(datos.getPassword()));
+        }
         return usuarioRepository.save(usuario);
     }
 
