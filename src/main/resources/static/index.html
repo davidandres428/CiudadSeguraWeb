@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ciudad Segura</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
@@ -27,6 +29,17 @@
                todos conectados al mismo back-end (Spring Boot) y a la misma base de datos (MySQL).</p>
         </div>
 
+        <section class="tarjeta" aria-labelledby="titulo-mapa-principal">
+            <h2 id="titulo-mapa-principal">Incidentes y zonas de riesgo</h2>
+            <p>Consulta los reportes georreferenciados y las zonas de riesgo registradas.</p>
+            <div id="msg-mapa-principal" class="mensaje error oculto" role="alert"></div>
+            <div id="mapa-principal" class="mapa" aria-label="Mapa de incidentes y zonas de riesgo"></div>
+            <div class="leyenda-mapa">
+                <span><i class="leyenda-incidente"></i> Reporte de incidente</span>
+                <span><i class="leyenda-zona"></i> Zona de riesgo</span>
+            </div>
+        </section>
+
         <div class="grid-modulos">
             <a href="/reportes.html" class="modulo reportes">
                 📢 Reportes de incidentes
@@ -49,5 +62,25 @@
 
     <script src="/js/api-config.js"></script>
     <script src="/js/api.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="/js/mapa-ciudad-segura.js"></script>
+    <script>
+        async function cargarMapaPrincipal() {
+            try {
+                const mapa = MapaCiudadSegura.crear("mapa-principal");
+                const [reportes, zonas] = await Promise.all([
+                    CiudadSeguraAPI.listarReportes(),
+                    CiudadSeguraAPI.listarZonas(),
+                ]);
+                mapa.mostrarReportes(reportes);
+                mapa.mostrarZonas(zonas, true);
+            } catch (err) {
+                mostrarMensaje("msg-mapa-principal", err.message);
+            }
+        }
+
+        cargarMapaPrincipal();
+    </script>
 </body>
 </html>
