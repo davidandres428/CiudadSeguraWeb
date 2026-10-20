@@ -54,6 +54,11 @@ public class GlobalExceptionHandler {
                 "El registro tiene datos asociados (por ejemplo reportes) o viola una restricción de la base de datos");
     }
 
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> manejarAccesoDenegado(org.springframework.security.access.AccessDeniedException ex) {
+        return construir(HttpStatus.FORBIDDEN, "No tienes permiso para realizar esta acción");
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> manejarGeneral(Exception ex) {
         return construir(HttpStatus.INTERNAL_SERVER_ERROR, "Ocurrió un error inesperado: " + ex.getMessage());

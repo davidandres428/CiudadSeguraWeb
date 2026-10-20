@@ -10,9 +10,14 @@ const API_BASE = `${(window.CIUDAD_SEGURA_API_URL || "").replace(/\/$/, "")}/api
 /** Realiza una petición fetch y normaliza el manejo de errores del back-end. */
 async function apiFetch(path, options = {}) {
     const respuesta = await fetch(API_BASE + path, {
-        headers: { "Content-Type": "application/json" },
         ...options,
+        headers: { "Content-Type": "application/json", ...Sesion.cabeceraAuth(), ...(options.headers || {}) },
     });
+
+    if (respuesta.status === 401 && !path.startsWith("/auth/")) {
+        Sesion.cerrar();
+        throw new Error("Tu sesión expiró. Inicia sesión de nuevo.");
+    }
 
     if (respuesta.status === 204) {
         return null;
@@ -42,7 +47,7 @@ const CiudadSeguraAPI = {
     // --- Reportes de incidentes ---
     listarReportes: (params = "") => apiFetch(`/reportes${params}`),
     obtenerReporte: (id) => apiFetch(`/reportes/${id}`),
-    crearReporte: (datos, usuarioId) => apiFetch(`/reportes?usuarioId=${usuarioId}`, { method: "POST", body: JSON.stringify(datos) }),
+    crearReporte: (datos) => apiFetch("/reportes", { method: "POST", body: JSON.stringify(datos) }),
     actualizarReporte: (id, datos) => apiFetch(`/reportes/${id}`, { method: "PUT", body: JSON.stringify(datos) }),
     eliminarReporte: (id) => apiFetch(`/reportes/${id}`, { method: "DELETE" }),
 
@@ -63,8 +68,21 @@ const CiudadSeguraAPI = {
 
 // --- Sesión del ciudadano autenticado ---
 const Sesion = {
-    guardar(usuario) {
-        sessionStorage.setItem("cs_usuario", JSON.stringify(usuario));
+    /** Guarda la respuesta de login/registro: { token, usuario }. */
+    guardar(auth) {
+        sessionStorage.setItem("cs_usuario", JSON.stringify(auth.usuario));
+        sessionStorage.setItem("cs_token", auth.token);
+    },
+    token() {
+        return sessionStorage.getItem("cs_token");
+    },
+    cabeceraAuth() {
+        const t = Sesion.token();
+        return t ? { Authorization: `Bearer ${t}` } : {};
+    },
+    esAdmin() {
+        const u = Sesion.obtener();
+        return !!u && u.rol === "ADMINISTRADOR";
     },
     obtener() {
         const datos = sessionStorage.getItem("cs_usuario");
@@ -72,6 +90,7 @@ const Sesion = {
     },
     cerrar() {
         sessionStorage.removeItem("cs_usuario");
+        sessionStorage.removeItem("cs_token");
         window.location.href = "/login.html";
     },
 };
@@ -111,4 +130,16 @@ function formatearFecha(iso) {
     return f.toLocaleString("es-CO");
 }
 
-document.addEventListener("DOMContentLoaded", pintarUsuarioActivo);
+/** Exige sesión en todas las páginas salvo el login y oculta lo reservado a administradores. */
+function protegerPagina() {
+    if (!Sesion.token() && !location.pathname.endsWith("/login.html")) {
+        window.location.href = "/login.html";
+        return;
+    }
+    if (!Sesion.esAdmin()) document.body.classList.add("no-admin");
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    protegerPagina();
+    pintarUsuarioActivo();
+});

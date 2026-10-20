@@ -1,9 +1,11 @@
 package com.ciudadsegura.controller;
 
+import com.ciudadsegura.dto.AuthResponse;
 import com.ciudadsegura.dto.LoginRequest;
 import com.ciudadsegura.dto.RegistroRequest;
 import com.ciudadsegura.dto.UsuarioResponse;
 import com.ciudadsegura.model.Usuario;
+import com.ciudadsegura.security.JwtService;
 import com.ciudadsegura.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -15,20 +17,24 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final JwtService jwtService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, JwtService jwtService) {
         this.authService = authService;
+        this.jwtService = jwtService;
     }
 
     @PostMapping({"/registro", "/register"})
-    public ResponseEntity<UsuarioResponse> registrar(@Valid @RequestBody RegistroRequest request) {
-        Usuario usuario = authService.registrar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new UsuarioResponse(usuario));
+    public ResponseEntity<AuthResponse> registrar(@Valid @RequestBody RegistroRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(respuesta(authService.registrar(request)));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UsuarioResponse> login(@Valid @RequestBody LoginRequest request) {
-        Usuario usuario = authService.login(request);
-        return ResponseEntity.ok(new UsuarioResponse(usuario));
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+        return ResponseEntity.ok(respuesta(authService.login(request)));
+    }
+
+    private AuthResponse respuesta(Usuario usuario) {
+        return new AuthResponse(jwtService.generar(usuario), new UsuarioResponse(usuario));
     }
 }

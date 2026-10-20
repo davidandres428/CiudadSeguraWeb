@@ -14,13 +14,13 @@
             <a href="/reportes.html">Reportes</a>
             <a href="/zonas.html" class="activo">Zonas de riesgo</a>
             <a href="/alertas.html">Alertas</a>
-            <a href="/usuarios.html">Usuarios</a>
+            <a class="solo-admin" href="/usuarios.html">Usuarios</a>
         </nav>
         <div id="usuario-activo"></div>
     </header>
 
     <main>
-        <div class="tarjeta">
+        <div class="tarjeta solo-admin">
             <h2 id="titulo-form">Nueva zona de riesgo</h2>
             <div id="msg-form" class="mensaje oculto"></div>
             <form class="formulario" id="form-zona">
@@ -74,7 +74,7 @@
             <div id="msg-lista" class="mensaje oculto"></div>
             <table>
                 <thead>
-                    <tr><th>ID</th><th>Nombre</th><th>Nivel</th><th>Descripción</th><th>Acciones</th></tr>
+                    <tr><th>ID</th><th>Nombre</th><th>Nivel</th><th>Descripción</th><th class="solo-admin">Acciones</th></tr>
                 </thead>
                 <tbody id="tabla-zonas"></tbody>
             </table>
@@ -96,7 +96,7 @@
                         <td>${z.nombre}</td>
                         <td><span class="badge ${z.nivelRiesgo}">${z.nivelRiesgo}</span></td>
                         <td>${z.descripcion || "-"}</td>
-                        <td class="acciones-fila">
+                        <td class="acciones-fila solo-admin">
                             <button onclick='editarZona(${JSON.stringify(z)})'>Editar</button>
                             <button class="peligro" onclick="eliminarZona(${z.id})">Eliminar</button>
                         </td>
