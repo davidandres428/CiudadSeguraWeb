@@ -8,6 +8,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -28,21 +30,22 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(EmailDuplicadoException.class)
-    public ResponseEntity<ErrorResponse> manejarEmailDuplicado(EmailDuplicadoException ex) {
-        return construir(HttpStatus.CONFLICT, ex.getMessage());
+    public ResponseEntity<Map<String, String>> manejarEmailDuplicado(EmailDuplicadoException ex) {
+        return construirError(HttpStatus.CONFLICT, "Correo ya registrado", ex.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> manejarValidacion(MethodArgumentNotValidException ex) {
-        String mensaje = ex.getBindingResult().getFieldErrors().stream()
+    public ResponseEntity<Map<String, String>> manejarValidacion(MethodArgumentNotValidException ex) {
+        String detalles = ex.getBindingResult().getFieldErrors().stream()
                 .map(FieldError::getDefaultMessage)
-                .collect(Collectors.joining("; "));
-        return construir(HttpStatus.BAD_REQUEST, mensaje);
+                .distinct()
+                .collect(Collectors.joining(" y "));
+        return construirError(HttpStatus.BAD_REQUEST, "Datos de entrada inválidos", detalles);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponse> manejarArgumentoInvalido(IllegalArgumentException ex) {
-        return construir(HttpStatus.BAD_REQUEST, ex.getMessage());
+    public ResponseEntity<Map<String, String>> manejarArgumentoInvalido(IllegalArgumentException ex) {
+        return construirError(HttpStatus.BAD_REQUEST, "Datos de entrada inválidos", ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
@@ -52,5 +55,12 @@ public class GlobalExceptionHandler {
 
     private ResponseEntity<ErrorResponse> construir(HttpStatus status, String mensaje) {
         return ResponseEntity.status(status).body(new ErrorResponse(status.value(), mensaje));
+    }
+
+    private ResponseEntity<Map<String, String>> construirError(HttpStatus status, String error, String detalles) {
+        Map<String, String> body = new LinkedHashMap<>();
+        body.put("error", error);
+        body.put("detalles", detalles);
+        return ResponseEntity.status(status).body(body);
     }
 }

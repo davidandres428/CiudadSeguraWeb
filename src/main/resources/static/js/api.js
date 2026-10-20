@@ -5,7 +5,7 @@
  * de la sesión del usuario autenticado (guardada en memoria + sessionStorage).
  */
 
-const API_BASE = "/api";
+const API_BASE = `${(window.CIUDAD_SEGURA_API_URL || "").replace(/\/$/, "")}/api`;
 
 /** Realiza una petición fetch y normaliza el manejo de errores del back-end. */
 async function apiFetch(path, options = {}) {
@@ -22,7 +22,9 @@ async function apiFetch(path, options = {}) {
     const datos = texto ? JSON.parse(texto) : null;
 
     if (!respuesta.ok) {
-        const mensaje = (datos && datos.mensaje) ? datos.mensaje : `Error ${respuesta.status}`;
+        const mensaje = datos && (datos.mensaje || datos.detalles || datos.error)
+            ? (datos.mensaje || datos.detalles || datos.error)
+            : `Error ${respuesta.status}`;
         throw new Error(mensaje);
     }
     return datos;

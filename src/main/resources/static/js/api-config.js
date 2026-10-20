@@ -1,0 +1,1 @@
+window.CIUDAD_SEGURA_API_URL = "";

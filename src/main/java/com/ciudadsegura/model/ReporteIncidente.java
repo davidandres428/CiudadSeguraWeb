@@ -1,10 +1,12 @@
 package com.ciudadsegura.model;
 
 import com.ciudadsegura.model.enums.EstadoReporte;
+import com.ciudadsegura.model.enums.PrioridadReporte;
 import com.ciudadsegura.model.enums.TipoReporte;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
 
@@ -29,16 +31,24 @@ public class ReporteIncidente {
     @Column(nullable = false)
     private TipoReporte tipo;
 
+    @NotNull(message = "La prioridad es obligatoria")
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PrioridadReporte prioridad;
+
+    @NotBlank(message = "La dirección es obligatoria")
+    @Size(max = 250, message = "La dirección no puede superar 250 caracteres")
+    @Column(nullable = false, length = 250)
+    private String direccion;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private EstadoReporte estado = EstadoReporte.PENDIENTE;
 
-    @NotNull(message = "La latitud es obligatoria")
-    @Column(nullable = false)
+    @Column
     private Double latitud;
 
-    @NotNull(message = "La longitud es obligatoria")
-    @Column(nullable = false)
+    @Column
     private Double longitud;
 
     @Column(name = "fecha_reporte", nullable = false, updatable = false)
@@ -89,6 +99,22 @@ public class ReporteIncidente {
 
     public void setTipo(TipoReporte tipo) {
         this.tipo = tipo;
+    }
+
+    public PrioridadReporte getPrioridad() {
+        return prioridad;
+    }
+
+    public void setPrioridad(PrioridadReporte prioridad) {
+        this.prioridad = prioridad;
+    }
+
+    public String getDireccion() {
+        return direccion;
+    }
+
+    public void setDireccion(String direccion) {
+        this.direccion = direccion;
     }
 
     public EstadoReporte getEstado() {

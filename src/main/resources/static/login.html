@@ -50,6 +50,13 @@
                     <label>Contraseña (mínimo 6 caracteres)</label>
                     <input type="password" id="reg-password" minlength="6" required>
                 </div>
+                <div>
+                    <label>Tipo de usuario</label>
+                    <select id="reg-rol" required>
+                        <option value="CIUDADANO">Ciudadano</option>
+                        <option value="ADMINISTRADOR">Administrador</option>
+                    </select>
+                </div>
                 <div class="botones">
                     <button type="submit">Crear cuenta</button>
                 </div>
@@ -57,6 +64,7 @@
         </div>
     </main>
 
+    <script src="/js/api-config.js"></script>
     <script src="/js/api.js"></script>
     <script>
         document.getElementById("form-login").addEventListener("submit", async (e) => {
@@ -82,6 +90,7 @@
                     nombre: document.getElementById("reg-nombre").value,
                     email: document.getElementById("reg-email").value,
                     password: document.getElementById("reg-password").value,
+                    rol: document.getElementById("reg-rol").value,
                 });
                 Sesion.guardar(usuario);
                 mostrarMensaje("msg-registro", "Cuenta creada con éxito. Redirigiendo...", "exito");

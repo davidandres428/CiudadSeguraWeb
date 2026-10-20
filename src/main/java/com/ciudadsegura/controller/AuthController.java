@@ -20,7 +20,7 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @PostMapping("/registro")
+    @PostMapping({"/registro", "/register"})
     public ResponseEntity<UsuarioResponse> registrar(@Valid @RequestBody RegistroRequest request) {
         Usuario usuario = authService.registrar(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(new UsuarioResponse(usuario));

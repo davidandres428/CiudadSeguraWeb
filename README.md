@@ -10,8 +10,8 @@ ejecutar desde una interfaz real en el navegador.
 
 ## Módulos integrados
 
-1. **Usuarios**: registro e inicio de sesión de ciudadanos (contraseña cifrada con BCrypt), y CRUD de usuarios.
-2. **Reportes de incidentes**: los ciudadanos reportan hechos de inseguridad (robo, vandalismo, accidente, disturbio) en una ubicación geográfica.
+1. **Usuarios**: registro e inicio de sesión (contraseña cifrada con BCrypt), con rol de ciudadano o administrador, y CRUD de usuarios.
+2. **Reportes de incidentes**: registro de hechos de inseguridad con tipo, prioridad, dirección y descripción; las coordenadas son opcionales.
 3. **Zonas de riesgo**: zonas geográficas clasificadas por nivel de riesgo (bajo, medio, alto).
 4. **Alertas**: notificaciones emitidas a los ciudadanos, opcionalmente asociadas a una zona de riesgo.
 
@@ -21,7 +21,7 @@ funcionen de extremo a extremo.
 
 ## Tecnologías
 
-- Java 17 · Spring Boot 3.2.3
+- Java 25 · Spring Boot 4.1.1
 - Spring Web (API REST) + front-end estático (HTML, CSS y JavaScript puro) servido desde `src/main/resources/static`
 - Spring Data JPA + MySQL
 - Spring Validation (`@NotBlank`, `@Email`, etc.)
@@ -68,6 +68,13 @@ src/test/java/com/ciudadsegura/service/  -> pruebas unitarias (JUnit 5 + Mockito
 4. Abrir el navegador en `http://localhost:8080` — ahí se carga el **menú principal** con acceso
    a los cuatro módulos.
 5. Para registrarte como ciudadano y poder crear reportes, entra a `http://localhost:8080/login.html`.
+6. Para desplegar el front-end por separado en Vercel, configura la URL base pública del back-end en `src/main/resources/static/js/api-config.js` (por ejemplo, `https://mi-api.example.com`, sin `/api` al final).
+
+> El registro permite seleccionar el rol, incluido `ADMINISTRADOR`, según el alcance solicitado. No expongas esa opción en una aplicación pública sin implementar autenticación y autorización para restringir la asignación de roles.
+
+### CORS
+
+La API acepta solicitudes desde orígenes `https://*.vercel.app` y desde `localhost` para desarrollo. Si usas un dominio personalizado en Vercel, agrega su origen a `CorsConfig`.
 
 ## Ejecutar las pruebas unitarias
 
@@ -80,7 +87,7 @@ src/test/java/com/ciudadsegura/service/  -> pruebas unitarias (JUnit 5 + Mockito
 ### Autenticación — `/api/auth`
 | Método | Endpoint | Descripción |
 |---|---|---|
-| POST | `/api/auth/registro` | Registra un nuevo usuario (nombre, email, password) |
+| POST | `/api/auth/registro` | Registra un nuevo usuario (nombre, email, password y rol opcional `CIUDADANO` o `ADMINISTRADOR`; por defecto `CIUDADANO`) |
 | POST | `/api/auth/login` | Valida credenciales y retorna los datos del usuario |
 
 ### Usuarios — `/api/usuarios`
@@ -108,10 +115,13 @@ Cuerpo JSON esperado en POST/PUT:
   "titulo": "Robo en la calle 45",
   "descripcion": "Robo a mano armada frente al parque",
   "tipo": "ROBO",
+  "prioridad": "ALTA",
+  "direccion": "Calle 45 con carrera 7, Bogotá",
   "latitud": 4.710989,
   "longitud": -74.072092
 }
 ```
+Los campos `latitud` y `longitud` son opcionales; `titulo`, `descripcion`, `tipo`, `prioridad` y `direccion` son obligatorios.
 
 ### Zonas de riesgo — `/api/zonas-riesgo`
 | Método | Endpoint | Descripción |

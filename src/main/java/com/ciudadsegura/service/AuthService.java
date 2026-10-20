@@ -25,6 +25,9 @@ public class AuthService {
         }
         String hash = passwordEncoder.encode(request.getPassword());
         Usuario usuario = new Usuario(request.getNombre(), request.getEmail(), hash);
+        if (request.getRol() != null) {
+            usuario.setRol(request.getRol());
+        }
         return usuarioRepository.save(usuario);
     }
 

@@ -1,6 +1,7 @@
 package com.ciudadsegura.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.ciudadsegura.model.enums.RolUsuario;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -30,6 +31,10 @@ public class Usuario {
     @JsonIgnore
     @Column(nullable = false)
     private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private RolUsuario rol = RolUsuario.CIUDADANO;
 
     @Column(name = "fecha_registro", nullable = false, updatable = false)
     private LocalDateTime fechaRegistro;
@@ -78,6 +83,14 @@ public class Usuario {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public RolUsuario getRol() {
+        return rol;
+    }
+
+    public void setRol(RolUsuario rol) {
+        this.rol = rol;
     }
 
     public LocalDateTime getFechaRegistro() {

@@ -34,6 +34,10 @@
                     <label>Descripción</label>
                     <textarea id="reporte-descripcion" rows="3" required></textarea>
                 </div>
+                <div>
+                    <label>Dirección</label>
+                    <input type="text" id="reporte-direccion" maxlength="250" required>
+                </div>
                 <div class="fila-form">
                     <div>
                         <label>Tipo</label>
@@ -42,6 +46,15 @@
                             <option value="VANDALISMO">Vandalismo</option>
                             <option value="ACCIDENTE">Accidente</option>
                             <option value="DISTURBIO">Disturbio</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Prioridad</label>
+                        <select id="reporte-prioridad" required>
+                            <option value="BAJA">Baja</option>
+                            <option value="MEDIA">Media</option>
+                            <option value="ALTA">Alta</option>
+                            <option value="URGENTE">Urgente</option>
                         </select>
                     </div>
                     <div id="grupo-estado" class="oculto">
@@ -57,11 +70,11 @@
                 <div class="fila-form">
                     <div>
                         <label>Latitud</label>
-                        <input type="number" step="any" id="reporte-lat" required>
+                        <input type="number" step="any" id="reporte-lat">
                     </div>
                     <div>
                         <label>Longitud</label>
-                        <input type="number" step="any" id="reporte-lng" required>
+                        <input type="number" step="any" id="reporte-lng">
                     </div>
                 </div>
                 <div class="botones">
@@ -88,16 +101,29 @@
             <div id="msg-lista" class="mensaje oculto"></div>
             <table>
                 <thead>
-                    <tr><th>ID</th><th>Título</th><th>Tipo</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr>
+                    <tr><th>ID</th><th>Título</th><th>Tipo</th><th>Prioridad</th><th>Dirección</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr>
                 </thead>
                 <tbody id="tabla-reportes"></tbody>
             </table>
         </div>
     </main>
 
+    <script src="/js/api-config.js"></script>
     <script src="/js/api.js"></script>
     <script>
         const usuario = Sesion.obtener();
+        const reportesPorId = new Map();
+
+        function escaparHtml(valor) {
+            return String(valor ?? "").replace(/[&<>"']/g, (caracter) => ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                "\"": "&quot;",
+                "'": "&#39;",
+            })[caracter]);
+        }
+
         if (!usuario) {
             document.getElementById("aviso-sesion").classList.remove("oculto");
             document.getElementById("form-reporte").classList.add("oculto");
@@ -109,18 +135,28 @@
             try {
                 const reportes = await CiudadSeguraAPI.listarReportes(query);
                 const tbody = document.getElementById("tabla-reportes");
+                reportesPorId.clear();
+                reportes.forEach(reporte => reportesPorId.set(String(reporte.id), reporte));
                 tbody.innerHTML = reportes.map(r => `
                     <tr>
                         <td>${r.id}</td>
-                        <td>${r.titulo}</td>
-                        <td><span class="badge ${r.tipo}">${r.tipo}</span></td>
-                        <td><span class="badge ${r.estado}">${r.estado}</span></td>
+                        <td>${escaparHtml(r.titulo)}</td>
+                        <td><span class="badge ${escaparHtml(r.tipo)}">${escaparHtml(r.tipo)}</span></td>
+                        <td>${escaparHtml(r.prioridad)}</td>
+                        <td>${escaparHtml(r.direccion)}</td>
+                        <td><span class="badge ${escaparHtml(r.estado)}">${escaparHtml(r.estado)}</span></td>
                         <td>${formatearFecha(r.fechaReporte)}</td>
                         <td class="acciones-fila">
-                            <button onclick='editarReporte(${JSON.stringify(r)})'>Editar</button>
-                            <button class="peligro" onclick="eliminarReporte(${r.id})">Eliminar</button>
+                            <button data-editar="${r.id}">Editar</button>
+                            <button class="peligro" data-eliminar="${r.id}">Eliminar</button>
                         </td>
-                    </tr>`).join("") || `<tr><td colspan="6">No hay reportes.</td></tr>`;
+                    </tr>`).join("") || `<tr><td colspan="8">No hay reportes.</td></tr>`;
+                tbody.querySelectorAll("[data-editar]").forEach(boton => {
+                    boton.addEventListener("click", () => editarReporte(reportesPorId.get(boton.dataset.editar)));
+                });
+                tbody.querySelectorAll("[data-eliminar]").forEach(boton => {
+                    boton.addEventListener("click", () => eliminarReporte(boton.dataset.eliminar));
+                });
             } catch (err) {
                 mostrarMensaje("msg-lista", err.message);
             }
@@ -130,7 +166,9 @@
             document.getElementById("reporte-id").value = r.id;
             document.getElementById("reporte-titulo").value = r.titulo;
             document.getElementById("reporte-descripcion").value = r.descripcion;
+            document.getElementById("reporte-direccion").value = r.direccion;
             document.getElementById("reporte-tipo").value = r.tipo;
+            document.getElementById("reporte-prioridad").value = r.prioridad;
             document.getElementById("reporte-estado").value = r.estado;
             document.getElementById("reporte-lat").value = r.latitud;
             document.getElementById("reporte-lng").value = r.longitud;
@@ -157,10 +195,14 @@
             const datos = {
                 titulo: document.getElementById("reporte-titulo").value,
                 descripcion: document.getElementById("reporte-descripcion").value,
+                direccion: document.getElementById("reporte-direccion").value,
                 tipo: document.getElementById("reporte-tipo").value,
+                prioridad: document.getElementById("reporte-prioridad").value,
                 estado: document.getElementById("reporte-estado").value,
-                latitud: parseFloat(document.getElementById("reporte-lat").value),
-                longitud: parseFloat(document.getElementById("reporte-lng").value),
+                latitud: document.getElementById("reporte-lat").value
+                    ? parseFloat(document.getElementById("reporte-lat").value) : null,
+                longitud: document.getElementById("reporte-lng").value
+                    ? parseFloat(document.getElementById("reporte-lng").value) : null,
             };
             try {
                 if (id) {

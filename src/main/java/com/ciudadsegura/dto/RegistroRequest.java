@@ -1,5 +1,6 @@
 package com.ciudadsegura.dto;
 
+import com.ciudadsegura.model.enums.RolUsuario;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -16,6 +17,8 @@ public class RegistroRequest {
     @NotBlank(message = "La contraseña es obligatoria")
     @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
     private String password;
+
+    private RolUsuario rol;
 
     public String getNombre() {
         return nombre;
@@ -39,5 +42,13 @@ public class RegistroRequest {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public RolUsuario getRol() {
+        return rol;
+    }
+
+    public void setRol(RolUsuario rol) {
+        this.rol = rol;
     }
 }

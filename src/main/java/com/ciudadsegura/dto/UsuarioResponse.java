@@ -1,6 +1,7 @@
 package com.ciudadsegura.dto;
 
 import com.ciudadsegura.model.Usuario;
+import com.ciudadsegura.model.enums.RolUsuario;
 
 import java.time.LocalDateTime;
 
@@ -12,6 +13,7 @@ public class UsuarioResponse {
     private Long id;
     private String nombre;
     private String email;
+    private RolUsuario rol;
     private LocalDateTime fechaRegistro;
 
     public UsuarioResponse() {
@@ -21,6 +23,7 @@ public class UsuarioResponse {
         this.id = usuario.getId();
         this.nombre = usuario.getNombre();
         this.email = usuario.getEmail();
+        this.rol = usuario.getRol();
         this.fechaRegistro = usuario.getFechaRegistro();
     }
 
@@ -46,6 +49,14 @@ public class UsuarioResponse {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public RolUsuario getRol() {
+        return rol;
+    }
+
+    public void setRol(RolUsuario rol) {
+        this.rol = rol;
     }
 
     public LocalDateTime getFechaRegistro() {

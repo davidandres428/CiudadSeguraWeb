@@ -51,6 +51,8 @@ public class ReporteIncidenteService {
         reporte.setTitulo(datos.getTitulo());
         reporte.setDescripcion(datos.getDescripcion());
         reporte.setTipo(datos.getTipo());
+        reporte.setPrioridad(datos.getPrioridad());
+        reporte.setDireccion(datos.getDireccion());
         reporte.setLatitud(datos.getLatitud());
         reporte.setLongitud(datos.getLongitud());
         if (datos.getEstado() != null) {

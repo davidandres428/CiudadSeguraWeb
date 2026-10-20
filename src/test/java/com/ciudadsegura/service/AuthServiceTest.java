@@ -5,6 +5,7 @@ import com.ciudadsegura.dto.RegistroRequest;
 import com.ciudadsegura.exception.CredencialesInvalidasException;
 import com.ciudadsegura.exception.EmailDuplicadoException;
 import com.ciudadsegura.model.Usuario;
+import com.ciudadsegura.model.enums.RolUsuario;
 import com.ciudadsegura.repository.UsuarioRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,6 +47,23 @@ class AuthServiceTest {
 
         assertNotEquals("secreto123", captor.getValue().getPassword(), "La contraseña debe quedar cifrada, no en texto plano");
         assertEquals("carlos@example.com", resultado.getEmail());
+        assertEquals(RolUsuario.CIUDADANO, resultado.getRol());
+    }
+
+    @Test
+    void registrar_conRolAdministrador_debeGuardarElRolElegido() {
+        RegistroRequest request = new RegistroRequest();
+        request.setNombre("Administradora");
+        request.setEmail("admin@example.com");
+        request.setPassword("secreto123");
+        request.setRol(RolUsuario.ADMINISTRADOR);
+
+        when(usuarioRepository.existsByEmail("admin@example.com")).thenReturn(false);
+        when(usuarioRepository.save(any(Usuario.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Usuario resultado = authService.registrar(request);
+
+        assertEquals(RolUsuario.ADMINISTRADOR, resultado.getRol());
     }
 
     @Test
