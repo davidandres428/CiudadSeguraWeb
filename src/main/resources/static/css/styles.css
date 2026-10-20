@@ -199,3 +199,5 @@ tr:hover td { background: #fafbfc; }
     align-items: center;
     gap: 10px;
 }
+
+.no-admin .solo-admin { display: none !important; }

@@ -14,7 +14,7 @@
             <a href="/reportes.html" class="activo">Reportes</a>
             <a href="/zonas.html">Zonas de riesgo</a>
             <a href="/alertas.html">Alertas</a>
-            <a href="/usuarios.html">Usuarios</a>
+            <a class="solo-admin" href="/usuarios.html">Usuarios</a>
         </nav>
         <div id="usuario-activo"></div>
     </header>
@@ -208,7 +208,7 @@
                 if (id) {
                     await CiudadSeguraAPI.actualizarReporte(id, datos);
                 } else {
-                    await CiudadSeguraAPI.crearReporte(datos, usuario.id);
+                    await CiudadSeguraAPI.crearReporte(datos);
                 }
                 cancelarEdicionReporte();
                 cargarReportes();

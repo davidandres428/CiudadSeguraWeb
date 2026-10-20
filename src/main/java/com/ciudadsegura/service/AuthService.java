@@ -25,9 +25,7 @@ public class AuthService {
         }
         String hash = passwordEncoder.encode(request.getPassword());
         Usuario usuario = new Usuario(request.getNombre(), request.getEmail(), hash);
-        if (request.getRol() != null) {
-            usuario.setRol(request.getRol());
-        }
+        // El registro público siempre crea ciudadanos; los administradores se asignan desde /api/usuarios.
         return usuarioRepository.save(usuario);
     }
 

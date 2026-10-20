@@ -14,13 +14,13 @@
             <a href="/reportes.html">Reportes</a>
             <a href="/zonas.html">Zonas de riesgo</a>
             <a href="/alertas.html" class="activo">Alertas</a>
-            <a href="/usuarios.html">Usuarios</a>
+            <a class="solo-admin" href="/usuarios.html">Usuarios</a>
         </nav>
         <div id="usuario-activo"></div>
     </header>
 
     <main>
-        <div class="tarjeta">
+        <div class="tarjeta solo-admin">
             <h2 id="titulo-form">Nueva alerta</h2>
             <div id="msg-form" class="mensaje oculto"></div>
             <form class="formulario" id="form-alerta">
@@ -73,7 +73,7 @@
             <div id="msg-lista" class="mensaje oculto"></div>
             <table>
                 <thead>
-                    <tr><th>ID</th><th>Título</th><th>Tipo</th><th>Zona</th><th>Activa</th><th>Fecha</th><th>Acciones</th></tr>
+                    <tr><th>ID</th><th>Título</th><th>Tipo</th><th>Zona</th><th>Activa</th><th>Fecha</th><th class="solo-admin">Acciones</th></tr>
                 </thead>
                 <tbody id="tabla-alertas"></tbody>
             </table>
@@ -110,7 +110,7 @@
                         <td>${a.zonaRiesgo ? a.zonaRiesgo.nombre : "-"}</td>
                         <td>${a.activa ? "Sí" : "No"}</td>
                         <td>${formatearFecha(a.fechaCreacion)}</td>
-                        <td class="acciones-fila">
+                        <td class="acciones-fila solo-admin">
                             <button onclick='editarAlerta(${JSON.stringify(a)})'>Editar</button>
                             <button class="peligro" onclick="eliminarAlerta(${a.id})">Eliminar</button>
                         </td>
