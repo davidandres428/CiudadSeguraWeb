@@ -460,7 +460,7 @@ tr:hover td { background: #f5f9fb; }
     gap: 10px;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 768px) {
     header.topbar {
         position: relative;
         padding: 14px 18px;
@@ -469,9 +469,21 @@ tr:hover td { background: #f5f9fb; }
     nav.menu {
         width: 100%;
         order: 3;
+        flex-wrap: nowrap;
+        gap: 7px;
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        scroll-behavior: smooth;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    nav.menu::-webkit-scrollbar {
+        display: none;
     }
 
     nav.menu a {
+        flex: 0 0 auto;
         padding: 7px 10px;
         font-size: 0.84rem;
     }
@@ -481,34 +493,46 @@ tr:hover td { background: #f5f9fb; }
         padding: 0 14px 32px;
     }
 
-    .tarjeta {
-        padding: 18px;
-    }
-
-    .mapa {
-        height: 320px;
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-        scroll-behavior: auto !important;
     .inicio-dashboard {
         min-height: calc(100svh - 110px);
         padding-top: 22px;
         padding-bottom: 22px;
     }
 
-        transition-duration: 0.01ms !important;
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
+    .tarjeta {
+        padding: 18px;
     }
+
     .hero-banner {
-        padding: 26px 20px;
+        padding: 24px 18px;
         border-radius: 18px;
     }
 
-}
+    .hero-etiqueta {
+        display: inline-flex;
+        max-width: 100%;
+        margin-bottom: 12px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(28, 135, 144, 0.09);
+        font-size: 0.68rem;
+        letter-spacing: 0.07em;
+        line-height: 1.4;
+        text-wrap: balance;
+    }
+
+    .hero-banner h2 {
+        font-size: clamp(1.65rem, 7vw, 2.25rem);
+    }
+
+    .hero-banner p:not(.hero-etiqueta) {
+        margin-top: 10px;
+        font-size: 0.98rem;
+    }
+
+    .mapa {
+        height: 320px;
+    }
 
     .metricas-inicio {
         grid-template-columns: 1fr;
@@ -519,3 +543,13 @@ tr:hover td { background: #f5f9fb; }
         min-height: 0;
         padding: 18px 20px;
     }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+}
