@@ -73,7 +73,14 @@
                 DESCARTADO: "Descartado",
             },
             prioridades: { ALTA: "Alta", MEDIA: "Media", BAJA: "Baja", URGENTE: "Urgente" },
-            tipos: { ROBO: "Robo", VANDALISMO: "Vandalismo", ACCIDENTE: "Accidente", DISTURBIO: "Disturbio" },
+            tipos: {
+                ROBO: "Robo",
+                VANDALISMO: "Vandalismo",
+                ACCIDENTE: "Accidente",
+                DISTURBIO: "Disturbio",
+                ILUMINACION_DEFICIENTE: "Iluminación deficiente",
+                SOSPECHA: "Sospecha",
+            },
         };
 
         function parametrosFechas() {
@@ -123,7 +130,7 @@
                 actualizarGrafico("grafico-prioridades", "bar", datos.porPrioridad, etiquetas.prioridades,
                     ["#c0392b", "#d9822b", "#2e7d32", "#7b1fa2"]);
                 actualizarGrafico("grafico-tipos", "pie", datos.porTipo, etiquetas.tipos,
-                    ["#c0392b", "#7b1fa2", "#2c5282", "#d9822b"]);
+                    ["#c0392b", "#7b1fa2", "#2c5282", "#d9822b", "#546e7a", "#00897b"]);
             } catch (err) {
                 mostrarMensaje("msg-dashboard", err.message);
             }

@@ -4,5 +4,7 @@ public enum TipoReporte {
     ROBO,
     VANDALISMO,
     ACCIDENTE,
-    DISTURBIO
+    DISTURBIO,
+    ILUMINACION_DEFICIENTE,
+    SOSPECHA
 }

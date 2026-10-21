@@ -72,6 +72,27 @@ src/test/java/com/ciudadsegura/service/  -> pruebas unitarias (JUnit 5 + Mockito
 4. Para registrarte como ciudadano y poder crear reportes, entra a `http://localhost:8081/login`.
 5. Para desplegar el front-end por separado en Vercel, configura la URL base pública del back-end en `src/main/resources/static/js/api-config.js` (por ejemplo, `https://mi-api.example.com`, sin `/api` al final).
 
+### Datos de demostración locales
+
+El inicializador está desactivado por defecto y solo se carga sin perfil explícito o con el perfil
+`local` (nunca con `prod` ni otros perfiles). Para poblar una
+base local vacía con una cuenta administradora, tres ciudadanos, cuatro zonas, seis reportes y
+cuatro alertas, configura `SEED_DATA_ENABLED=true` y `SEED_ADMIN_PASSWORD` (mínimo 12 caracteres)
+al iniciar la aplicación. La contraseña no se guarda en el código; las contraseñas aleatorias de
+los ciudadanos de demostración no son utilizables para iniciar sesión.
+
+PowerShell:
+```powershell
+$env:SEED_DATA_ENABLED = "true"
+$env:SEED_ADMIN_PASSWORD = "elige-una-clave-local-segura"
+.\mvnw.cmd spring-boot:run
+```
+
+Cuenta inicial de administrador: `admin.demo@ciudadsegura.local`. El sembrado se ejecuta solo si
+usuarios, zonas, reportes y alertas están todos vacíos; si cualquiera de esas tablas ya contiene
+datos, no modifica ninguna de ellas. Para volver a probarlo en local, usa una base H2 en memoria
+vacía o elimina explícitamente los datos locales.
+
 ### Despliegue en Railway
 
 No se incluye una configuración específica de Railway en el repositorio. Para producción, configura

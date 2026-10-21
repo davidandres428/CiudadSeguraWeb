@@ -71,7 +71,9 @@ public class ReporteIncidente {
 
     @PrePersist
     public void prePersist() {
-        this.fechaReporte = LocalDateTime.now();
+        if (this.fechaReporte == null) {
+            this.fechaReporte = LocalDateTime.now();
+        }
         if (this.estado == null) {
             this.estado = EstadoReporte.PENDIENTE;
         }
