@@ -77,6 +77,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/pqrs").permitAll()
                 .requestMatchers("/*.html", "/css/**", "/js/**").permitAll()
+                .requestMatchers("/api/admin/**").hasAuthority("SCOPE_ADMINISTRADOR")
                 .requestMatchers("/api/usuarios/**").hasAuthority("SCOPE_ADMINISTRADOR")
                 .requestMatchers("/api/reportes/metricas", "/api/reportes/exportar/csv")
                     .hasAuthority("SCOPE_ADMINISTRADOR")

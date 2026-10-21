@@ -238,15 +238,34 @@ Cuerpo JSON esperado en POST/PUT:
 | PUT | `/api/alertas/{id}?zonaRiesgoId={id}` | Actualizar alerta (administrador) |
 | DELETE | `/api/alertas/{id}` | Eliminar alerta (administrador) |
 
+Las alertas incluyen `severidad`: `BAJA`, `MEDIA`, `ALTA` o `CRITICA`. Si se omite al crear
+una alerta, se asigna `MEDIA`.
+
 Cuerpo JSON esperado en POST/PUT:
 ```json
 {
   "titulo": "Alerta de seguridad",
   "mensaje": "Se reportan hurtos frecuentes en el sector",
   "tipo": "SEGURIDAD",
+  "severidad": "ALTA",
   "activa": true
 }
 ```
+
+### Sembrado masivo de datos de demostración
+
+Un administrador autenticado puede solicitar una sola vez la creación de 10 ciudadanos, 10 zonas
+de riesgo de Bogotá, 30 reportes y 12 alertas:
+
+| Método | Endpoint | Acceso |
+|---|---|---|
+| POST | `/api/admin/seed-masivo` | Solo administrador |
+
+La ejecución es explícita (no se activa durante el arranque), se registra en la base de datos y se
+rechazan posteriores intentos con `409 Conflict`, incluso si la aplicación corre en varias
+instancias. Los registros y contraseñas aleatorias de las cuentas de demostración se insertan en
+la base de datos; dichas contraseñas no se devuelven. Antes de invocarlo en producción, confirma
+que deseas añadir esos datos permanentes a esa base.
 
 ## Manejo de errores
 

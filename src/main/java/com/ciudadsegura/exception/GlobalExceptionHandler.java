@@ -35,6 +35,11 @@ public class GlobalExceptionHandler {
         return construirError(HttpStatus.CONFLICT, "Correo ya registrado", ex.getMessage());
     }
 
+    @ExceptionHandler(LoteSemillaYaEjecutadoException.class)
+    public ResponseEntity<ErrorResponse> manejarLoteSemillaYaEjecutado(LoteSemillaYaEjecutadoException ex) {
+        return construir(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> manejarValidacion(MethodArgumentNotValidException ex) {
         String detalles = ex.getBindingResult().getFieldErrors().stream()

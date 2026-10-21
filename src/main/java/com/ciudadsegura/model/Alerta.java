@@ -1,5 +1,6 @@
 package com.ciudadsegura.model;
 
+import com.ciudadsegura.model.enums.SeveridadAlerta;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 
@@ -25,6 +26,10 @@ public class Alerta {
     @Column(nullable = false)
     private String tipo;
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private SeveridadAlerta severidad = SeveridadAlerta.MEDIA;
+
     @Column(nullable = false)
     private boolean activa = true;
 
@@ -40,6 +45,9 @@ public class Alerta {
 
     @PrePersist
     public void prePersist() {
+        if (this.severidad == null) {
+            this.severidad = SeveridadAlerta.MEDIA;
+        }
         if (this.fechaCreacion == null) {
             this.fechaCreacion = LocalDateTime.now();
         }
@@ -75,6 +83,14 @@ public class Alerta {
 
     public void setTipo(String tipo) {
         this.tipo = tipo;
+    }
+
+    public SeveridadAlerta getSeveridad() {
+        return severidad;
+    }
+
+    public void setSeveridad(SeveridadAlerta severidad) {
+        this.severidad = severidad;
     }
 
     public boolean isActiva() {

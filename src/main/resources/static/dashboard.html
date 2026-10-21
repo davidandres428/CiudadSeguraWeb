@@ -80,6 +80,8 @@
                 DISTURBIO: "Disturbio",
                 ILUMINACION_DEFICIENTE: "Iluminación deficiente",
                 SOSPECHA: "Sospecha",
+                VENTA_ESTUPEFACIENTES: "Venta de estupefacientes",
+                RUIDO_EXCESIVO: "Ruido excesivo",
             },
         };
 
@@ -130,7 +132,7 @@
                 actualizarGrafico("grafico-prioridades", "bar", datos.porPrioridad, etiquetas.prioridades,
                     ["#c0392b", "#d9822b", "#2e7d32", "#7b1fa2"]);
                 actualizarGrafico("grafico-tipos", "pie", datos.porTipo, etiquetas.tipos,
-                    ["#c0392b", "#7b1fa2", "#2c5282", "#d9822b", "#546e7a", "#00897b"]);
+                    ["#c0392b", "#7b1fa2", "#2c5282", "#d9822b", "#546e7a", "#00897b", "#6d4c41", "#3949ab"]);
             } catch (err) {
                 mostrarMensaje("msg-dashboard", err.message);
             }

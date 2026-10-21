@@ -53,6 +53,7 @@ public class AlertaService {
         alerta.setTitulo(datos.getTitulo());
         alerta.setMensaje(datos.getMensaje());
         alerta.setTipo(datos.getTipo());
+        alerta.setSeveridad(datos.getSeveridad());
         alerta.setActiva(datos.isActiva());
         if (zonaRiesgoId != null) {
             alerta.setZonaRiesgo(buscarZona(zonaRiesgoId));

@@ -40,6 +40,15 @@
                         <input type="text" id="alerta-tipo" placeholder="Ej: SEGURIDAD" required>
                     </div>
                     <div>
+                        <label for="alerta-severidad">Severidad</label>
+                        <select id="alerta-severidad" required>
+                            <option value="BAJA">Baja</option>
+                            <option value="MEDIA" selected>Media</option>
+                            <option value="ALTA">Alta</option>
+                            <option value="CRITICA">Crítica</option>
+                        </select>
+                    </div>
+                    <div>
                         <label for="alerta-zona">Zona de riesgo (opcional)</label>
                         <select id="alerta-zona">
                             <option value="">Ninguna</option>
@@ -75,7 +84,7 @@
             <div class="tabla-desplazable" role="region" aria-label="Lista de alertas" tabindex="0">
             <table>
                 <thead>
-                    <tr><th>ID</th><th>Título</th><th>Tipo</th><th>Zona</th><th>Activa</th><th>Fecha</th><th>Acciones</th></tr>
+                    <tr><th>ID</th><th>Título</th><th>Tipo</th><th>Severidad</th><th>Zona</th><th>Activa</th><th>Fecha</th><th>Acciones</th></tr>
                 </thead>
                 <tbody id="tabla-alertas"></tbody>
             </table>
@@ -117,6 +126,7 @@
                         <td>${a.id}</td>
                         <td>${escaparHtml(a.titulo)}</td>
                         <td>${escaparHtml(a.tipo)}</td>
+                        <td>${escaparHtml(a.severidad || "MEDIA")}</td>
                         <td>${escaparHtml(a.zonaRiesgo ? a.zonaRiesgo.nombre : "-")}</td>
                         <td>${a.activa ? "Sí" : "No"}</td>
                         <td>${formatearFecha(a.fechaCreacion)}</td>
@@ -124,7 +134,7 @@
                             ? `<button data-editar-alerta="${a.id}">Editar</button>
                                <button class="peligro" data-eliminar-alerta="${a.id}">Eliminar</button>`
                             : "—"}</td>
-                    </tr>`).join("") || `<tr><td colspan="7">No hay alertas.</td></tr>`;
+                    </tr>`).join("") || `<tr><td colspan="8">No hay alertas.</td></tr>`;
                 tbody.querySelectorAll("[data-editar-alerta]").forEach(boton => {
                     boton.addEventListener("click", () => editarAlerta(alertasPorId.get(boton.dataset.editarAlerta)));
                 });
@@ -141,6 +151,7 @@
             document.getElementById("alerta-titulo").value = a.titulo;
             document.getElementById("alerta-mensaje").value = a.mensaje;
             document.getElementById("alerta-tipo").value = a.tipo;
+            document.getElementById("alerta-severidad").value = a.severidad || "MEDIA";
             document.getElementById("alerta-zona").value = a.zonaRiesgo ? a.zonaRiesgo.id : "";
             document.getElementById("alerta-activa").value = String(a.activa);
             document.getElementById("titulo-form").textContent = "Editar alerta";
@@ -174,6 +185,7 @@
                 titulo: document.getElementById("alerta-titulo").value,
                 mensaje: document.getElementById("alerta-mensaje").value,
                 tipo: document.getElementById("alerta-tipo").value,
+                severidad: document.getElementById("alerta-severidad").value,
                 activa: document.getElementById("alerta-activa").value === "true",
             };
             try {
