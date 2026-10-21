@@ -22,6 +22,7 @@
     <main>
         <div class="tarjeta" id="tarjeta-form-zona">
             <h2 id="titulo-form">Nueva zona de riesgo</h2>
+            <div id="aviso-acceso-zona" class="mensaje error oculto"></div>
             <div id="msg-form" class="mensaje oculto"></div>
             <form class="formulario" id="form-zona">
                 <input type="hidden" id="zona-id">
@@ -145,6 +146,14 @@
 
         document.getElementById("form-zona").addEventListener("submit", async (e) => {
             e.preventDefault();
+            if (!Sesion.token()) {
+                window.location.href = "/login.html#form-login";
+                return;
+            }
+            if (!esAdministrador()) {
+                mostrarMensaje("msg-form", "La creación y gestión de zonas está reservada para administradores.");
+                return;
+            }
             ocultarMensaje("msg-form");
             const id = document.getElementById("zona-id").value;
             const datos = {
@@ -163,6 +172,7 @@
                 cancelarEdicionZona();
                 cargarZonas();
             } catch (err) {
+                if (redirigirALoginSiSesionExpirada(err)) return;
                 mostrarMensaje("msg-form", err.message);
             }
         });
@@ -178,7 +188,12 @@
         }
 
         if (!esAdministrador()) {
-            document.getElementById("tarjeta-form-zona").classList.add("oculto");
+            document.getElementById("form-zona").classList.add("oculto");
+            const aviso = document.getElementById("aviso-acceso-zona");
+            aviso.innerHTML = Sesion.token()
+                ? "La creación y gestión de zonas está reservada para administradores."
+                : 'Debes <a href="/login.html#form-login">iniciar sesión</a> para solicitar la creación de una zona.';
+            aviso.classList.remove("oculto");
         }
         cargarZonas();
     </script>

@@ -21,6 +21,10 @@ public class ZonaRiesgoService {
         return zonaRiesgoRepository.findAll();
     }
 
+    public long contar() {
+        return zonaRiesgoRepository.count();
+    }
+
     public List<ZonaRiesgo> listarPorNivel(NivelRiesgo nivel) {
         return zonaRiesgoRepository.findByNivelRiesgo(nivel);
     }

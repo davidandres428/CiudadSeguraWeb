@@ -29,7 +29,9 @@ async function apiFetch(path, options = {}) {
         const mensaje = datos && (datos.mensaje || datos.detalles || datos.error)
             ? (datos.mensaje || datos.detalles || datos.error)
             : `Error ${respuesta.status}`;
-        throw new Error(mensaje);
+        const error = new Error(mensaje);
+        error.status = respuesta.status;
+        throw error;
     }
     return datos;
 }
@@ -55,6 +57,10 @@ const CiudadSeguraAPI = {
 
     // --- Reportes de incidentes ---
     listarReportes: (params = "") => apiFetch(`/reportes${params}`),
+    contarReportes: (desde, hasta) => {
+        const params = new URLSearchParams({ desde, hasta });
+        return apiFetch(`/reportes/count?${params}`);
+    },
     obtenerMetricas: (params = "") => apiFetch(`/reportes/metricas${params}`),
     exportarReportesCsv: async (params = "") => {
         const respuesta = await fetch(`${API_BASE}/reportes/exportar/csv${params}`, {
@@ -79,6 +85,7 @@ const CiudadSeguraAPI = {
 
     // --- Zonas de riesgo ---
     listarZonas: (params = "") => apiFetch(`/zonas-riesgo${params}`),
+    contarZonas: () => apiFetch("/zonas-riesgo/count"),
     obtenerZona: (id) => apiFetch(`/zonas-riesgo/${id}`),
     crearZona: (datos) => apiFetch("/zonas-riesgo", { method: "POST", body: JSON.stringify(datos) }),
     actualizarZona: (id, datos) => apiFetch(`/zonas-riesgo/${id}`, { method: "PUT", body: JSON.stringify(datos) }),
@@ -86,6 +93,7 @@ const CiudadSeguraAPI = {
 
     // --- Alertas ---
     listarAlertas: (params = "") => apiFetch(`/alertas${params}`),
+    contarAlertas: (activas = false) => apiFetch(`/alertas/count${activas ? "?activas=true" : ""}`),
     obtenerAlerta: (id) => apiFetch(`/alertas/${id}`),
     crearAlerta: (datos, zonaRiesgoId) => apiFetch(`/alertas${zonaRiesgoId ? "?zonaRiesgoId=" + zonaRiesgoId : ""}`, { method: "POST", body: JSON.stringify(datos) }),
     actualizarAlerta: (id, datos, zonaRiesgoId) => apiFetch(`/alertas/${id}${zonaRiesgoId ? "?zonaRiesgoId=" + zonaRiesgoId : ""}`, { method: "PUT", body: JSON.stringify(datos) }),
@@ -155,6 +163,12 @@ function mostrarMensaje(contenedorId, texto, tipo = "error") {
 function ocultarMensaje(contenedorId) {
     const el = document.getElementById(contenedorId);
     if (el) el.classList.add("oculto");
+}
+
+function redirigirALoginSiSesionExpirada(error) {
+    if (error?.status !== 401) return false;
+    window.location.href = "/login.html#form-login";
+    return true;
 }
 
 function formatearFecha(iso) {

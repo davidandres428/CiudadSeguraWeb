@@ -28,6 +28,11 @@ public class ZonaRiesgoController {
         return zonaRiesgoService.listarTodas();
     }
 
+    @GetMapping("/count")
+    public long contar() {
+        return zonaRiesgoService.contar();
+    }
+
     @GetMapping("/{id}")
     public ZonaRiesgo buscarPorId(@PathVariable Long id) {
         return zonaRiesgoService.buscarPorId(id);

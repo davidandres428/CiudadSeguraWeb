@@ -24,6 +24,14 @@ public class AlertaService {
         return alertaRepository.findAll();
     }
 
+    public long contar() {
+        return alertaRepository.count();
+    }
+
+    public long contarActivas() {
+        return alertaRepository.countByActivaTrue();
+    }
+
     public List<Alerta> listarActivas() {
         return alertaRepository.findByActivaTrue();
     }

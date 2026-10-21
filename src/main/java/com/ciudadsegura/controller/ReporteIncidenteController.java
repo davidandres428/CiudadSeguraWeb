@@ -38,6 +38,13 @@ public class ReporteIncidenteController {
         return reporteService.listarFiltrados(usuarioId, estado, desde, hasta);
     }
 
+    @GetMapping("/count")
+    public long contar(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
+        return reporteService.obtenerMetricas(desde, hasta).getTotal();
+    }
+
     @GetMapping("/metricas")
     public ReporteMetricasResponse obtenerMetricas(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,

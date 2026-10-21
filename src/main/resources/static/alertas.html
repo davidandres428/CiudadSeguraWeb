@@ -22,6 +22,7 @@
     <main>
         <div class="tarjeta" id="tarjeta-form-alerta">
             <h2 id="titulo-form">Nueva alerta</h2>
+            <div id="aviso-acceso-alerta" class="mensaje error oculto"></div>
             <div id="msg-form" class="mensaje oculto"></div>
             <form class="formulario" id="form-alerta">
                 <input type="hidden" id="alerta-id">
@@ -158,6 +159,14 @@
 
         document.getElementById("form-alerta").addEventListener("submit", async (e) => {
             e.preventDefault();
+            if (!Sesion.token()) {
+                window.location.href = "/login.html#form-login";
+                return;
+            }
+            if (!esAdministrador()) {
+                mostrarMensaje("msg-form", "La creación y gestión de alertas está reservada para administradores.");
+                return;
+            }
             ocultarMensaje("msg-form");
             const id = document.getElementById("alerta-id").value;
             const zonaId = document.getElementById("alerta-zona").value || null;
@@ -176,6 +185,7 @@
                 cancelarEdicionAlerta();
                 cargarAlertas();
             } catch (err) {
+                if (redirigirALoginSiSesionExpirada(err)) return;
                 mostrarMensaje("msg-form", err.message);
             }
         });
@@ -191,7 +201,10 @@
         }
 
         if (!esAdministrador()) {
-            document.getElementById("tarjeta-form-alerta").classList.add("oculto");
+            document.getElementById("form-alerta").classList.add("oculto");
+            const aviso = document.getElementById("aviso-acceso-alerta");
+            aviso.textContent = "La creación y gestión de alertas está reservada para administradores.";
+            aviso.classList.remove("oculto");
         }
         cargarZonasSelect();
         cargarAlertas();

@@ -27,6 +27,11 @@ public class AlertaController {
         return alertaService.listarTodas();
     }
 
+    @GetMapping("/count")
+    public long contar(@RequestParam(required = false) Boolean activas) {
+        return Boolean.TRUE.equals(activas) ? alertaService.contarActivas() : alertaService.contar();
+    }
+
     @GetMapping("/{id}")
     public Alerta buscarPorId(@PathVariable Long id) {
         return alertaService.buscarPorId(id);

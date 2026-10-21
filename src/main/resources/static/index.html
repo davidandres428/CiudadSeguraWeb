@@ -46,7 +46,7 @@
                         </svg>
                     </span>
                 </h3>
-                <strong>128</strong>
+                <strong id="metrica-reportes" data-fallback="128">128</strong>
                 <span class="badge-tendencia badge-tendencia--positivo">↓ -8% vs mes anterior</span>
                 <p>Registrados este mes</p>
             </article>
@@ -63,7 +63,7 @@
                         </svg>
                     </span>
                 </h3>
-                <strong>15</strong>
+                <strong id="metrica-zonas" data-fallback="15">15</strong>
                 <span class="badge-tendencia badge-tendencia--neutro">100% activas</span>
                 <p>En observación activa</p>
             </article>
@@ -78,7 +78,7 @@
                         </svg>
                     </span>
                 </h3>
-                <strong>3</strong>
+                <strong id="metrica-alertas" data-fallback="3">3</strong>
                 <span class="badge-tendencia badge-tendencia--atendida">Atendidas</span>
                 <p>Alertas comunitarias vigentes</p>
             </article>
@@ -147,5 +147,35 @@
 
     <script src="/js/api-config.js"></script>
     <script src="/js/api.js"></script>
+    <script>
+        async function cargarMetricasInicio() {
+            const hoy = new Date();
+            const fechaIsoLocal = (fecha) => [
+                fecha.getFullYear(),
+                String(fecha.getMonth() + 1).padStart(2, "0"),
+                String(fecha.getDate()).padStart(2, "0"),
+            ].join("-");
+            const desde = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}-01`;
+            const hasta = fechaIsoLocal(hoy);
+            const metricas = [
+                ["metrica-reportes", () => CiudadSeguraAPI.contarReportes(desde, hasta), "reportes"],
+                ["metrica-zonas", CiudadSeguraAPI.contarZonas, "zonas"],
+                ["metrica-alertas", () => CiudadSeguraAPI.contarAlertas(true), "alertas"],
+            ];
+            const resultados = await Promise.allSettled(metricas.map(([, contar]) => contar()));
+            resultados.forEach((resultado, indice) => {
+                const [elementoId, , recurso] = metricas[indice];
+                const elemento = document.getElementById(elementoId);
+                if (resultado.status === "fulfilled" && Number.isFinite(resultado.value)) {
+                    elemento.textContent = String(resultado.value);
+                    return;
+                }
+                console.warn(`No se pudo actualizar el conteo de ${recurso}; se conserva el valor de referencia.`,
+                    resultado.status === "rejected" ? resultado.reason : resultado.value);
+            });
+        }
+
+        cargarMetricasInicio();
+    </script>
 </body>
 </html>

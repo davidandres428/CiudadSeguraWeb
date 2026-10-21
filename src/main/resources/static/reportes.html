@@ -25,7 +25,7 @@
         <div class="tarjeta" id="tarjeta-form">
             <h2>Nuevo reporte de incidente</h2>
             <div id="msg-form" class="mensaje oculto"></div>
-            <div id="aviso-sesion" class="mensaje error oculto">Debes <a href="/login.html">iniciar sesión</a> para registrar un reporte.</div>
+            <div id="aviso-sesion" class="mensaje error oculto">Debes <a href="/login.html#form-login">iniciar sesión</a> para registrar un reporte.</div>
             <form class="formulario" id="form-reporte">
                 <input type="hidden" id="reporte-id">
                 <div>
@@ -224,6 +224,10 @@
 
         document.getElementById("form-reporte").addEventListener("submit", async (e) => {
             e.preventDefault();
+            if (!Sesion.token()) {
+                window.location.href = "/login.html#form-login";
+                return;
+            }
             ocultarMensaje("msg-form");
             const id = document.getElementById("reporte-id").value;
             const datos = {
@@ -247,6 +251,7 @@
                 cancelarEdicionReporte();
                 cargarReportes();
             } catch (err) {
+                if (redirigirALoginSiSesionExpirada(err)) return;
                 mostrarMensaje("msg-form", err.message);
             }
         });
