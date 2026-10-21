@@ -110,11 +110,15 @@ function pintarUsuarioActivo() {
     if (usuario) {
         contenedor.innerHTML = `
             <span class="usuario-activo">
-                👤 ${usuario.nombre}
+                👤 ${escaparHtml(usuario.nombre)}
                 <button class="secundario" onclick="Sesion.cerrar()">Salir</button>
             </span>`;
     } else {
-        contenedor.innerHTML = `<a href="/login.html" class="boton">Iniciar sesión</a>`;
+        contenedor.innerHTML = `
+            <span class="acciones-acceso">
+                <a href="/login.html#form-login" class="boton boton-login">Iniciar sesión</a>
+                <a href="/login.html#form-registro" class="boton boton-registro">Registrarse</a>
+            </span>`;
     }
     if (usuario?.rol === "ADMINISTRADOR") {
         const menu = document.querySelector("nav.menu");

@@ -7,6 +7,12 @@
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
+    <div class="utility-topbar">
+        <div class="utility-topbar-contenido">
+            <a class="linea-emergencias" href="tel:123">🚨 Línea de atención: 123</a>
+            <a href="#atencion-ciudadano">PQRS (Peticiones, Quejas, Reclamos y Sugerencias)</a>
+        </div>
+    </div>
     <header class="topbar">
         <h1>🛡️ Ciudad Segura</h1>
         <nav class="menu">
@@ -30,22 +36,114 @@
 
         <section class="metricas-inicio" aria-label="Resumen de seguridad ciudadana">
             <article class="metrica-inicio">
-                <h3>Incidentes Reportados</h3>
+                <h3>
+                    <span>Incidentes Reportados</span>
+                    <span class="icono-metrica icono-metrica--azul" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m3 11 18-5v12L3 13v-2Z"></path>
+                            <path d="M11.6 14.8 13 21h-4l-2-8"></path>
+                            <path d="M21 10v4"></path>
+                        </svg>
+                    </span>
+                </h3>
                 <strong>128</strong>
+                <span class="badge-tendencia badge-tendencia--positivo">↓ -8% vs mes anterior</span>
                 <p>Registrados este mes</p>
             </article>
             <article class="metrica-inicio">
-                <h3>Zonas Monitoreadas</h3>
+                <h3>
+                    <span>Zonas Monitoreadas</span>
+                    <span class="icono-metrica icono-metrica--verde" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3V6Z"></path>
+                            <path d="M9 3v15"></path>
+                            <path d="M15 6v15"></path>
+                            <path d="M20 10c0 5-8 11-8 11s-8-6-8-11a8 8 0 1 1 16 0Z"></path>
+                            <circle cx="12" cy="10" r="2.5"></circle>
+                        </svg>
+                    </span>
+                </h3>
                 <strong>15</strong>
+                <span class="badge-tendencia badge-tendencia--neutro">100% activas</span>
                 <p>En observación activa</p>
             </article>
             <article class="metrica-inicio">
-                <h3>Alertas Emitidas</h3>
+                <h3>
+                    <span>Alertas Emitidas</span>
+                    <span class="icono-metrica icono-metrica--naranja" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+                            <path d="M10 21h4"></path>
+                            <path d="M12 3V1"></path>
+                        </svg>
+                    </span>
+                </h3>
                 <strong>3</strong>
+                <span class="badge-tendencia badge-tendencia--atendida">Atendidas</span>
                 <p>Alertas comunitarias vigentes</p>
             </article>
         </section>
+
+        <section class="servicios-ciudadanos" aria-label="Información y atención ciudadana">
+            <article class="panel-ciudadano" aria-labelledby="noticias-titulo">
+                <div class="panel-ciudadano-encabezado">
+                    <div>
+                        <p class="panel-eyebrow">Recomendaciones ciudadanas</p>
+                        <h2 id="noticias-titulo">Noticias y Comunicados</h2>
+                    </div>
+                </div>
+                <div class="lista-comunicados">
+                    <article class="comunicado">
+                        <time datetime="2026-10-20">20 de octubre de 2026</time>
+                        <h3>Verifica la información antes de compartirla</h3>
+                        <p>Consulta canales oficiales y evita difundir rumores que puedan generar alarma.</p>
+                    </article>
+                    <article class="comunicado">
+                        <time datetime="2026-10-16">16 de octubre de 2026</time>
+                        <h3>Reporta situaciones de riesgo</h3>
+                        <p>Comparte detalles claros y ubicación para facilitar la atención de los incidentes.</p>
+                    </article>
+                    <article class="comunicado">
+                        <time datetime="2026-10-12">12 de octubre de 2026</time>
+                        <h3>Identifica rutas y puntos de encuentro</h3>
+                        <p>Planifica tus recorridos y acuerda un punto de contacto con tu comunidad.</p>
+                    </article>
+                </div>
+            </article>
+
+            <article class="panel-ciudadano panel-atencion" id="atencion-ciudadano" aria-labelledby="atencion-titulo">
+                <p class="panel-eyebrow">Estamos para ayudarte</p>
+                <h2 id="atencion-titulo">Atención al Ciudadano &amp; PQRS</h2>
+                <p class="atencion-intro">Encuentra los canales para presentar peticiones, quejas, reclamos o sugerencias ante tu entidad.</p>
+                <a class="enlace-pqrs" href="https://www.gov.co/" target="_blank" rel="noopener noreferrer">
+                    Consultar canales oficiales de PQRS
+                    <span aria-hidden="true">↗</span>
+                </a>
+                <div class="datos-atencion">
+                    <div>
+                        <h3>Línea de atención</h3>
+                        <a href="tel:123">123 <span>(emergencias)</span></a>
+                    </div>
+                    <div>
+                        <h3>Horario de orientación ciudadana</h3>
+                        <p>Lunes a viernes, 8:00 a. m. a 5:00 p. m.</p>
+                    </div>
+                </div>
+                <p class="nota-emergencias">Si se trata de una emergencia, comunícate con la línea 123.</p>
+            </article>
+        </section>
     </main>
+
+    <footer class="site-footer">
+        <div class="site-footer-contenido">
+            <p>© 2026 Ciudad Segura — Sistema Integrado de Gestión de Seguridad Ciudadana</p>
+            <nav aria-label="Enlaces legales">
+                <a href="#terminos">Términos de servicio</a>
+                <a href="#privacidad">Privacidad</a>
+            </nav>
+            <span class="estado-sistema">Estado del sistema: Operativo</span>
+        </div>
+    </footer>
 
     <script src="/js/api-config.js"></script>
     <script src="/js/api.js"></script>
