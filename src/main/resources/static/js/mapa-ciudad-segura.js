@@ -41,18 +41,19 @@ window.MapaCiudadSegura = (() => {
         if (!contenedor) {
             throw new Error(`No existe el contenedor del mapa "${contenedorId}".`);
         }
-        if (!window.L) {
+        const leaflet = window.L;
+        if (!leaflet) {
             throw new Error("No se pudo cargar Leaflet. Comprueba la conexión e inténtalo de nuevo.");
         }
 
-        const mapa = L.map(contenedor).setView(centroInicial, 6);
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        const mapa = leaflet.map(contenedor).setView(centroInicial, 6);
+        leaflet.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
             maxZoom: 19,
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
         }).addTo(mapa);
 
-        const capaReportes = L.layerGroup().addTo(mapa);
-        const capaZonas = L.layerGroup().addTo(mapa);
+        const capaReportes = leaflet.layerGroup().addTo(mapa);
+        const capaZonas = leaflet.layerGroup().addTo(mapa);
         let marcadorSeleccionado = null;
 
         function ajustarVista() {
@@ -60,7 +61,7 @@ window.MapaCiudadSegura = (() => {
             if (marcadorSeleccionado) {
                 capas.push(marcadorSeleccionado);
             }
-            const grupo = L.featureGroup(capas);
+            const grupo = leaflet.featureGroup(capas);
             if (grupo.getLayers().length > 0) {
                 mapa.fitBounds(grupo.getBounds(), { padding: [24, 24], maxZoom: 14 });
             }
@@ -74,7 +75,7 @@ window.MapaCiudadSegura = (() => {
             if (marcadorSeleccionado) {
                 mapa.removeLayer(marcadorSeleccionado);
             }
-            marcadorSeleccionado = L.marker(coordenadas)
+            marcadorSeleccionado = leaflet.marker(coordenadas)
                 .bindPopup("Ubicación seleccionada para el reporte")
                 .addTo(mapa);
             mapa.panTo(coordenadas);
@@ -82,7 +83,11 @@ window.MapaCiudadSegura = (() => {
 
         if (alSeleccionarCoordenadas) {
             mapa.on("click", (evento) => {
-                const { lat, lng } = evento.latlng;
+                const punto = evento?.latlng;
+                if (!punto || !Number.isFinite(punto.lat) || !Number.isFinite(punto.lng)) {
+                    return;
+                }
+                const { lat, lng } = punto;
                 seleccionarCoordenadas(lat, lng);
                 alSeleccionarCoordenadas(lat, lng);
             });
@@ -94,7 +99,7 @@ window.MapaCiudadSegura = (() => {
                 reportes.forEach((reporte) => {
                     const coordenadas = obtenerCoordenadas(reporte);
                     if (coordenadas) {
-                        L.marker(coordenadas)
+                        leaflet.marker(coordenadas)
                             .bindPopup(popupReporte(reporte))
                             .addTo(capaReportes);
                     }
@@ -108,7 +113,7 @@ window.MapaCiudadSegura = (() => {
                 zonas.forEach((zona) => {
                     const coordenadas = obtenerCoordenadas(zona);
                     if (coordenadas) {
-                        L.circleMarker(coordenadas, {
+                        leaflet.circleMarker(coordenadas, {
                             radius: 9,
                             color: "#8a5a00",
                             fillColor: "#f6ad32",
