@@ -57,14 +57,15 @@ window.MapaCiudadSegura = (() => {
         let marcadorSeleccionado = null;
 
         function ajustarVista() {
-            const capas = [capaReportes, capaZonas];
+            const capas = [...capaReportes.getLayers(), ...capaZonas.getLayers()];
             if (marcadorSeleccionado) {
                 capas.push(marcadorSeleccionado);
             }
-            const grupo = leaflet.featureGroup(capas);
-            if (grupo.getLayers().length > 0) {
-                mapa.fitBounds(grupo.getBounds(), { padding: [24, 24], maxZoom: 14 });
+            if (capas.length === 0) {
+                return;
             }
+            const grupo = leaflet.featureGroup(capas);
+            mapa.fitBounds(grupo.getBounds(), { padding: [24, 24], maxZoom: 14 });
         }
 
         function seleccionarCoordenadas(latitud, longitud) {
