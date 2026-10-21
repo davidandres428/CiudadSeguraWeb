@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -25,8 +26,7 @@ class PrettyUrlControllerTest {
     void raiz_sirveInicioSinRedireccionar() throws Exception {
         mockMvc.perform(get("/"))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.TEXT_HTML))
-                .andExpect(content().string(containsString("<title>Ciudad Segura</title>")));
+                .andExpect(forwardedUrl("/index.html"));
     }
 
     @Test
@@ -40,8 +40,7 @@ class PrettyUrlControllerTest {
     void vistasUsanRutasLimpiasYLasRutasHtmlRedirigen() throws Exception {
         mockMvc.perform(get("/reportes"))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.TEXT_HTML))
-                .andExpect(content().string(containsString("Reportes")));
+                .andExpect(forwardedUrl("/reportes.html"));
 
         mockMvc.perform(get("/alertas.html").queryParam("filtro", "activas"))
                 .andExpect(status().isPermanentRedirect())
@@ -49,15 +48,15 @@ class PrettyUrlControllerTest {
 
         mockMvc.perform(get("/alertas"))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.TEXT_HTML));
+                .andExpect(forwardedUrl("/alertas.html"));
 
         mockMvc.perform(get("/zonas"))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.TEXT_HTML));
+                .andExpect(forwardedUrl("/zonas.html"));
 
         mockMvc.perform(get("/usuarios"))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.TEXT_HTML));
+                .andExpect(forwardedUrl("/usuarios.html"));
 
         mockMvc.perform(get("/usuarios.html"))
                 .andExpect(status().isPermanentRedirect())
@@ -65,7 +64,7 @@ class PrettyUrlControllerTest {
 
         mockMvc.perform(get("/dashboard"))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.TEXT_HTML));
+                .andExpect(forwardedUrl("/dashboard.html"));
 
         mockMvc.perform(get("/dashboard.html"))
                 .andExpect(status().isPermanentRedirect())
@@ -73,7 +72,7 @@ class PrettyUrlControllerTest {
 
         mockMvc.perform(get("/login"))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.TEXT_HTML));
+                .andExpect(forwardedUrl("/login.html"));
 
         mockMvc.perform(get("/login.html"))
                 .andExpect(status().isPermanentRedirect())
