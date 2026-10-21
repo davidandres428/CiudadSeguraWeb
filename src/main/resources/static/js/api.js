@@ -10,8 +10,12 @@ const API_BASE = `${(window.CIUDAD_SEGURA_API_URL || "").replace(/\/$/, "")}/api
 /** Realiza una petición fetch y normaliza el manejo de errores del back-end. */
 async function apiFetch(path, options = {}) {
     const respuesta = await fetch(API_BASE + path, {
-        headers: { "Content-Type": "application/json" },
         ...options,
+        headers: {
+            "Content-Type": "application/json",
+            ...(Sesion.token() ? { Authorization: `Bearer ${Sesion.token()}` } : {}),
+            ...options.headers,
+        },
     });
 
     if (respuesta.status === 204) {
@@ -41,6 +45,23 @@ const CiudadSeguraAPI = {
 
     // --- Reportes de incidentes ---
     listarReportes: (params = "") => apiFetch(`/reportes${params}`),
+    obtenerMetricas: (params = "") => apiFetch(`/reportes/metricas${params}`),
+    exportarReportesCsv: async (params = "") => {
+        const respuesta = await fetch(`${API_BASE}/reportes/exportar/csv${params}`, {
+            headers: Sesion.token() ? { Authorization: `Bearer ${Sesion.token()}` } : {},
+        });
+        if (!respuesta.ok) {
+            const texto = await respuesta.text();
+            let datos;
+            try {
+                datos = texto ? JSON.parse(texto) : null;
+            } catch {
+                datos = null;
+            }
+            throw new Error(datos?.detalles || datos?.mensaje || datos?.error || `Error ${respuesta.status}`);
+        }
+        return respuesta.blob();
+    },
     obtenerReporte: (id) => apiFetch(`/reportes/${id}`),
     crearReporte: (datos, usuarioId) => apiFetch(`/reportes?usuarioId=${usuarioId}`, { method: "POST", body: JSON.stringify(datos) }),
     actualizarReporte: (id, datos) => apiFetch(`/reportes/${id}`, { method: "PUT", body: JSON.stringify(datos) }),
@@ -63,8 +84,9 @@ const CiudadSeguraAPI = {
 
 // --- Sesión del ciudadano autenticado ---
 const Sesion = {
-    guardar(usuario) {
+    guardar(usuario, accessToken) {
         sessionStorage.setItem("cs_usuario", JSON.stringify(usuario));
+        sessionStorage.setItem("cs_access_token", accessToken);
     },
     obtener() {
         const datos = sessionStorage.getItem("cs_usuario");
@@ -72,7 +94,11 @@ const Sesion = {
     },
     cerrar() {
         sessionStorage.removeItem("cs_usuario");
+        sessionStorage.removeItem("cs_access_token");
         window.location.href = "/login.html";
+    },
+    token() {
+        return sessionStorage.getItem("cs_access_token");
     },
 };
 
@@ -89,6 +115,17 @@ function pintarUsuarioActivo() {
             </span>`;
     } else {
         contenedor.innerHTML = `<a href="/login.html" class="boton">Iniciar sesión</a>`;
+    }
+    if (usuario?.rol === "ADMINISTRADOR") {
+        const menu = document.querySelector("nav.menu");
+        if (menu && !menu.querySelector('a[href="/dashboard.html"]')) {
+            const enlaceDashboard = document.createElement("a");
+            enlaceDashboard.href = "/dashboard.html";
+            enlaceDashboard.textContent = "Dashboard";
+            menu.appendChild(enlaceDashboard);
+        }
+    } else {
+        document.querySelectorAll('nav.menu a[href="/usuarios.html"]').forEach((enlace) => enlace.remove());
     }
 }
 

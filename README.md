@@ -10,10 +10,11 @@ ejecutar desde una interfaz real en el navegador.
 
 ## Módulos integrados
 
-1. **Usuarios**: registro e inicio de sesión (contraseña cifrada con BCrypt), con rol de ciudadano o administrador, y CRUD de usuarios.
+1. **Usuarios**: registro e inicio de sesión (contraseña cifrada con BCrypt), con roles de ciudadano o administrador, y CRUD de usuarios.
 2. **Reportes de incidentes**: registro de hechos de inseguridad con tipo, prioridad, dirección y descripción; las coordenadas son opcionales.
 3. **Zonas de riesgo**: zonas geográficas clasificadas por nivel de riesgo (bajo, medio, alto).
 4. **Alertas**: notificaciones emitidas a los ciudadanos, opcionalmente asociadas a una zona de riesgo.
+5. **Dashboard administrativo**: gráficos de reportes por estado, prioridad y tipo, con filtros de fechas y exportación CSV.
 
 El **menú principal** (`index.html`) enlaza los cuatro módulos y cada página consume los mismos
 endpoints REST documentados abajo, verificando que la navegación y la conexión a base de datos
@@ -25,6 +26,7 @@ funcionen de extremo a extremo.
 - Spring Web (API REST) + front-end estático (HTML, CSS y JavaScript puro) servido desde `src/main/resources/static`
 - Spring Data JPA + MySQL
 - Spring Validation (`@NotBlank`, `@Email`, etc.)
+- Spring Security OAuth2 Resource Server y JWT HS256 para proteger métricas y exportación
 - BCrypt (`spring-security-crypto`) para cifrado de contraseñas
 - JUnit 5 + Mockito (pruebas unitarias de la capa de servicios)
 
@@ -50,6 +52,7 @@ src/main/resources/
     ├── reportes.html
     ├── zonas.html
     ├── alertas.html
+    ├── dashboard.html  -> estadísticas y exportación CSV (administradores)
     ├── css/styles.css
     └── js/api.js         -> cliente REST compartido por todas las páginas
 
@@ -69,12 +72,13 @@ src/test/java/com/ciudadsegura/service/  -> pruebas unitarias (JUnit 5 + Mockito
    a los cuatro módulos.
 5. Para registrarte como ciudadano y poder crear reportes, entra a `http://localhost:8080/login.html`.
 6. Para desplegar el front-end por separado en Vercel, configura la URL base pública del back-end en `src/main/resources/static/js/api-config.js` (por ejemplo, `https://mi-api.example.com`, sin `/api` al final).
+7. En producción, configura `JWT_SECRET` con un valor aleatorio de al menos 32 bytes. El perfil `prod` falla al iniciar si falta esta variable; nunca reutilices la clave local de desarrollo.
 
-> El registro permite seleccionar el rol, incluido `ADMINISTRADOR`, según el alcance solicitado. No expongas esa opción en una aplicación pública sin implementar autenticación y autorización para restringir la asignación de roles.
+> El registro público siempre crea cuentas `CIUDADANO`; el rol enviado por el cliente no se acepta para asignar privilegios. Los administradores se asignan de forma controlada en la base de datos. Antes de habilitar el dashboard en una base existente, audita las cuentas que ya tengan rol `ADMINISTRADOR`, pues registros anteriores podían elegir ese rol. Los endpoints de métricas y CSV requieren JWT de una cuenta con rol `ADMINISTRADOR`.
 
 ### CORS
 
-La API acepta solicitudes desde orígenes `https://*.vercel.app` y desde `localhost` para desarrollo. Si usas un dominio personalizado en Vercel, agrega su origen a `CorsConfig`.
+La API habilita CORS con cualquier origen (`allowedOriginPatterns = ["*"]`), permite `GET`, `POST`, `PUT`, `DELETE` y `OPTIONS`, y no acepta credenciales de navegador. El cliente envía el JWT explícitamente en `Authorization: Bearer ...`.
 
 ## Ejecutar las pruebas unitarias
 
@@ -87,16 +91,16 @@ La API acepta solicitudes desde orígenes `https://*.vercel.app` y desde `localh
 ### Autenticación — `/api/auth`
 | Método | Endpoint | Descripción |
 |---|---|---|
-| POST | `/api/auth/registro` | Registra un nuevo usuario (nombre, email, password y rol opcional `CIUDADANO` o `ADMINISTRADOR`; por defecto `CIUDADANO`) |
-| POST | `/api/auth/login` | Valida credenciales y retorna los datos del usuario |
+| POST | `/api/auth/registro` | Registra un ciudadano y retorna usuario más JWT |
+| POST | `/api/auth/login` | Valida credenciales y retorna usuario más JWT (vigencia por defecto: 30 minutos) |
 
 ### Usuarios — `/api/usuarios`
 | Método | Endpoint | Descripción |
 |---|---|---|
-| GET | `/api/usuarios` | Consultar todos los usuarios |
-| GET | `/api/usuarios/{id}` | Consultar un usuario por id |
-| PUT | `/api/usuarios/{id}` | Actualizar un usuario (nombre, email) |
-| DELETE | `/api/usuarios/{id}` | Eliminar un usuario |
+| GET | `/api/usuarios` | Consultar todos los usuarios (requiere JWT de administrador) |
+| GET | `/api/usuarios/{id}` | Consultar un usuario por id (requiere JWT de administrador) |
+| PUT | `/api/usuarios/{id}` | Actualizar un usuario (requiere JWT de administrador) |
+| DELETE | `/api/usuarios/{id}` | Eliminar un usuario (requiere JWT de administrador) |
 
 ### Reportes de incidentes — `/api/reportes`
 | Método | Endpoint | Descripción |
@@ -104,6 +108,9 @@ La API acepta solicitudes desde orígenes `https://*.vercel.app` y desde `localh
 | GET | `/api/reportes` | Consultar todos los reportes |
 | GET | `/api/reportes?usuarioId={id}` | Consultar reportes de un usuario |
 | GET | `/api/reportes?estado={PENDIENTE\|EN_REVISION\|RESUELTO\|DESCARTADO}` | Filtrar por estado |
+| GET | `/api/reportes?desde=AAAA-MM-DD&hasta=AAAA-MM-DD` | Filtrar por fechas (ambos extremos inclusivos; puede combinarse con estado y usuarioId) |
+| GET | `/api/reportes/metricas?desde=AAAA-MM-DD&hasta=AAAA-MM-DD` | Conteos por estado, prioridad y tipo; requiere JWT de administrador |
+| GET | `/api/reportes/exportar/csv?desde=AAAA-MM-DD&hasta=AAAA-MM-DD` | Descarga CSV del período; requiere JWT de administrador |
 | GET | `/api/reportes/{id}` | Consultar un reporte por id |
 | POST | `/api/reportes?usuarioId={id}` | Registrar un nuevo reporte |
 | PUT | `/api/reportes/{id}` | Actualizar un reporte |

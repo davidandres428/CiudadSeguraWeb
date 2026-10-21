@@ -1,13 +1,19 @@
 package com.ciudadsegura.controller;
 
+import com.ciudadsegura.dto.ReporteMetricasResponse;
 import com.ciudadsegura.model.ReporteIncidente;
 import com.ciudadsegura.model.enums.EstadoReporte;
 import com.ciudadsegura.service.ReporteIncidenteService;
 import jakarta.validation.Valid;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -23,14 +29,30 @@ public class ReporteIncidenteController {
     @GetMapping
     public List<ReporteIncidente> listar(
             @RequestParam(required = false) Long usuarioId,
-            @RequestParam(required = false) EstadoReporte estado) {
-        if (usuarioId != null) {
-            return reporteService.listarPorUsuario(usuarioId);
-        }
-        if (estado != null) {
-            return reporteService.listarPorEstado(estado);
-        }
-        return reporteService.listarTodos();
+            @RequestParam(required = false) EstadoReporte estado,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
+        return reporteService.listarFiltrados(usuarioId, estado, desde, hasta);
+    }
+
+    @GetMapping("/metricas")
+    public ReporteMetricasResponse obtenerMetricas(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
+        return reporteService.obtenerMetricas(desde, hasta);
+    }
+
+    @GetMapping("/exportar/csv")
+    public ResponseEntity<byte[]> exportarCsv(
+            @RequestParam(required = false) EstadoReporte estado,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
+        List<ReporteIncidente> reportes = reporteService.listarFiltrados(null, estado, desde, hasta);
+        byte[] contenido = reporteService.exportarCsv(reportes).getBytes(StandardCharsets.UTF_8);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"reportes.csv\"")
+                .contentType(MediaType.parseMediaType("text/csv;charset=UTF-8"))
+                .body(contenido);
     }
 
     @GetMapping("/{id}")

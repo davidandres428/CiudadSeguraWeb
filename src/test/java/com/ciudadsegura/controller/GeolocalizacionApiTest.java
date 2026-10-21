@@ -34,7 +34,7 @@ class GeolocalizacionApiTest {
         reporte.setEstado(EstadoReporte.PENDIENTE);
         reporte.setLatitud(4.711);
         reporte.setLongitud(-74.0721);
-        when(servicio.listarTodos()).thenReturn(List.of(reporte));
+        when(servicio.listarFiltrados(null, null, null, null)).thenReturn(List.of(reporte));
         MockMvc mvc = standaloneSetup(new ReporteIncidenteController(servicio)).build();
 
         mvc.perform(get("/api/reportes"))
