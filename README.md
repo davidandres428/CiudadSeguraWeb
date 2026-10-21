@@ -5,7 +5,7 @@ Evidencia: **GA8-220501096-AA1-EV01** — Integrar módulos, de acuerdo con el d
 
 Este proyecto integra en **una sola aplicación Spring Boot** los módulos construidos en guías
 anteriores: un menú principal (front-end) que conecta con los servicios REST (back-end) y estos,
-a su vez, con la base de datos (MySQL), de modo que el CRUD completo de cada módulo se puede
+a su vez, con la base de datos, de modo que el CRUD de cada módulo se puede
 ejecutar desde una interfaz real en el navegador.
 
 ## Módulos integrados
@@ -24,7 +24,7 @@ funcionen de extremo a extremo.
 
 - Java 25 · Spring Boot 4.1.1
 - Spring Web (API REST) + front-end estático (HTML, CSS y JavaScript puro) servido desde `src/main/resources/static`
-- Spring Data JPA + MySQL
+- Spring Data JPA + H2 para desarrollo local y PostgreSQL en el perfil `prod`
 - Spring Validation (`@NotBlank`, `@Email`, etc.)
 - Spring Security OAuth2 Resource Server y JWT HS256 para proteger métricas y exportación
 - BCrypt (`spring-security-crypto`) para cifrado de contraseñas
@@ -61,20 +61,26 @@ src/test/java/com/ciudadsegura/service/  -> pruebas unitarias (JUnit 5 + Mockito
 
 ## Configuración y ejecución
 
-1. Tener MySQL corriendo localmente (o ajustar la URL a tu servidor).
-2. Ajustar usuario/contraseña de MySQL en `src/main/resources/application.properties`
-   (por defecto: `root` / `root`, base de datos `ciudad_segura`, se crea automáticamente).
-3. Ejecutar:
+1. La configuración local usa una base H2 en memoria; no requiere instalar una base de datos.
+2. Ejecutar:
    ```bash
-   ./mvnw spring-boot:run
+   .\mvnw.cmd spring-boot:run
    ```
-4. Abrir el navegador en `http://localhost:8080` — ahí se carga el **menú principal** con acceso
+3. Abrir el navegador en `http://localhost:8081` — ahí se carga el **menú principal** con acceso
    a los cuatro módulos.
-5. Para registrarte como ciudadano y poder crear reportes, entra a `http://localhost:8080/login.html`.
-6. Para desplegar el front-end por separado en Vercel, configura la URL base pública del back-end en `src/main/resources/static/js/api-config.js` (por ejemplo, `https://mi-api.example.com`, sin `/api` al final).
-7. En producción, configura `JWT_SECRET` con un valor aleatorio de al menos 32 bytes. El perfil `prod` falla al iniciar si falta esta variable; nunca reutilices la clave local de desarrollo.
+4. Para registrarte como ciudadano y poder crear reportes, entra a `http://localhost:8081/login.html`.
+5. Para desplegar el front-end por separado en Vercel, configura la URL base pública del back-end en `src/main/resources/static/js/api-config.js` (por ejemplo, `https://mi-api.example.com`, sin `/api` al final).
 
-> El registro público siempre crea cuentas `CIUDADANO`; el rol enviado por el cliente no se acepta para asignar privilegios. Los administradores se asignan de forma controlada en la base de datos. Antes de habilitar el dashboard en una base existente, audita las cuentas que ya tengan rol `ADMINISTRADOR`, pues registros anteriores podían elegir ese rol. Los endpoints de métricas y CSV requieren JWT de una cuenta con rol `ADMINISTRADOR`.
+### Despliegue en Railway
+
+No se incluye una configuración específica de Railway en el repositorio. Para producción, configura
+el servicio para activar el perfil `prod` (`SPRING_PROFILES_ACTIVE=prod`) y referencia las variables
+de una instancia PostgreSQL de Railway: `PGHOST`, `PGPORT`, `PGDATABASE`, `PGUSER` y `PGPASSWORD`.
+Configura también `JWT_SECRET` con un valor aleatorio de al menos 32 bytes. Railway proporciona
+`PORT` para el puerto de escucha. No guardes credenciales ni claves en el repositorio. La aplicación
+falla al iniciar si falta el secreto JWT en el perfil `prod`.
+
+> El registro público siempre crea cuentas `CIUDADANO`; el rol enviado por el cliente no se acepta para asignar privilegios. Los administradores se asignan de forma controlada en la base de datos. Antes de habilitar el dashboard en una base existente, audita las cuentas que ya tengan rol `ADMINISTRADOR`, pues registros anteriores podían elegir ese rol. Los endpoints de métricas, CSV, usuarios y las escrituras de zonas/alertas requieren JWT de una cuenta con rol `ADMINISTRADOR`. Las escrituras de reportes requieren autenticación; los ciudadanos solo modifican/eliminan los propios y el servidor deriva el propietario desde el JWT. Las lecturas de reportes, zonas y alertas siguen siendo públicas.
 
 ### CORS
 
@@ -112,9 +118,9 @@ La API habilita CORS con cualquier origen (`allowedOriginPatterns = ["*"]`), per
 | GET | `/api/reportes/metricas?desde=AAAA-MM-DD&hasta=AAAA-MM-DD` | Conteos por estado, prioridad y tipo; requiere JWT de administrador |
 | GET | `/api/reportes/exportar/csv?desde=AAAA-MM-DD&hasta=AAAA-MM-DD` | Descarga CSV del período; requiere JWT de administrador |
 | GET | `/api/reportes/{id}` | Consultar un reporte por id |
-| POST | `/api/reportes?usuarioId={id}` | Registrar un nuevo reporte |
-| PUT | `/api/reportes/{id}` | Actualizar un reporte |
-| DELETE | `/api/reportes/{id}` | Eliminar un reporte |
+| POST | `/api/reportes` | Registrar un reporte autenticado; el servidor asigna el propietario desde el JWT |
+| PUT | `/api/reportes/{id}` | Actualizar un reporte propio o cualquiera como administrador |
+| DELETE | `/api/reportes/{id}` | Eliminar un reporte propio o cualquiera como administrador |
 
 Cuerpo JSON esperado en POST/PUT:
 ```json
@@ -136,9 +142,9 @@ Los campos `latitud` y `longitud` son opcionales; `titulo`, `descripcion`, `tipo
 | GET | `/api/zonas-riesgo` | Consultar todas las zonas |
 | GET | `/api/zonas-riesgo?nivel={BAJO\|MEDIO\|ALTO}` | Filtrar por nivel de riesgo |
 | GET | `/api/zonas-riesgo/{id}` | Consultar una zona por id |
-| POST | `/api/zonas-riesgo` | Registrar una nueva zona |
-| PUT | `/api/zonas-riesgo/{id}` | Actualizar una zona |
-| DELETE | `/api/zonas-riesgo/{id}` | Eliminar una zona |
+| POST | `/api/zonas-riesgo` | Registrar una nueva zona (administrador) |
+| PUT | `/api/zonas-riesgo/{id}` | Actualizar una zona (administrador) |
+| DELETE | `/api/zonas-riesgo/{id}` | Eliminar una zona (administrador) |
 
 Cuerpo JSON esperado en POST/PUT:
 ```json
@@ -157,9 +163,9 @@ Cuerpo JSON esperado en POST/PUT:
 | GET | `/api/alertas` | Consultar todas las alertas |
 | GET | `/api/alertas?activas=true` | Consultar solo alertas activas |
 | GET | `/api/alertas/{id}` | Consultar una alerta por id |
-| POST | `/api/alertas?zonaRiesgoId={id}` | Registrar alerta (zona opcional) |
-| PUT | `/api/alertas/{id}?zonaRiesgoId={id}` | Actualizar alerta |
-| DELETE | `/api/alertas/{id}` | Eliminar alerta |
+| POST | `/api/alertas?zonaRiesgoId={id}` | Registrar alerta (administrador; zona opcional) |
+| PUT | `/api/alertas/{id}?zonaRiesgoId={id}` | Actualizar alerta (administrador) |
+| DELETE | `/api/alertas/{id}` | Eliminar alerta (administrador) |
 
 Cuerpo JSON esperado en POST/PUT:
 ```json
@@ -173,7 +179,7 @@ Cuerpo JSON esperado en POST/PUT:
 
 ## Manejo de errores
 
-Todas las respuestas de error siguen este formato JSON, con el código HTTP correspondiente (`400`, `401`, `404`, `409`, `500`):
+Todas las respuestas de error siguen este formato JSON, con el código HTTP correspondiente (`400`, `401`, `403`, `404`, `409`, `500`):
 ```json
 {
   "timestamp": "2026-08-19T10:00:00",

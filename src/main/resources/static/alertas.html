@@ -20,32 +20,32 @@
     </header>
 
     <main>
-        <div class="tarjeta">
+        <div class="tarjeta" id="tarjeta-form-alerta">
             <h2 id="titulo-form">Nueva alerta</h2>
             <div id="msg-form" class="mensaje oculto"></div>
             <form class="formulario" id="form-alerta">
                 <input type="hidden" id="alerta-id">
                 <div>
-                    <label>Título</label>
+                    <label for="alerta-titulo">Título</label>
                     <input type="text" id="alerta-titulo" required>
                 </div>
                 <div>
-                    <label>Mensaje</label>
+                    <label for="alerta-mensaje">Mensaje</label>
                     <textarea id="alerta-mensaje" rows="3" required></textarea>
                 </div>
                 <div class="fila-form">
                     <div>
-                        <label>Tipo</label>
+                        <label for="alerta-tipo">Tipo</label>
                         <input type="text" id="alerta-tipo" placeholder="Ej: SEGURIDAD" required>
                     </div>
                     <div>
-                        <label>Zona de riesgo (opcional)</label>
+                        <label for="alerta-zona">Zona de riesgo (opcional)</label>
                         <select id="alerta-zona">
                             <option value="">Ninguna</option>
                         </select>
                     </div>
                     <div>
-                        <label>Activa</label>
+                        <label for="alerta-activa">Activa</label>
                         <select id="alerta-activa">
                             <option value="true">Sí</option>
                             <option value="false">No</option>
@@ -63,7 +63,7 @@
             <h2>Alertas registradas</h2>
             <div class="fila-form" style="margin-bottom: 14px;">
                 <div>
-                    <label>Mostrar</label>
+                    <label for="filtro-activas">Mostrar</label>
                     <select id="filtro-activas" onchange="cargarAlertas()">
                         <option value="">Todas</option>
                         <option value="true">Solo activas</option>
@@ -71,12 +71,14 @@
                 </div>
             </div>
             <div id="msg-lista" class="mensaje oculto"></div>
+            <div class="tabla-desplazable" role="region" aria-label="Lista de alertas" tabindex="0">
             <table>
                 <thead>
                     <tr><th>ID</th><th>Título</th><th>Tipo</th><th>Zona</th><th>Activa</th><th>Fecha</th><th>Acciones</th></tr>
                 </thead>
                 <tbody id="tabla-alertas"></tbody>
             </table>
+            </div>
         </div>
     </main>
 
@@ -84,13 +86,18 @@
     <script src="/js/api.js"></script>
     <script>
         let zonasCache = [];
+        const alertasPorId = new Map();
+
+        function esAdministrador() {
+            return Sesion.obtener()?.rol === "ADMINISTRADOR";
+        }
 
         async function cargarZonasSelect() {
             try {
                 zonasCache = await CiudadSeguraAPI.listarZonas();
                 const select = document.getElementById("alerta-zona");
                 select.innerHTML = `<option value="">Ninguna</option>` +
-                    zonasCache.map(z => `<option value="${z.id}">${z.nombre} (${z.nivelRiesgo})</option>`).join("");
+                    zonasCache.map(z => `<option value="${z.id}">${escaparHtml(z.nombre)} (${escaparHtml(z.nivelRiesgo)})</option>`).join("");
             } catch (err) {
                 console.error(err);
             }
@@ -102,19 +109,27 @@
             try {
                 const alertas = await CiudadSeguraAPI.listarAlertas(query);
                 const tbody = document.getElementById("tabla-alertas");
+                alertasPorId.clear();
+                alertas.forEach(alerta => alertasPorId.set(String(alerta.id), alerta));
                 tbody.innerHTML = alertas.map(a => `
                     <tr>
                         <td>${a.id}</td>
-                        <td>${a.titulo}</td>
-                        <td>${a.tipo}</td>
-                        <td>${a.zonaRiesgo ? a.zonaRiesgo.nombre : "-"}</td>
+                        <td>${escaparHtml(a.titulo)}</td>
+                        <td>${escaparHtml(a.tipo)}</td>
+                        <td>${escaparHtml(a.zonaRiesgo ? a.zonaRiesgo.nombre : "-")}</td>
                         <td>${a.activa ? "Sí" : "No"}</td>
                         <td>${formatearFecha(a.fechaCreacion)}</td>
-                        <td class="acciones-fila">
-                            <button onclick='editarAlerta(${JSON.stringify(a)})'>Editar</button>
-                            <button class="peligro" onclick="eliminarAlerta(${a.id})">Eliminar</button>
-                        </td>
+                        <td class="acciones-fila">${esAdministrador()
+                            ? `<button data-editar-alerta="${a.id}">Editar</button>
+                               <button class="peligro" data-eliminar-alerta="${a.id}">Eliminar</button>`
+                            : "—"}</td>
                     </tr>`).join("") || `<tr><td colspan="7">No hay alertas.</td></tr>`;
+                tbody.querySelectorAll("[data-editar-alerta]").forEach(boton => {
+                    boton.addEventListener("click", () => editarAlerta(alertasPorId.get(boton.dataset.editarAlerta)));
+                });
+                tbody.querySelectorAll("[data-eliminar-alerta]").forEach(boton => {
+                    boton.addEventListener("click", () => eliminarAlerta(boton.dataset.eliminarAlerta));
+                });
             } catch (err) {
                 mostrarMensaje("msg-lista", err.message);
             }
@@ -175,6 +190,9 @@
             }
         }
 
+        if (!esAdministrador()) {
+            document.getElementById("tarjeta-form-alerta").classList.add("oculto");
+        }
         cargarZonasSelect();
         cargarAlertas();
     </script>

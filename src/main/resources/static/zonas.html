@@ -20,22 +20,22 @@
     </header>
 
     <main>
-        <div class="tarjeta">
+        <div class="tarjeta" id="tarjeta-form-zona">
             <h2 id="titulo-form">Nueva zona de riesgo</h2>
             <div id="msg-form" class="mensaje oculto"></div>
             <form class="formulario" id="form-zona">
                 <input type="hidden" id="zona-id">
                 <div>
-                    <label>Nombre</label>
+                    <label for="zona-nombre">Nombre</label>
                     <input type="text" id="zona-nombre" required>
                 </div>
                 <div>
-                    <label>Descripción</label>
+                    <label for="zona-descripcion">Descripción</label>
                     <textarea id="zona-descripcion" rows="2"></textarea>
                 </div>
                 <div class="fila-form">
                     <div>
-                        <label>Nivel de riesgo</label>
+                        <label for="zona-nivel">Nivel de riesgo</label>
                         <select id="zona-nivel" required>
                             <option value="BAJO">Bajo</option>
                             <option value="MEDIO">Medio</option>
@@ -43,11 +43,11 @@
                         </select>
                     </div>
                     <div>
-                        <label>Latitud</label>
+                        <label for="zona-lat">Latitud</label>
                         <input type="number" step="any" id="zona-lat" required>
                     </div>
                     <div>
-                        <label>Longitud</label>
+                        <label for="zona-lng">Longitud</label>
                         <input type="number" step="any" id="zona-lng" required>
                     </div>
                 </div>
@@ -62,7 +62,7 @@
             <h2>Zonas registradas</h2>
             <div class="fila-form" style="margin-bottom: 14px;">
                 <div>
-                    <label>Filtrar por nivel</label>
+                    <label for="filtro-nivel">Filtrar por nivel</label>
                     <select id="filtro-nivel" onchange="cargarZonas()">
                         <option value="">Todos</option>
                         <option value="BAJO">Bajo</option>
@@ -72,38 +72,54 @@
                 </div>
             </div>
             <div id="msg-lista" class="mensaje oculto"></div>
+            <div class="tabla-desplazable" role="region" aria-label="Lista de zonas de riesgo" tabindex="0">
             <table>
                 <thead>
                     <tr><th>ID</th><th>Nombre</th><th>Nivel</th><th>Descripción</th><th>Acciones</th></tr>
                 </thead>
                 <tbody id="tabla-zonas"></tbody>
             </table>
+            </div>
         </div>
     </main>
 
     <script src="/js/api-config.js"></script>
     <script src="/js/api.js"></script>
     <script>
+        const zonasPorId = new Map();
+
         async function cargarZonas() {
             const nivel = document.getElementById("filtro-nivel").value;
             const query = nivel ? `?nivel=${nivel}` : "";
             try {
                 const zonas = await CiudadSeguraAPI.listarZonas(query);
                 const tbody = document.getElementById("tabla-zonas");
+                zonasPorId.clear();
+                zonas.forEach(zona => zonasPorId.set(String(zona.id), zona));
                 tbody.innerHTML = zonas.map(z => `
                     <tr>
                         <td>${z.id}</td>
-                        <td>${z.nombre}</td>
+                        <td>${escaparHtml(z.nombre)}</td>
                         <td><span class="badge ${z.nivelRiesgo}">${z.nivelRiesgo}</span></td>
-                        <td>${z.descripcion || "-"}</td>
-                        <td class="acciones-fila">
-                            <button onclick='editarZona(${JSON.stringify(z)})'>Editar</button>
-                            <button class="peligro" onclick="eliminarZona(${z.id})">Eliminar</button>
-                        </td>
+                        <td>${escaparHtml(z.descripcion || "-")}</td>
+                        <td class="acciones-fila">${esAdministrador()
+                            ? `<button data-editar-zona="${z.id}">Editar</button>
+                               <button class="peligro" data-eliminar-zona="${z.id}">Eliminar</button>`
+                            : "—"}</td>
                     </tr>`).join("") || `<tr><td colspan="5">No hay zonas registradas.</td></tr>`;
+                tbody.querySelectorAll("[data-editar-zona]").forEach(boton => {
+                    boton.addEventListener("click", () => editarZona(zonasPorId.get(boton.dataset.editarZona)));
+                });
+                tbody.querySelectorAll("[data-eliminar-zona]").forEach(boton => {
+                    boton.addEventListener("click", () => eliminarZona(boton.dataset.eliminarZona));
+                });
             } catch (err) {
                 mostrarMensaje("msg-lista", err.message);
             }
+        }
+
+        function esAdministrador() {
+            return Sesion.obtener()?.rol === "ADMINISTRADOR";
         }
 
         function editarZona(z) {
@@ -161,6 +177,9 @@
             }
         }
 
+        if (!esAdministrador()) {
+            document.getElementById("tarjeta-form-zona").classList.add("oculto");
+        }
         cargarZonas();
     </script>
 </body>

@@ -29,20 +29,20 @@
             <form class="formulario" id="form-reporte">
                 <input type="hidden" id="reporte-id">
                 <div>
-                    <label>Título</label>
+                    <label for="reporte-titulo">Título</label>
                     <input type="text" id="reporte-titulo" required>
                 </div>
                 <div>
-                    <label>Descripción</label>
+                    <label for="reporte-descripcion">Descripción</label>
                     <textarea id="reporte-descripcion" rows="3" required></textarea>
                 </div>
                 <div>
-                    <label>Dirección</label>
+                    <label for="reporte-direccion">Dirección</label>
                     <input type="text" id="reporte-direccion" maxlength="250" required>
                 </div>
                 <div class="fila-form">
                     <div>
-                        <label>Tipo</label>
+                        <label for="reporte-tipo">Tipo</label>
                         <select id="reporte-tipo" required>
                             <option value="ROBO">Robo</option>
                             <option value="VANDALISMO">Vandalismo</option>
@@ -51,7 +51,7 @@
                         </select>
                     </div>
                     <div>
-                        <label>Prioridad</label>
+                        <label for="reporte-prioridad">Prioridad</label>
                         <select id="reporte-prioridad" required>
                             <option value="BAJA">Baja</option>
                             <option value="MEDIA">Media</option>
@@ -60,7 +60,7 @@
                         </select>
                     </div>
                     <div id="grupo-estado" class="oculto">
-                        <label>Estado</label>
+                        <label for="reporte-estado">Estado</label>
                         <select id="reporte-estado">
                             <option value="PENDIENTE">Pendiente</option>
                             <option value="EN_REVISION">En revisión</option>
@@ -71,11 +71,11 @@
                 </div>
                 <div class="fila-form">
                     <div>
-                        <label>Latitud</label>
+                        <label for="reporte-lat">Latitud</label>
                         <input type="number" step="any" min="-90" max="90" id="reporte-lat">
                     </div>
                     <div>
-                        <label>Longitud</label>
+                        <label for="reporte-lng">Longitud</label>
                         <input type="number" step="any" min="-180" max="180" id="reporte-lng">
                     </div>
                 </div>
@@ -91,7 +91,7 @@
             <p>Haz clic en el mapa para seleccionar la ubicación del reporte; haz clic en un marcador para consultar sus detalles.</p>
             <div class="fila-form" style="margin-bottom: 14px;">
                 <div>
-                    <label>Filtrar por estado</label>
+                    <label for="filtro-estado">Filtrar por estado</label>
                     <select id="filtro-estado">
                         <option value="">Todos</option>
                         <option value="PENDIENTE">Pendiente</option>
@@ -101,11 +101,11 @@
                     </select>
                 </div>
                 <div>
-                    <label>Desde</label>
+                    <label for="filtro-desde">Desde</label>
                     <input type="date" id="filtro-desde">
                 </div>
                 <div>
-                    <label>Hasta</label>
+                    <label for="filtro-hasta">Hasta</label>
                     <input type="date" id="filtro-hasta">
                 </div>
                 <div class="acciones-fila acciones-filtros">
@@ -115,12 +115,14 @@
             </div>
             <div id="msg-lista" class="mensaje oculto"></div>
             <div id="mapa-reportes" class="mapa" aria-label="Mapa de reportes de incidentes"></div>
+            <div class="tabla-desplazable" role="region" aria-label="Lista de reportes" tabindex="0">
             <table>
                 <thead>
                     <tr><th>ID</th><th>Título</th><th>Tipo</th><th>Prioridad</th><th>Dirección</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr>
                 </thead>
                 <tbody id="tabla-reportes"></tbody>
             </table>
+            </div>
         </div>
     </main>
 
@@ -134,14 +136,10 @@
         const reportesPorId = new Map();
         let mapaReportes;
 
-        function escaparHtml(valor) {
-            return String(valor ?? "").replace(/[&<>"']/g, (caracter) => ({
-                "&": "&amp;",
-                "<": "&lt;",
-                ">": "&gt;",
-                "\"": "&quot;",
-                "'": "&#39;",
-            })[caracter]);
+        function puedeGestionarReporte(reporte) {
+            const usuario = Sesion.obtener();
+            return usuario?.rol === "ADMINISTRADOR"
+                || (usuario?.id != null && String(reporte.usuario?.id) === String(usuario.id));
         }
 
         function parametrosFiltroReportes() {
@@ -178,8 +176,8 @@
                         <td><span class="badge ${escaparHtml(r.estado)}">${escaparHtml(r.estado)}</span></td>
                         <td>${formatearFecha(r.fechaReporte)}</td>
                         <td class="acciones-fila">
-                            <button data-editar="${r.id}">Editar</button>
-                            <button class="peligro" data-eliminar="${r.id}">Eliminar</button>
+                            ${puedeGestionarReporte(r) ? `<button data-editar="${r.id}">Editar</button>
+                            <button class="peligro" data-eliminar="${r.id}">Eliminar</button>` : ""}
                         </td>
                     </tr>`).join("") || `<tr><td colspan="8">No hay reportes.</td></tr>`;
                 tbody.querySelectorAll("[data-editar]").forEach(boton => {
@@ -206,7 +204,9 @@
             if (r.latitud !== null && r.longitud !== null) {
                 mapaReportes.seleccionarCoordenadas(r.latitud, r.longitud);
             }
-            document.getElementById("grupo-estado").classList.remove("oculto");
+            if (usuario?.rol === "ADMINISTRADOR") {
+                document.getElementById("grupo-estado").classList.remove("oculto");
+            }
             document.getElementById("btn-reporte").textContent = "Guardar cambios";
             document.getElementById("btn-cancelar-reporte").classList.remove("oculto");
             document.getElementById("form-reporte").classList.remove("oculto");
@@ -242,7 +242,7 @@
                 if (id) {
                     await CiudadSeguraAPI.actualizarReporte(id, datos);
                 } else {
-                    await CiudadSeguraAPI.crearReporte(datos, usuario.id);
+                    await CiudadSeguraAPI.crearReporte(datos);
                 }
                 cancelarEdicionReporte();
                 cargarReportes();

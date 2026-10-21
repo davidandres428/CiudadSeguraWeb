@@ -1,5 +1,6 @@
 package com.ciudadsegura.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.ciudadsegura.model.enums.EstadoReporte;
 import com.ciudadsegura.model.enums.PrioridadReporte;
 import com.ciudadsegura.model.enums.TipoReporte;
@@ -7,6 +8,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 
 import java.time.LocalDateTime;
 
@@ -46,9 +49,13 @@ public class ReporteIncidente {
     private EstadoReporte estado = EstadoReporte.PENDIENTE;
 
     @Column
+    @DecimalMin(value = "-90.0", message = "La latitud debe estar entre -90 y 90")
+    @DecimalMax(value = "90.0", message = "La latitud debe estar entre -90 y 90")
     private Double latitud;
 
     @Column
+    @DecimalMin(value = "-180.0", message = "La longitud debe estar entre -180 y 180")
+    @DecimalMax(value = "180.0", message = "La longitud debe estar entre -180 y 180")
     private Double longitud;
 
     @Column(name = "fecha_reporte", nullable = false, updatable = false)
@@ -56,6 +63,7 @@ public class ReporteIncidente {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "usuario_id", nullable = false)
+    @JsonIgnoreProperties({"nombre", "email", "password", "rol", "fechaRegistro"})
     private Usuario usuario;
 
     public ReporteIncidente() {

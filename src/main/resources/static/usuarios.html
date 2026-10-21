@@ -33,12 +33,14 @@
             <p>Nuevos usuarios se crean desde <a href="/login.html">la página de registro</a>. Aquí puedes
                consultar, actualizar y eliminar los usuarios existentes.</p>
             <div id="msg" class="mensaje oculto"></div>
+            <div class="tabla-desplazable" role="region" aria-label="Lista de usuarios" tabindex="0">
             <table>
                 <thead>
                     <tr><th>ID</th><th>Nombre</th><th>Email</th><th>Rol</th><th>Registrado</th><th>Acciones</th></tr>
                 </thead>
                 <tbody id="tabla-usuarios"></tbody>
             </table>
+            </div>
         </div>
 
         <div class="tarjeta oculto" id="tarjeta-editar">
@@ -46,22 +48,22 @@
             <form class="formulario" id="form-editar">
                 <input type="hidden" id="edit-id">
                 <div>
-                    <label>Nombre</label>
+                    <label for="edit-nombre">Nombre</label>
                     <input type="text" id="edit-nombre" required>
                 </div>
                 <div>
-                    <label>Email</label>
+                    <label for="edit-email">Email</label>
                     <input type="email" id="edit-email" required>
                 </div>
                 <div>
-                    <label>Rol</label>
+                    <label for="edit-rol">Rol</label>
                     <select id="edit-rol">
                         <option value="CIUDADANO">Ciudadano</option>
                         <option value="ADMINISTRADOR">Administrador</option>
                     </select>
                 </div>
                 <div>
-                    <label>Nueva contraseña (opcional)</label>
+                    <label for="edit-password">Nueva contraseña (opcional)</label>
                     <input type="password" id="edit-password" minlength="6" autocomplete="new-password">
                 </div>
                 <div class="botones">
@@ -81,9 +83,9 @@
                 tbody.innerHTML = usuarios.map(u => `
                     <tr>
                         <td>${u.id}</td>
-                        <td>${u.nombre}</td>
-                        <td>${u.email}</td>
-                        <td>${u.rol}</td>
+                        <td>${escaparHtml(u.nombre)}</td>
+                        <td>${escaparHtml(u.email)}</td>
+                        <td>${escaparHtml(u.rol)}</td>
                         <td>${formatearFecha(u.fechaRegistro)}</td>
                         <td class="acciones-fila">
                             <button onclick="editar(${u.id})">Editar</button>

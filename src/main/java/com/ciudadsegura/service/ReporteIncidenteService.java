@@ -13,6 +13,7 @@ import jakarta.persistence.criteria.Predicate;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 public class ReporteIncidenteService {
@@ -155,16 +157,17 @@ public class ReporteIncidenteService {
                 .orElseThrow(() -> new RecursoNoEncontradoException("Reporte no encontrado con id " + id));
     }
 
-    public ReporteIncidente crear(ReporteIncidente reporte, Long usuarioId) {
-        Usuario usuario = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado con id " + usuarioId));
+    public ReporteIncidente crear(ReporteIncidente reporte, String email) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario autenticado no encontrado"));
         reporte.setUsuario(usuario);
         reporte.setEstado(EstadoReporte.PENDIENTE);
         return reporteRepository.save(reporte);
     }
 
-    public ReporteIncidente actualizar(Long id, ReporteIncidente datos) {
+    public ReporteIncidente actualizar(Long id, ReporteIncidente datos, String email, boolean administrador) {
         ReporteIncidente reporte = buscarPorId(id);
+        validarPropietario(reporte, email, administrador);
         reporte.setTitulo(datos.getTitulo());
         reporte.setDescripcion(datos.getDescripcion());
         reporte.setTipo(datos.getTipo());
@@ -172,16 +175,22 @@ public class ReporteIncidenteService {
         reporte.setDireccion(datos.getDireccion());
         reporte.setLatitud(datos.getLatitud());
         reporte.setLongitud(datos.getLongitud());
-        if (datos.getEstado() != null) {
+        if (administrador && datos.getEstado() != null) {
             reporte.setEstado(datos.getEstado());
         }
         return reporteRepository.save(reporte);
     }
 
-    public void eliminar(Long id) {
-        if (!reporteRepository.existsById(id)) {
-            throw new RecursoNoEncontradoException("Reporte no encontrado con id " + id);
+    public void eliminar(Long id, String email, boolean administrador) {
+        ReporteIncidente reporte = buscarPorId(id);
+        validarPropietario(reporte, email, administrador);
+        reporteRepository.delete(reporte);
+    }
+
+    private void validarPropietario(ReporteIncidente reporte, String email, boolean administrador) {
+        if (!administrador && (reporte.getUsuario() == null
+                || !Objects.equals(reporte.getUsuario().getEmail(), email))) {
+            throw new AccessDeniedException("Solo puedes modificar o eliminar tus propios reportes.");
         }
-        reporteRepository.deleteById(id);
     }
 }

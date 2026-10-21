@@ -4,6 +4,7 @@ import com.ciudadsegura.dto.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -43,9 +44,21 @@ public class GlobalExceptionHandler {
         return construirError(HttpStatus.BAD_REQUEST, "Datos de entrada inválidos", detalles);
     }
 
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, String>> manejarCuerpoInvalido(HttpMessageNotReadableException ex) {
+        return construirError(HttpStatus.BAD_REQUEST, "Cuerpo de la solicitud inválido",
+                "Verifica que el JSON y sus valores correspondan al formato esperado");
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, String>> manejarArgumentoInvalido(IllegalArgumentException ex) {
         return construirError(HttpStatus.BAD_REQUEST, "Datos de entrada inválidos", ex.getMessage());
+    }
+
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> manejarAccesoDenegado(
+            org.springframework.security.access.AccessDeniedException ex) {
+        return construir(HttpStatus.FORBIDDEN, ex.getMessage());
     }
 
     @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)

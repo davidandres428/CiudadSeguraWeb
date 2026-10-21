@@ -34,6 +34,16 @@ async function apiFetch(path, options = {}) {
     return datos;
 }
 
+function escaparHtml(valor) {
+    return String(valor ?? "").replace(/[&<>"']/g, (caracter) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#39;",
+    })[caracter]);
+}
+
 const CiudadSeguraAPI = {
     // --- Autenticación / Usuarios ---
     registrar: (datos) => apiFetch("/auth/registro", { method: "POST", body: JSON.stringify(datos) }),
@@ -63,7 +73,7 @@ const CiudadSeguraAPI = {
         return respuesta.blob();
     },
     obtenerReporte: (id) => apiFetch(`/reportes/${id}`),
-    crearReporte: (datos, usuarioId) => apiFetch(`/reportes?usuarioId=${usuarioId}`, { method: "POST", body: JSON.stringify(datos) }),
+    crearReporte: (datos) => apiFetch("/reportes", { method: "POST", body: JSON.stringify(datos) }),
     actualizarReporte: (id, datos) => apiFetch(`/reportes/${id}`, { method: "PUT", body: JSON.stringify(datos) }),
     eliminarReporte: (id) => apiFetch(`/reportes/${id}`, { method: "DELETE" }),
 

@@ -5,6 +5,9 @@ import com.ciudadsegura.model.ReporteIncidente;
 import com.ciudadsegura.model.enums.EstadoReporte;
 import com.ciudadsegura.service.ReporteIncidenteService;
 import jakarta.validation.Valid;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpHeaders;
@@ -62,19 +65,26 @@ public class ReporteIncidenteController {
 
     @PostMapping
     public ResponseEntity<ReporteIncidente> crear(@Valid @RequestBody ReporteIncidente reporte,
-                                                    @RequestParam Long usuarioId) {
-        ReporteIncidente creado = reporteService.crear(reporte, usuarioId);
+                                                   @AuthenticationPrincipal Jwt jwt) {
+        ReporteIncidente creado = reporteService.crear(reporte, jwt.getSubject());
         return ResponseEntity.status(HttpStatus.CREATED).body(creado);
     }
 
     @PutMapping("/{id}")
-    public ReporteIncidente actualizar(@PathVariable Long id, @Valid @RequestBody ReporteIncidente reporte) {
-        return reporteService.actualizar(id, reporte);
+    public ReporteIncidente actualizar(@PathVariable Long id, @Valid @RequestBody ReporteIncidente reporte,
+                                        @AuthenticationPrincipal Jwt jwt, Authentication authentication) {
+        return reporteService.actualizar(id, reporte, jwt.getSubject(), esAdministrador(authentication));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        reporteService.eliminar(id);
+    public ResponseEntity<Void> eliminar(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt,
+                                          Authentication authentication) {
+        reporteService.eliminar(id, jwt.getSubject(), esAdministrador(authentication));
         return ResponseEntity.noContent().build();
+    }
+
+    private boolean esAdministrador(Authentication authentication) {
+        return authentication.getAuthorities().stream()
+                .anyMatch(authority -> "SCOPE_ADMINISTRADOR".equals(authority.getAuthority()));
     }
 }

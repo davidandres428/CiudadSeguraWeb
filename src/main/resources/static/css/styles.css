@@ -849,6 +849,18 @@ table {
     font-size: 0.88rem;
 }
 
+.tabla-desplazable {
+    max-width: 100%;
+    overflow-x: auto;
+    border-radius: 8px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.tabla-desplazable:focus-visible {
+    outline: 3px solid rgba(28, 135, 144, 0.55);
+    outline-offset: 3px;
+}
+
 th, td {
     text-align: left;
     padding: 8px 10px;
@@ -899,6 +911,11 @@ tr:hover td { background: #f5f9fb; }
 }
 
 @media (max-width: 768px) {
+    .utility-topbar-contenido {
+        padding-right: 18px;
+        padding-left: 18px;
+    }
+
     header.topbar {
         position: relative;
         padding: 14px 18px;
