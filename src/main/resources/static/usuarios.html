@@ -10,7 +10,7 @@
     <script>
         const usuarioActual = Sesion.obtener();
         if (!Sesion.token() || usuarioActual?.rol !== "ADMINISTRADOR") {
-            window.location.replace("/index.html");
+            window.location.replace("/");
         }
     </script>
 </head>
@@ -18,11 +18,11 @@
     <header class="topbar">
         <h1>🛡️ Ciudad Segura</h1>
         <nav class="menu">
-            <a href="/index.html">Inicio</a>
-            <a href="/reportes.html">Reportes</a>
-            <a href="/zonas.html">Zonas de riesgo</a>
-            <a href="/alertas.html">Alertas</a>
-            <a href="/usuarios.html" class="activo">Usuarios</a>
+            <a href="/">Inicio</a>
+            <a href="/reportes">Reportes</a>
+            <a href="/zonas">Zonas de riesgo</a>
+            <a href="/alertas">Alertas</a>
+            <a href="/usuarios" class="activo">Usuarios</a>
         </nav>
         <div id="usuario-activo"></div>
     </header>
@@ -30,7 +30,7 @@
     <main>
         <div class="tarjeta">
             <h2>Usuarios registrados</h2>
-            <p>Nuevos usuarios se crean desde <a href="/login.html">la página de registro</a>. Aquí puedes
+            <p>Nuevos usuarios se crean desde <a href="/login">la página de registro</a>. Aquí puedes
                consultar, actualizar y eliminar los usuarios existentes.</p>
             <div id="msg" class="mensaje oculto"></div>
             <div class="tabla-desplazable" role="region" aria-label="Lista de usuarios" tabindex="0">

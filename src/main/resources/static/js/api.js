@@ -50,6 +50,7 @@ const CiudadSeguraAPI = {
     // --- Autenticación / Usuarios ---
     registrar: (datos) => apiFetch("/auth/registro", { method: "POST", body: JSON.stringify(datos) }),
     login: (datos) => apiFetch("/auth/login", { method: "POST", body: JSON.stringify(datos) }),
+    radicarPqrs: (datos) => apiFetch("/pqrs", { method: "POST", body: JSON.stringify(datos) }),
     listarUsuarios: () => apiFetch("/usuarios"),
     obtenerUsuario: (id) => apiFetch(`/usuarios/${id}`),
     actualizarUsuario: (id, datos) => apiFetch(`/usuarios/${id}`, { method: "PUT", body: JSON.stringify(datos) }),
@@ -113,7 +114,7 @@ const Sesion = {
     cerrar() {
         sessionStorage.removeItem("cs_usuario");
         sessionStorage.removeItem("cs_access_token");
-        window.location.href = "/login.html";
+        window.location.href = "/login";
     },
     token() {
         return sessionStorage.getItem("cs_access_token");
@@ -134,21 +135,21 @@ function pintarUsuarioActivo() {
     } else {
         contenedor.innerHTML = `
             <span class="acciones-acceso">
-                <a href="/login.html#form-login" class="boton boton-login">Iniciar sesión</a>
-                <a href="/login.html#form-registro" class="boton boton-registro">Registrarse</a>
+                <a href="/login#form-login" class="boton boton-login">Iniciar sesión</a>
+                <a href="/login#form-registro" class="boton boton-registro">Registrarse</a>
             </span>`;
     }
     if (usuario?.rol === "ADMINISTRADOR") {
         const menu = document.querySelector("nav.menu");
-        if (menu && !menu.querySelector('a[href="/dashboard.html"]')) {
+        if (menu && !menu.querySelector('a[href="/dashboard"]')) {
             const enlaceDashboard = document.createElement("a");
-            enlaceDashboard.href = "/dashboard.html";
+            enlaceDashboard.href = "/dashboard";
             enlaceDashboard.textContent = "Dashboard";
             menu.appendChild(enlaceDashboard);
         }
     }
     if (usuario?.rol !== "ADMINISTRADOR") {
-        document.querySelectorAll('a[href="/usuarios.html"]').forEach((enlace) => enlace.remove());
+        document.querySelectorAll('a[href="/usuarios"]').forEach((enlace) => enlace.remove());
     }
 }
 
@@ -167,7 +168,7 @@ function ocultarMensaje(contenedorId) {
 
 function redirigirALoginSiSesionExpirada(error) {
     if (error?.status !== 401) return false;
-    window.location.href = "/login.html#form-login";
+    window.location.href = "/login#form-login";
     return true;
 }
 

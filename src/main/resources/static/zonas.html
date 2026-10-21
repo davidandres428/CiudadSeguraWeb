@@ -4,17 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ciudad Segura — Zonas de riesgo</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="topbar">
         <h1>🛡️ Ciudad Segura</h1>
         <nav class="menu">
-            <a href="/index.html">Inicio</a>
-            <a href="/reportes.html">Reportes</a>
-            <a href="/zonas.html" class="activo">Zonas de riesgo</a>
-            <a href="/alertas.html">Alertas</a>
-            <a href="/usuarios.html">Usuarios</a>
+            <a href="/">Inicio</a>
+            <a href="/reportes">Reportes</a>
+            <a href="/zonas" class="activo">Zonas de riesgo</a>
+            <a href="/alertas">Alertas</a>
+            <a href="/usuarios">Usuarios</a>
         </nav>
         <div id="usuario-activo"></div>
     </header>
@@ -61,6 +63,8 @@
 
         <div class="tarjeta">
             <h2>Zonas registradas</h2>
+            <p>El mapa muestra las zonas de riesgo y los reportes registrados con coordenadas.</p>
+            <div id="mapa-zonas" class="mapa" aria-label="Mapa de reportes y zonas de riesgo"></div>
             <div class="fila-form" style="margin-bottom: 14px;">
                 <div>
                     <label for="filtro-nivel">Filtrar por nivel</label>
@@ -86,14 +90,23 @@
 
     <script src="/js/api-config.js"></script>
     <script src="/js/api.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="/js/mapa-ciudad-segura.js"></script>
     <script>
         const zonasPorId = new Map();
+        const mapaZonas = MapaCiudadSegura.crear("mapa-zonas");
 
         async function cargarZonas() {
             const nivel = document.getElementById("filtro-nivel").value;
             const query = nivel ? `?nivel=${nivel}` : "";
             try {
-                const zonas = await CiudadSeguraAPI.listarZonas(query);
+                const [zonas, reportes] = await Promise.all([
+                    CiudadSeguraAPI.listarZonas(query),
+                    CiudadSeguraAPI.listarReportes(),
+                ]);
+                mapaZonas.mostrarReportes(reportes);
+                mapaZonas.mostrarZonas(zonas, true);
                 const tbody = document.getElementById("tabla-zonas");
                 zonasPorId.clear();
                 zonas.forEach(zona => zonasPorId.set(String(zona.id), zona));
@@ -147,7 +160,7 @@
         document.getElementById("form-zona").addEventListener("submit", async (e) => {
             e.preventDefault();
             if (!Sesion.token()) {
-                window.location.href = "/login.html#form-login";
+                window.location.href = "/login#form-login";
                 return;
             }
             if (!esAdministrador()) {
@@ -192,7 +205,7 @@
             const aviso = document.getElementById("aviso-acceso-zona");
             aviso.innerHTML = Sesion.token()
                 ? "La creación y gestión de zonas está reservada para administradores."
-                : 'Debes <a href="/login.html#form-login">iniciar sesión</a> para solicitar la creación de una zona.';
+                : 'Debes <a href="/login#form-login">iniciar sesión</a> para solicitar la creación de una zona.';
             aviso.classList.remove("oculto");
         }
         cargarZonas();

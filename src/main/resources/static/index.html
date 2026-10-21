@@ -16,11 +16,11 @@
     <header class="topbar">
         <h1>🛡️ Ciudad Segura</h1>
         <nav class="menu">
-            <a href="/index.html" class="activo">Inicio</a>
-            <a href="/reportes.html">Reportes</a>
-            <a href="/zonas.html">Zonas de riesgo</a>
-            <a href="/alertas.html">Alertas</a>
-            <a href="/usuarios.html">Usuarios</a>
+            <a href="/" class="activo">Inicio</a>
+            <a href="/reportes">Reportes</a>
+            <a href="/zonas">Zonas de riesgo</a>
+            <a href="/alertas">Alertas</a>
+            <a href="/usuarios">Usuarios</a>
         </nav>
         <div id="usuario-activo"></div>
     </header>
@@ -115,10 +115,51 @@
                 <p class="panel-eyebrow">Estamos para ayudarte</p>
                 <h2 id="atencion-titulo">Atención al Ciudadano &amp; PQRS</h2>
                 <p class="atencion-intro">Encuentra los canales para presentar peticiones, quejas, reclamos o sugerencias ante tu entidad.</p>
-                <a class="enlace-pqrs" href="https://www.gov.co/" target="_blank" rel="noopener noreferrer">
-                    Consultar canales oficiales de PQRS
-                    <span aria-hidden="true">↗</span>
+                <button class="enlace-pqrs" type="button" id="abrir-pqrs">
+                    Radicar una PQRS <span aria-hidden="true">→</span>
+                </button>
+                <a class="enlace-oficial-pqrs" href="https://www.gov.co/" target="_blank" rel="noopener noreferrer">
+                    Consultar canales oficiales de PQRS <span aria-hidden="true">↗</span>
                 </a>
+                <div id="confirmacion-pqrs" class="mensaje oculto" role="status" aria-live="polite"></div>
+                <dialog id="dialogo-pqrs" aria-labelledby="titulo-pqrs">
+                    <div class="dialogo-encabezado">
+                        <h2 id="titulo-pqrs">Radicar petición, queja, reclamo o sugerencia</h2>
+                        <button type="button" class="secundario" id="cerrar-pqrs" aria-label="Cerrar formulario">Cerrar</button>
+                    </div>
+                    <p>Completa los datos para guardar tu solicitud y recibir el número de radicado.</p>
+                    <div id="mensaje-formulario-pqrs" class="mensaje oculto" role="alert"></div>
+                    <form class="formulario" id="formulario-pqrs">
+                        <div>
+                            <label for="pqrs-nombre">Nombre completo</label>
+                            <input id="pqrs-nombre" name="nombre" maxlength="120" autocomplete="name" required>
+                        </div>
+                        <div>
+                            <label for="pqrs-email">Correo electrónico</label>
+                            <input id="pqrs-email" name="email" type="email" maxlength="254" autocomplete="email" required>
+                        </div>
+                        <div>
+                            <label for="pqrs-tipo">Tipo de solicitud</label>
+                            <select id="pqrs-tipo" name="tipo" required>
+                                <option value="PETICION">Petición</option>
+                                <option value="QUEJA">Queja</option>
+                                <option value="RECLAMO">Reclamo</option>
+                                <option value="SUGERENCIA">Sugerencia</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="pqrs-asunto">Asunto</label>
+                            <input id="pqrs-asunto" name="asunto" maxlength="160" required>
+                        </div>
+                        <div>
+                            <label for="pqrs-detalle">Detalle</label>
+                            <textarea id="pqrs-detalle" name="detalle" rows="4" maxlength="4000" required></textarea>
+                        </div>
+                        <div class="botones">
+                            <button type="submit" id="enviar-pqrs">Enviar solicitud</button>
+                        </div>
+                    </form>
+                </dialog>
                 <div class="datos-atencion">
                     <div>
                         <h3>Línea de atención</h3>
@@ -176,6 +217,34 @@
         }
 
         cargarMetricasInicio();
+
+        const dialogoPqrs = document.getElementById("dialogo-pqrs");
+        document.getElementById("abrir-pqrs").addEventListener("click", () => dialogoPqrs.showModal());
+        document.getElementById("cerrar-pqrs").addEventListener("click", () => dialogoPqrs.close());
+        document.getElementById("formulario-pqrs").addEventListener("submit", async (evento) => {
+            evento.preventDefault();
+            const boton = document.getElementById("enviar-pqrs");
+            boton.disabled = true;
+            ocultarMensaje("mensaje-formulario-pqrs");
+            ocultarMensaje("confirmacion-pqrs");
+            const datos = {
+                nombre: document.getElementById("pqrs-nombre").value,
+                email: document.getElementById("pqrs-email").value,
+                tipo: document.getElementById("pqrs-tipo").value,
+                asunto: document.getElementById("pqrs-asunto").value,
+                detalle: document.getElementById("pqrs-detalle").value,
+            };
+            try {
+                const radicacion = await CiudadSeguraAPI.radicarPqrs(datos);
+                document.getElementById("formulario-pqrs").reset();
+                dialogoPqrs.close();
+                mostrarMensaje("confirmacion-pqrs", `Solicitud radicada con el número ${radicacion.id}.`, "exito");
+            } catch (error) {
+                mostrarMensaje("mensaje-formulario-pqrs", error.message);
+            } finally {
+                boton.disabled = false;
+            }
+        });
     </script>
 </body>
 </html>

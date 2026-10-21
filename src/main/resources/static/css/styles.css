@@ -488,6 +488,9 @@ p { color: var(--texto-suave); }
     text-decoration: none;
     box-shadow: 0 5px 14px rgba(22, 50, 79, 0.16);
     transition: background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+    border: 0;
+    font-family: inherit;
+    cursor: pointer;
 }
 
 .enlace-pqrs:hover {
@@ -500,6 +503,46 @@ p { color: var(--texto-suave); }
 .utility-topbar a:focus-visible {
     outline: 3px solid #69d9cb;
     outline-offset: 3px;
+}
+
+.enlace-oficial-pqrs {
+    margin-top: 10px;
+    color: var(--acento);
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.enlace-oficial-pqrs:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+#dialogo-pqrs {
+    width: min(620px, calc(100% - 32px));
+    max-height: min(90vh, 800px);
+    padding: 24px;
+    border: 1px solid var(--borde);
+    border-radius: 16px;
+    color: var(--texto);
+    box-shadow: var(--sombra-flotante);
+}
+
+#dialogo-pqrs::backdrop {
+    background: rgba(9, 25, 40, 0.62);
+}
+
+.dialogo-encabezado {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.dialogo-encabezado h2 {
+    margin: 0;
+    color: var(--azul);
+    font-size: 1.25rem;
 }
 
 .datos-atencion {

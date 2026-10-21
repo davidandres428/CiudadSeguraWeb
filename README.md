@@ -15,6 +15,7 @@ ejecutar desde una interfaz real en el navegador.
 3. **Zonas de riesgo**: zonas geográficas clasificadas por nivel de riesgo (bajo, medio, alto).
 4. **Alertas**: notificaciones emitidas a los ciudadanos, opcionalmente asociadas a una zona de riesgo.
 5. **Dashboard administrativo**: gráficos de reportes por estado, prioridad y tipo, con filtros de fechas y exportación CSV.
+6. **PQRS**: radicación pública de peticiones, quejas, reclamos y sugerencias, persistida en la base de datos.
 
 El **menú principal** (`index.html`) enlaza los cuatro módulos y cada página consume los mismos
 endpoints REST documentados abajo, verificando que la navegación y la conexión a base de datos
@@ -66,9 +67,9 @@ src/test/java/com/ciudadsegura/service/  -> pruebas unitarias (JUnit 5 + Mockito
    ```bash
    .\mvnw.cmd spring-boot:run
    ```
-3. Abrir el navegador en `http://localhost:8081` — ahí se carga el **menú principal** con acceso
-   a los cuatro módulos.
-4. Para registrarte como ciudadano y poder crear reportes, entra a `http://localhost:8081/login.html`.
+3. Abrir el navegador en `http://localhost:8081/` — ahí se carga el **menú principal** con acceso
+   a los módulos; la dirección permanece en la raíz.
+4. Para registrarte como ciudadano y poder crear reportes, entra a `http://localhost:8081/login`.
 5. Para desplegar el front-end por separado en Vercel, configura la URL base pública del back-end en `src/main/resources/static/js/api-config.js` (por ejemplo, `https://mi-api.example.com`, sin `/api` al final).
 
 ### Despliegue en Railway
@@ -80,7 +81,36 @@ Configura también `JWT_SECRET` con un valor aleatorio de al menos 32 bytes. Rai
 `PORT` para el puerto de escucha. No guardes credenciales ni claves en el repositorio. La aplicación
 falla al iniciar si falta el secreto JWT en el perfil `prod`.
 
-> El registro público siempre crea cuentas `CIUDADANO`; el rol enviado por el cliente no se acepta para asignar privilegios. Los administradores se asignan de forma controlada en la base de datos. Antes de habilitar el dashboard en una base existente, audita las cuentas que ya tengan rol `ADMINISTRADOR`, pues registros anteriores podían elegir ese rol. Los endpoints de métricas, CSV, usuarios y las escrituras de zonas/alertas requieren JWT de una cuenta con rol `ADMINISTRADOR`. Las escrituras de reportes requieren autenticación; los ciudadanos solo modifican/eliminan los propios y el servidor deriva el propietario desde el JWT. Las lecturas de reportes, zonas y alertas siguen siendo públicas.
+> El registro público siempre crea cuentas `CIUDADANO`; el rol enviado por el cliente no se acepta para asignar privilegios. Una vez aprovisionada la primera cuenta administradora, un administrador puede consultar usuarios y asignar roles desde `usuarios.html`. Antes de habilitar el dashboard en una base existente, audita las cuentas que ya tengan rol `ADMINISTRADOR`. Los endpoints de métricas, CSV, usuarios y las escrituras de zonas/alertas requieren JWT de una cuenta administradora. Las escrituras de reportes requieren autenticación; los ciudadanos solo modifican/eliminan los propios y el servidor deriva el propietario desde el JWT. Las lecturas de reportes, zonas y alertas siguen siendo públicas.
+
+El mapa interactivo de reportes permite elegir coordenadas con un clic y presenta reportes y zonas guardadas. La página de zonas muestra las mismas capas sobre Leaflet/OpenStreetMap. El dashboard administrativo y la gestión de usuarios redirigen a usuarios sin el rol autorizado; las API también verifican los permisos en el servidor.
+
+### Radicación PQRS
+
+El formulario público de la página principal guarda cada radicación en PostgreSQL en producción o H2 en local. El identificador devuelto es el número de radicado; no se requiere iniciar sesión.
+
+| Método | Endpoint | Descripción |
+|---|---|---|
+| POST | `/api/pqrs` | Radicar una solicitud pública y retornar su identificador, estado y fecha |
+
+Cuerpo JSON esperado:
+```json
+{
+  "nombre": "Nombre del ciudadano",
+  "email": "ciudadano@example.com",
+  "tipo": "PETICION",
+  "asunto": "Asunto de la solicitud",
+  "detalle": "Descripción de la petición, queja, reclamo o sugerencia"
+}
+```
+`tipo` acepta `PETICION`, `QUEJA`, `RECLAMO` o `SUGERENCIA`.
+
+### URLs del sitio
+
+Spring Boot sirve las vistas desde estas rutas sin extensión: `/`, `/reportes`, `/zonas`,
+`/alertas`, `/usuarios`, `/dashboard` y `/login`. Las direcciones antiguas con `.html`
+redirigen permanentemente a la URL limpia equivalente; `/index.html` redirige a `/`.
+Los recursos `/api/**`, `/css/**` y `/js/**` conservan sus rutas.
 
 ### CORS
 
@@ -89,8 +119,28 @@ La API habilita CORS con cualquier origen (`allowedOriginPatterns = ["*"]`), per
 ## Ejecutar las pruebas unitarias
 
 ```bash
-./mvnw test
+.\mvnw.cmd test
 ```
+
+### Pruebas de navegador con Playwright
+
+Inicia la aplicación local en `http://127.0.0.1:18081` en una terminal:
+
+```powershell
+$env:PORT = "18081"
+.\mvnw.cmd spring-boot:run
+```
+
+En otra terminal, instala las dependencias del proyecto E2E, instala Chromium si aún no está disponible y ejecuta los flujos de registro, PQRS, reporte geolocalizado, cierre de sesión y rutas protegidas:
+
+```powershell
+Set-Location .\e2e-tests
+npm ci
+npm run install:chromium
+npm test
+```
+
+Playwright usa su Chromium administrado por defecto. Para usar una instalación existente, define `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`; para probar otro despliegue local, define `BASE_URL`.
 
 ## Endpoints
 

@@ -12,11 +12,11 @@
     <header class="topbar">
         <h1>🛡️ Ciudad Segura</h1>
         <nav class="menu">
-            <a href="/index.html">Inicio</a>
-            <a href="/reportes.html" class="activo">Reportes</a>
-            <a href="/zonas.html">Zonas de riesgo</a>
-            <a href="/alertas.html">Alertas</a>
-            <a href="/usuarios.html">Usuarios</a>
+            <a href="/">Inicio</a>
+            <a href="/reportes" class="activo">Reportes</a>
+            <a href="/zonas">Zonas de riesgo</a>
+            <a href="/alertas">Alertas</a>
+            <a href="/usuarios">Usuarios</a>
         </nav>
         <div id="usuario-activo"></div>
     </header>
@@ -25,7 +25,7 @@
         <div class="tarjeta" id="tarjeta-form">
             <h2>Nuevo reporte de incidente</h2>
             <div id="msg-form" class="mensaje oculto"></div>
-            <div id="aviso-sesion" class="mensaje error oculto">Debes <a href="/login.html#form-login">iniciar sesión</a> para registrar un reporte.</div>
+            <div id="aviso-sesion" class="mensaje error oculto">Debes <a href="/login#form-login">iniciar sesión</a> para registrar un reporte.</div>
             <form class="formulario" id="form-reporte">
                 <input type="hidden" id="reporte-id">
                 <div>
@@ -161,9 +161,13 @@
 
         async function cargarReportes() {
             try {
-                const reportes = await CiudadSeguraAPI.listarReportes(parametrosFiltroReportes());
+                const [reportes, zonas] = await Promise.all([
+                    CiudadSeguraAPI.listarReportes(parametrosFiltroReportes()),
+                    CiudadSeguraAPI.listarZonas(),
+                ]);
                 const tbody = document.getElementById("tabla-reportes");
-                mapaReportes.mostrarReportes(reportes, true);
+                mapaReportes.mostrarReportes(reportes);
+                mapaReportes.mostrarZonas(zonas, true);
                 reportesPorId.clear();
                 reportes.forEach(reporte => reportesPorId.set(String(reporte.id), reporte));
                 tbody.innerHTML = reportes.map(r => `
@@ -225,7 +229,7 @@
         document.getElementById("form-reporte").addEventListener("submit", async (e) => {
             e.preventDefault();
             if (!Sesion.token()) {
-                window.location.href = "/login.html#form-login";
+                window.location.href = "/login#form-login";
                 return;
             }
             ocultarMensaje("msg-form");
@@ -249,7 +253,7 @@
                     await CiudadSeguraAPI.crearReporte(datos);
                 }
                 cancelarEdicionReporte();
-                cargarReportes();
+                await cargarReportes();
             } catch (err) {
                 if (redirigirALoginSiSesionExpirada(err)) return;
                 mostrarMensaje("msg-form", err.message);

@@ -10,9 +10,9 @@
     <header class="topbar">
         <h1>🛡️ Ciudad Segura</h1>
         <nav class="menu">
-            <a href="/index.html">Inicio</a>
-            <a href="/reportes.html">Reportes</a>
-            <a href="/dashboard.html" class="activo">Dashboard</a>
+            <a href="/">Inicio</a>
+            <a href="/reportes">Reportes</a>
+            <a href="/dashboard" class="activo">Dashboard</a>
         </nav>
         <div id="usuario-activo"></div>
     </header>
@@ -144,9 +144,10 @@
             }
         });
 
-        if (!usuarioDashboard || usuarioDashboard.rol !== "ADMINISTRADOR" || !Sesion.token()) {
-            mostrarMensaje("msg-dashboard", "Esta sección requiere una sesión de administrador.");
-            document.getElementById("contenido-dashboard").classList.add("oculto");
+        if (!Sesion.token() || !usuarioDashboard) {
+            window.location.replace("/login#form-login");
+        } else if (usuarioDashboard.rol !== "ADMINISTRADOR") {
+            window.location.replace("/");
         } else if (!window.Chart) {
             mostrarMensaje("msg-dashboard", "No se pudo cargar Chart.js. Comprueba la conexión e inténtalo de nuevo.");
         } else {

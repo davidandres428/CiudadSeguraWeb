@@ -10,11 +10,11 @@
     <header class="topbar">
         <h1>🛡️ Ciudad Segura</h1>
         <nav class="menu">
-            <a href="/index.html">Inicio</a>
-            <a href="/reportes.html">Reportes</a>
-            <a href="/zonas.html">Zonas de riesgo</a>
-            <a href="/alertas.html" class="activo">Alertas</a>
-            <a href="/usuarios.html">Usuarios</a>
+            <a href="/">Inicio</a>
+            <a href="/reportes">Reportes</a>
+            <a href="/zonas">Zonas de riesgo</a>
+            <a href="/alertas" class="activo">Alertas</a>
+            <a href="/usuarios">Usuarios</a>
         </nav>
         <div id="usuario-activo"></div>
     </header>
@@ -160,7 +160,7 @@
         document.getElementById("form-alerta").addEventListener("submit", async (e) => {
             e.preventDefault();
             if (!Sesion.token()) {
-                window.location.href = "/login.html#form-login";
+                window.location.href = "/login#form-login";
                 return;
             }
             if (!esAdministrador()) {

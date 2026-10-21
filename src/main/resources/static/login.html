@@ -10,7 +10,7 @@
     <header class="topbar">
         <h1>🛡️ Ciudad Segura</h1>
         <nav class="menu">
-            <a href="/index.html">Inicio</a>
+            <a href="/">Inicio</a>
         </nav>
         <div id="usuario-activo"></div>
     </header>
@@ -116,7 +116,7 @@
                     password: document.getElementById("login-password").value,
                 });
                 Sesion.guardar(auth.usuario, auth.accessToken);
-                window.location.href = "/index.html";
+                window.location.href = "/";
             } catch (err) {
                 mostrarMensaje("msg-login", err.message);
             }
@@ -133,7 +133,7 @@
                 });
                 Sesion.guardar(auth.usuario, auth.accessToken);
                 mostrarMensaje("msg-registro", "Cuenta creada con éxito. Redirigiendo...", "exito");
-                setTimeout(() => window.location.href = "/index.html", 900);
+                setTimeout(() => window.location.href = "/", 900);
             } catch (err) {
                 mostrarMensaje("msg-registro", err.message);
             }
