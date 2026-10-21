@@ -94,6 +94,13 @@ class ProteccionDashboardTest {
     }
 
     @Test
+    void crudUsuarios_conTokenAdministrador_debePermitirLaSolicitud() throws Exception {
+        mockMvc.perform(get("/api/usuarios")
+                        .header("Authorization", "Bearer " + crearToken("ADMINISTRADOR")))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     void ciudadano_noDebePoderAutoAsignarseRolAdministrador() throws Exception {
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/api/usuarios/1")
                         .contentType(MediaType.APPLICATION_JSON)

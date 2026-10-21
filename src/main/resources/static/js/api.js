@@ -124,8 +124,9 @@ function pintarUsuarioActivo() {
             enlaceDashboard.textContent = "Dashboard";
             menu.appendChild(enlaceDashboard);
         }
-    } else {
-        document.querySelectorAll('nav.menu a[href="/usuarios.html"]').forEach((enlace) => enlace.remove());
+    }
+    if (usuario?.rol !== "ADMINISTRADOR") {
+        document.querySelectorAll('a[href="/usuarios.html"]').forEach((enlace) => enlace.remove());
     }
 }
 
