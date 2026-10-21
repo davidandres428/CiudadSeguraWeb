@@ -50,13 +50,7 @@
                     <label>Contraseña (mínimo 6 caracteres)</label>
                     <input type="password" id="reg-password" minlength="6" required>
                 </div>
-                <div>
-                    <label>Tipo de usuario</label>
-                    <select id="reg-rol" required>
-                        <option value="CIUDADANO">Ciudadano</option>
-                        <option value="ADMINISTRADOR">Administrador</option>
-                    </select>
-                </div>
+                <p>Las cuentas nuevas se crean como ciudadano. El rol administrador se asigna por personal autorizado.</p>
                 <div class="botones">
                     <button type="submit">Crear cuenta</button>
                 </div>
@@ -71,11 +65,11 @@
             e.preventDefault();
             ocultarMensaje("msg-login");
             try {
-                const usuario = await CiudadSeguraAPI.login({
+                const auth = await CiudadSeguraAPI.login({
                     email: document.getElementById("login-email").value,
                     password: document.getElementById("login-password").value,
                 });
-                Sesion.guardar(usuario);
+                Sesion.guardar(auth.usuario, auth.accessToken);
                 window.location.href = "/index.html";
             } catch (err) {
                 mostrarMensaje("msg-login", err.message);
@@ -86,13 +80,12 @@
             e.preventDefault();
             ocultarMensaje("msg-registro");
             try {
-                const usuario = await CiudadSeguraAPI.registrar({
+                const auth = await CiudadSeguraAPI.registrar({
                     nombre: document.getElementById("reg-nombre").value,
                     email: document.getElementById("reg-email").value,
                     password: document.getElementById("reg-password").value,
-                    rol: document.getElementById("reg-rol").value,
                 });
-                Sesion.guardar(usuario);
+                Sesion.guardar(auth.usuario, auth.accessToken);
                 mostrarMensaje("msg-registro", "Cuenta creada con éxito. Redirigiendo...", "exito");
                 setTimeout(() => window.location.href = "/index.html", 900);
             } catch (err) {

@@ -51,7 +51,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void registrar_conRolAdministrador_debeGuardarElRolElegido() {
+    void registrar_conRolAdministrador_debeMantenerRolCiudadano() {
         RegistroRequest request = new RegistroRequest();
         request.setNombre("Administradora");
         request.setEmail("admin@example.com");
@@ -63,7 +63,7 @@ class AuthServiceTest {
 
         Usuario resultado = authService.registrar(request);
 
-        assertEquals(RolUsuario.ADMINISTRADOR, resultado.getRol());
+        assertEquals(RolUsuario.CIUDADANO, resultado.getRol());
     }
 
     @Test

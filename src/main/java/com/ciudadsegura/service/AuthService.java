@@ -5,6 +5,7 @@ import com.ciudadsegura.dto.RegistroRequest;
 import com.ciudadsegura.exception.CredencialesInvalidasException;
 import com.ciudadsegura.exception.EmailDuplicadoException;
 import com.ciudadsegura.model.Usuario;
+import com.ciudadsegura.model.enums.RolUsuario;
 import com.ciudadsegura.repository.UsuarioRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,9 +26,7 @@ public class AuthService {
         }
         String hash = passwordEncoder.encode(request.getPassword());
         Usuario usuario = new Usuario(request.getNombre(), request.getEmail(), hash);
-        if (request.getRol() != null) {
-            usuario.setRol(request.getRol());
-        }
+        usuario.setRol(RolUsuario.CIUDADANO);
         return usuarioRepository.save(usuario);
     }
 

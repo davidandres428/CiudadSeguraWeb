@@ -77,6 +77,47 @@ h2 { margin-top: 0; }
     gap: 16px;
 }
 
+.grid-graficos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.grid-graficos .tarjeta {
+    margin-bottom: 0;
+}
+
+.grid-graficos h3 {
+    margin-top: 0;
+    font-size: 1rem;
+}
+
+.estadistica-total {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 16px 0;
+    background: #eef4fb;
+}
+
+.estadistica-total strong {
+    color: var(--azul);
+    font-size: 2rem;
+}
+
+.filtro-dashboard {
+    align-items: end;
+}
+
+.filtro-dashboard .botones {
+    flex-wrap: wrap;
+}
+
+.acciones-filtros {
+    align-items: end;
+    flex-wrap: wrap;
+}
+
 .mapa {
     width: 100%;
     height: 380px;
