@@ -87,7 +87,8 @@ window.MapaCiudadSegura = (() => {
                 if (!punto || !Number.isFinite(punto.lat) || !Number.isFinite(punto.lng)) {
                     return;
                 }
-                const { lat, lng } = punto;
+                const lat = evento.latlng.lat;
+                const lng = evento.latlng.lng;
                 seleccionarCoordenadas(lat, lng);
                 alSeleccionarCoordenadas(lat, lng);
             });
