@@ -30,7 +30,9 @@ import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -76,6 +78,18 @@ class SeedMasivoControllerTest {
         mockMvc.perform(post(ENDPOINT)
                         .header("Authorization", "Bearer " + crearToken("CIUDADANO")))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void sembradoMasivo_getAdminNoDebeEjecutarLaInsercion() throws Exception {
+        mockMvc.perform(get(ENDPOINT)
+                        .header("Authorization", "Bearer " + crearToken("ADMINISTRADOR")))
+                .andExpect(status().isMethodNotAllowed())
+                .andExpect(header().string("Allow", "POST"))
+                .andExpect(jsonPath("$.status").value(405));
+
+        org.junit.jupiter.api.Assertions.assertEquals(0, loteSemillaRepository.count());
+        org.junit.jupiter.api.Assertions.assertEquals(0, usuarioRepository.count());
     }
 
     @Test

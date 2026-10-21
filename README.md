@@ -266,6 +266,9 @@ rechazan posteriores intentos con `409 Conflict`, incluso si la aplicación corr
 instancias. Los registros y contraseñas aleatorias de las cuentas de demostración se insertan en
 la base de datos; dichas contraseñas no se devuelven. Antes de invocarlo en producción, confirma
 que deseas añadir esos datos permanentes a esa base.
+El endpoint solo acepta `POST`; `GET` responde `405 Method Not Allowed` y nunca modifica datos.
+Las rutas `/api/**` que no existen responden como errores JSON, sin pasar por el servidor de
+archivos estáticos.
 
 ## Manejo de errores
 

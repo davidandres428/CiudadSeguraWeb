@@ -100,6 +100,11 @@ class PrettyUrlControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("application/json"));
 
+        mockMvc.perform(get("/api/ruta-inexistente"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentTypeCompatibleWith("application/json"))
+                .andExpect(content().string(containsString("Endpoint API no encontrado")));
+
         mockMvc.perform(get("/js/api.js"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("text/javascript"));
