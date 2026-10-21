@@ -9,10 +9,14 @@ import com.ciudadsegura.model.enums.PrioridadReporte;
 import com.ciudadsegura.model.enums.TipoReporte;
 import com.ciudadsegura.repository.ReporteIncidenteRepository;
 import com.ciudadsegura.repository.UsuarioRepository;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +50,25 @@ public class ReporteIncidenteService {
             LocalDate desde,
             LocalDate hasta) {
         validarRangoFechas(desde, hasta);
-        return reporteRepository.buscarFiltrados(usuarioId, estado, inicio(desde), finExclusivo(hasta));
+        LocalDateTime desdeFecha = inicio(desde);
+        LocalDateTime hastaFecha = finExclusivo(hasta);
+        Specification<ReporteIncidente> filtros = (reporte, consulta, builder) -> {
+            List<Predicate> predicados = new ArrayList<>();
+            if (usuarioId != null) {
+                predicados.add(builder.equal(reporte.get("usuario").get("id"), usuarioId));
+            }
+            if (estado != null) {
+                predicados.add(builder.equal(reporte.get("estado"), estado));
+            }
+            if (desdeFecha != null) {
+                predicados.add(builder.greaterThanOrEqualTo(reporte.get("fechaReporte"), desdeFecha));
+            }
+            if (hastaFecha != null) {
+                predicados.add(builder.lessThan(reporte.get("fechaReporte"), hastaFecha));
+            }
+            return builder.and(predicados.toArray(Predicate[]::new));
+        };
+        return reporteRepository.findAll(filtros, Sort.by(Sort.Direction.DESC, "fechaReporte"));
     }
 
     public ReporteMetricasResponse obtenerMetricas(LocalDate desde, LocalDate hasta) {

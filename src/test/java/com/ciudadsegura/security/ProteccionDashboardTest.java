@@ -152,6 +152,10 @@ class ProteccionDashboardTest {
         reporte.setUsuario(ciudadano);
         reporte = reporteRepository.save(reporte);
 
+        mockMvc.perform(get("/api/reportes"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(reporte.getId()));
+
         String fecha = LocalDate.now().toString();
         mockMvc.perform(get("/api/reportes").param("desde", fecha).param("hasta", fecha))
                 .andExpect(status().isOk())
