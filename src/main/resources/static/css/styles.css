@@ -81,6 +81,72 @@ main {
     padding: 0 24px 48px;
 }
 
+.inicio-dashboard {
+    display: flex;
+    min-height: calc(100vh - 90px);
+    min-height: calc(100svh - 90px);
+    flex-direction: column;
+    justify-content: center;
+    gap: 22px;
+    max-width: 1040px;
+    padding-top: 28px;
+    padding-bottom: 28px;
+}
+
+.hero-banner {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    margin-bottom: 0;
+    padding: clamp(28px, 4vw, 42px);
+    border: 1px solid rgba(28, 135, 144, 0.15);
+    border-radius: 22px;
+    background:
+        radial-gradient(ellipse at 92% 8%, rgba(28, 135, 144, 0.15), transparent 34%),
+        linear-gradient(120deg, #fff 8%, #edf6f8 58%, #e7eff8 100%);
+    box-shadow: 0 18px 42px rgba(22, 50, 79, 0.1);
+}
+
+.hero-banner::after {
+    position: absolute;
+    z-index: -1;
+    right: -54px;
+    bottom: -94px;
+    width: 250px;
+    height: 250px;
+    border: 1px solid rgba(28, 135, 144, 0.12);
+    border-radius: 50%;
+    box-shadow: 0 0 0 28px rgba(28, 135, 144, 0.035), 0 0 0 58px rgba(28, 135, 144, 0.025);
+    content: "";
+}
+
+.hero-contenido {
+    max-width: 850px;
+}
+
+.hero-etiqueta {
+    margin: 0 0 10px;
+    color: var(--acento);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.hero-banner h2 {
+    max-width: 760px;
+    margin: 0;
+    color: var(--azul);
+    font-size: clamp(1.9rem, 4vw, 3rem);
+    letter-spacing: -0.045em;
+}
+
+.hero-banner p:not(.hero-etiqueta) {
+    max-width: 760px;
+    margin: 12px 0 0;
+    font-size: 1.05rem;
+}
+
 .tarjeta {
     background: var(--superficie);
     border: 1px solid var(--borde);
@@ -95,10 +161,56 @@ h2 { margin-top: 0; letter-spacing: -0.025em; }
 
 p { color: var(--texto-suave); }
 
-.grid-modulos {
+.metricas-inicio {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.metrica-inicio {
+    position: relative;
+    overflow: hidden;
+    min-height: 168px;
+    padding: 22px 24px;
+    border: 1px solid rgba(22, 50, 79, 0.1);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 10px 28px rgba(22, 50, 79, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.metrica-inicio:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 30px rgba(22, 50, 79, 0.13);
+}
+
+.metrica-inicio::before {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    background: var(--acento);
+    content: "";
+}
+
+.metrica-inicio h3 {
+    margin: 0 0 12px;
+    color: var(--azul);
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.metrica-inicio strong {
+    display: block;
+    color: #12314c;
+    font-size: clamp(2.1rem, 4vw, 2.8rem);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}
+
+.metrica-inicio p {
+    margin: 10px 0 0;
+    color: #3f5063;
+    font-size: 0.9rem;
 }
 
 .grid-graficos {
@@ -220,35 +332,6 @@ p { color: var(--texto-suave); }
 
 .leyenda-incidente { background: #c0392b; }
 .leyenda-zona { background: #f6ad32; border: 1px solid #8a5a00; }
-
-.modulo {
-    display: block;
-    padding: 22px;
-    border-radius: var(--radio);
-    color: #fff;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 1.05rem;
-    box-shadow: 0 8px 20px rgba(18, 42, 65, 0.12);
-    transition: transform 0.18s ease, box-shadow 0.18s ease;
-}
-
-.modulo:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--sombra-flotante);
-}
-
-.modulo p {
-    font-weight: 400;
-    font-size: 0.85rem;
-    margin: 8px 0 0;
-    opacity: 0.9;
-}
-
-.modulo.usuarios { background: var(--azul-claro); }
-.modulo.reportes { background: var(--rojo); }
-.modulo.zonas { background: var(--amarillo); }
-.modulo.alertas { background: var(--verde); }
 
 form.formulario {
     display: grid;
@@ -410,8 +493,29 @@ tr:hover td { background: #f5f9fb; }
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
         scroll-behavior: auto !important;
+    .inicio-dashboard {
+        min-height: calc(100svh - 110px);
+        padding-top: 22px;
+        padding-bottom: 22px;
+    }
+
         transition-duration: 0.01ms !important;
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
     }
+    .hero-banner {
+        padding: 26px 20px;
+        border-radius: 18px;
+    }
+
 }
+
+    .metricas-inicio {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .metrica-inicio {
+        min-height: 0;
+        padding: 18px 20px;
+    }
