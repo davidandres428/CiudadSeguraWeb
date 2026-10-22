@@ -3,68 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ciudad Segura — Acceso</title>
+    <meta name="theme-color" content="#f3f7fb">
+    <title>Iniciar sesión | Ciudad Segura</title>
     <link rel="stylesheet" href="/css/styles.css">
 </head>
-<body>
-    <header class="topbar">
-        <h1>🛡️ Ciudad Segura</h1>
-        <nav class="menu">
-            <a href="/">Inicio</a>
-        </nav>
-        <div id="usuario-activo"></div>
-    </header>
+<body class="login-page">
+    <main class="login-screen">
+        <section class="tarjeta auth-card login-card" aria-label="Acceso a Ciudad Segura">
+            <header class="login-brand">
+                <a class="login-brand-mark" href="/" aria-label="Ciudad Segura, ir al inicio">
+                    <svg viewBox="0 0 48 48" aria-hidden="true">
+                        <path d="M24 4 40 10v12c0 10-6.7 17.5-16 22C14.7 39.5 8 32 8 22V10l16-6Z" fill="currentColor"/>
+                        <path d="m16 24 5.2 5.2L32.5 18" fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5"/>
+                    </svg>
+                </a>
+                <div>
+                    <p class="login-brand-name">Ciudad <span>Segura</span></p>
+                    <p class="login-brand-caption">Tu comunidad, más segura</p>
+                </div>
+            </header>
 
-    <main class="auth-main">
-        <section class="tarjeta auth-card" aria-label="Acceso a Ciudad Segura">
-            <nav class="auth-tabs" role="tablist" aria-label="Opciones de acceso">
+            <nav class="auth-tabs login-tabs" role="tablist" aria-label="Opciones de acceso">
                 <a id="tab-login" href="#form-login" role="tab" aria-controls="panel-login">Iniciar sesión</a>
-                <a id="tab-registro" href="#form-registro" role="tab" aria-controls="panel-registro">Registrarse</a>
+                <a id="tab-registro" href="#form-registro" role="tab" aria-controls="panel-registro">Crear cuenta</a>
             </nav>
 
-            <section id="panel-login" class="auth-panel" role="tabpanel" aria-labelledby="tab-login">
-                <h2>Iniciar sesión</h2>
-                <div id="msg-login" class="mensaje oculto"></div>
-                <form class="formulario" id="form-login">
-                    <div>
-                        <label for="login-email">Email</label>
-                        <input type="email" id="login-email" required>
+            <section id="panel-login" class="auth-panel login-panel" role="tabpanel" aria-labelledby="tab-login">
+                <div class="login-heading">
+                    <p class="login-eyebrow">BIENVENIDO DE NUEVO</p>
+                    <h1>Inicia sesión</h1>
+                    <p>Accede para mantenerte al tanto de tu ciudad.</p>
+                </div>
+                <div id="msg-login" class="mensaje oculto" role="alert" aria-live="polite"></div>
+                <form class="formulario login-form" id="form-login">
+                    <div class="login-field">
+                        <label for="login-email">Correo electrónico</label>
+                        <div class="login-input-wrap">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <rect x="3.5" y="5" width="17" height="14" rx="2.5"/>
+                                <path d="m4.5 7 7.5 5.5L19.5 7"/>
+                            </svg>
+                            <input type="email" id="login-email" name="email" placeholder="nombre@correo.com"
+                                   autocomplete="email" inputmode="email" required>
+                        </div>
                     </div>
-                    <div>
+                    <div class="login-field">
                         <label for="login-password">Contraseña</label>
-                        <input type="password" id="login-password" required>
+                        <div class="login-input-wrap">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <rect x="4.5" y="10" width="15" height="11" rx="2.5"/>
+                                <path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/>
+                            </svg>
+                            <input type="password" id="login-password" name="password" placeholder="Ingresa tu contraseña"
+                                   autocomplete="current-password" required>
+                        </div>
                     </div>
-                    <div class="botones">
-                        <button type="submit">Ingresar</button>
+                    <div class="login-options">
+                        <label class="remember-option" for="login-remember">
+                            <input type="checkbox" id="login-remember" name="remember">
+                            <span>Recordarme</span>
+                        </label>
+                        <a class="forgot-link" href="#recuperar-contrasena" aria-controls="forgot-help">¿Olvidaste tu contraseña?</a>
                     </div>
+                    <p id="forgot-help" class="forgot-help" hidden>
+                        La recuperación de contraseña no está disponible todavía. Contacta al administrador del sistema.
+                    </p>
+                    <button class="login-submit" type="submit">
+                        Iniciar sesión
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M5 12h14m-6-6 6 6-6 6"/>
+                        </svg>
+                    </button>
                 </form>
-                <p class="auth-switch">¿No tienes cuenta? <a href="#form-registro">Regístrate aquí</a></p>
+                <p class="auth-switch login-switch">¿Aún no tienes una cuenta? <a href="#form-registro">Regístrate</a></p>
             </section>
 
-            <section id="panel-registro" class="auth-panel" role="tabpanel" aria-labelledby="tab-registro" hidden>
-                <h2>Registrarse</h2>
-                <div id="msg-registro" class="mensaje oculto"></div>
-                <form class="formulario" id="form-registro">
-                    <div>
+            <section id="panel-registro" class="auth-panel login-panel" role="tabpanel" aria-labelledby="tab-registro" hidden>
+                <div class="login-heading">
+                    <p class="login-eyebrow">ÚNETE A TU COMUNIDAD</p>
+                    <h1>Crea tu cuenta</h1>
+                    <p>Ayúdanos a construir una ciudad más segura.</p>
+                </div>
+                <div id="msg-registro" class="mensaje oculto" role="alert" aria-live="polite"></div>
+                <form class="formulario login-form" id="form-registro">
+                    <div class="login-field">
                         <label for="reg-nombre">Nombre</label>
-                        <input type="text" id="reg-nombre" required>
+                        <input type="text" id="reg-nombre" name="name" placeholder="Tu nombre completo" autocomplete="name" required>
                     </div>
-                    <div>
-                        <label for="reg-email">Email</label>
-                        <input type="email" id="reg-email" required>
+                    <div class="login-field">
+                        <label for="reg-email">Correo electrónico</label>
+                        <input type="email" id="reg-email" name="email" placeholder="nombre@correo.com" autocomplete="email" required>
                     </div>
-                    <div>
-                        <label for="reg-password">Contraseña (mínimo 6 caracteres)</label>
-                        <input type="password" id="reg-password" minlength="6" required>
+                    <div class="login-field">
+                        <label for="reg-password">Contraseña</label>
+                        <input type="password" id="reg-password" name="new-password" placeholder="Mínimo 6 caracteres"
+                               autocomplete="new-password" minlength="6" required>
                     </div>
-                    <p>Las cuentas nuevas se crean como ciudadano. El rol administrador se asigna por personal autorizado.</p>
-                    <div class="botones">
-                        <button type="submit">Crear cuenta</button>
-                    </div>
+                    <p class="registration-note">Las cuentas nuevas se crean como ciudadano. El rol administrador se asigna por personal autorizado.</p>
+                    <button class="login-submit" type="submit">Crear cuenta</button>
                 </form>
-                <p class="auth-switch">¿Ya tienes cuenta? <a href="#form-login">Inicia sesión</a></p>
+                <p class="auth-switch login-switch">¿Ya tienes cuenta? <a href="#form-login">Inicia sesión</a></p>
             </section>
         </section>
+        <p class="login-footer">© Ciudad Segura · Cuidarnos es tarea de todos</p>
     </main>
 
     <script src="/js/api-config.js"></script>
@@ -102,6 +143,12 @@
             const nextTab = authTabs[nextIndex].tab;
             nextTab.focus();
             window.location.hash = nextTab.getAttribute("href");
+        });
+
+        document.querySelector(".forgot-link").addEventListener("click", (event) => {
+            event.preventDefault();
+            const help = document.getElementById("forgot-help");
+            help.hidden = !help.hidden;
         });
 
         window.addEventListener("hashchange", () => seleccionarFormulario());

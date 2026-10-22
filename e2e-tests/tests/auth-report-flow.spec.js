@@ -21,6 +21,28 @@ test("rutas limpias sirven las vistas y las URLs HTML redirigen", async ({ page,
     expect(assetResponse.status()).toBe(200);
 });
 
+test("login adaptable ofrece acceso, recordatorio y ayuda de contraseña", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto("/login");
+
+    await expect(page).toHaveTitle("Iniciar sesión | Ciudad Segura");
+    await expect(page.getByRole("heading", { name: "Inicia sesión" })).toBeVisible();
+    await expect(page.locator("#login-email")).toBeVisible();
+    await expect(page.locator("#login-password")).toBeVisible();
+    await expect(page.getByRole("checkbox", { name: "Recordarme" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Iniciar sesión" })).toBeVisible();
+    await page.getByRole("link", { name: "¿Olvidaste tu contraseña?" }).click();
+    await expect(page.locator("#forgot-help")).toBeVisible();
+
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
+    expect(overflow).toBe(false);
+
+    await page.getByRole("tab", { name: "Crear cuenta" }).click();
+    await expect(page.getByRole("heading", { name: "Crea tu cuenta" })).toBeVisible();
+    await page.getByRole("tab", { name: "Iniciar sesión" }).click();
+    await expect(page.getByRole("heading", { name: "Inicia sesión" })).toBeVisible();
+});
+
 test("registro ciudadano, acceso, creación de reporte y métricas en vivo", async ({ page }) => {
     await page.goto("/");
     const fechaHoy = new Date();
@@ -52,7 +74,7 @@ test("registro ciudadano, acceso, creación de reporte y métricas en vivo", asy
     await page.getByRole("link", { name: "iniciar sesión", exact: true }).click();
     await expect(page).toHaveURL(/\/login#form-login$/);
 
-    await page.getByRole("link", { name: "Registrarse" }).click();
+    await page.getByRole("tab", { name: "Crear cuenta" }).click();
     await expect(page.locator("#panel-registro")).toBeVisible();
     await page.locator("#reg-nombre").fill("Prueba navegador");
     await page.locator("#reg-email").fill(`e2e-${Date.now()}@example.com`);

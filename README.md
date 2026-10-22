@@ -72,6 +72,16 @@ src/test/java/com/ciudadsegura/service/  -> pruebas unitarias (JUnit 5 + Mockito
 4. Para registrarte como ciudadano y poder crear reportes, entra a `http://localhost:8081/login`.
 5. Para desplegar el front-end por separado en Vercel, configura la URL base pública del back-end en `src/main/resources/static/js/api-config.js` (por ejemplo, `https://mi-api.example.com`, sin `/api` al final).
 
+### Ejecutar con Docker
+
+Construye la imagen multi-etapa y ejecuta el contenedor:
+```bash
+docker build -t ciudad-segura .
+docker run --rm -p 8081:8081 ciudad-segura
+```
+La aplicación queda disponible en `http://localhost:8081`. Este comando usa la configuración
+local predeterminada con H2 en memoria; los datos no persisten al detener el contenedor.
+
 ### Datos de demostración locales
 
 El inicializador está desactivado por defecto y solo se carga sin perfil explícito o con el perfil

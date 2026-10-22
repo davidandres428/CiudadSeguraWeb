@@ -1,0 +1,8 @@
+.git
+.github
+.mvn
+.vscode
+e2e-tests
+target
+src.zip
+*.log
