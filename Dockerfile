@@ -1,13 +1,15 @@
-# Etapa 1: Compilar el proyecto con Maven y Java 21
-FROM maven:3.9-eclipse-temurin-21 AS build
+# Etapa 1: Compilar el proyecto con Maven Wrapper y Java 21
+FROM eclipse-temurin:21-jdk AS build
 WORKDIR /app
 
-# Copiar primero el archivo de dependencias y luego el código fuente
-COPY pom.xml .
+# Copiar archivos de configuración y dependencias de Maven Wrapper
+COPY .mvn .mvn
+COPY mvnw pom.xml ./
 COPY src ./src
 
-# Empaquetar la aplicación ignorando las pruebas
-RUN mvn clean package -DskipTests
+# Dar permisos de ejecución al wrapper y compilar el proyecto
+RUN chmod +x mvnw
+RUN ./mvnw clean package -DskipTests
 
 # Etapa 2: Ejecutar la aplicación con una imagen ligera de Java 21 (JRE)
 FROM eclipse-temurin:21-jre
