@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f3f7fb">
+    <title>Iniciar sesión | Ciudad Segura</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="login-page">
+    <main class="login-screen">
+        <section class="tarjeta auth-card login-card" aria-label="Acceso a Ciudad Segura">
+            <header class="login-brand">
+                <a class="login-brand-mark" href="/" aria-label="Ciudad Segura, ir al inicio">
+                    <svg viewBox="0 0 48 48" aria-hidden="true">
+                        <path d="M24 4 40 10v12c0 10-6.7 17.5-16 22C14.7 39.5 8 32 8 22V10l16-6Z" fill="currentColor"/>
+                        <path d="m16 24 5.2 5.2L32.5 18" fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5"/>
+                    </svg>
+                </a>
+                <div>
+                    <p class="login-brand-name">Ciudad <span>Segura</span></p>
+                    <p class="login-brand-caption">Tu comunidad, más segura</p>
+                </div>
+            </header>
+
+            <nav class="auth-tabs login-tabs" role="tablist" aria-label="Opciones de acceso">
+                <a id="tab-login" href="#form-login" role="tab" aria-controls="panel-login">Iniciar sesión</a>
+                <a id="tab-registro" href="#form-registro" role="tab" aria-controls="panel-registro">Crear cuenta</a>
+            </nav>
+
+            <section id="panel-login" class="auth-panel login-panel" role="tabpanel" aria-labelledby="tab-login">
+                <div class="login-heading">
+                    <p class="login-eyebrow">BIENVENIDO DE NUEVO</p>
+                    <h1>Inicia sesión</h1>
+                    <p>Accede para mantenerte al tanto de tu ciudad.</p>
+                </div>
+                <div id="msg-login" class="mensaje oculto" role="alert" aria-live="polite"></div>
+                <form class="formulario login-form" id="form-login">
+                    <div class="login-field">
+                        <label for="login-email">Correo electrónico</label>
+                        <div class="login-input-wrap">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <rect x="3.5" y="5" width="17" height="14" rx="2.5"/>
+                                <path d="m4.5 7 7.5 5.5L19.5 7"/>
+                            </svg>
+                            <input type="email" id="login-email" name="email" placeholder="nombre@correo.com"
+                                   autocomplete="email" inputmode="email" required>
+                        </div>
+                    </div>
+                    <div class="login-field">
+                        <label for="login-password">Contraseña</label>
+                        <div class="login-input-wrap">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <rect x="4.5" y="10" width="15" height="11" rx="2.5"/>
+                                <path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/>
+                            </svg>
+                            <input type="password" id="login-password" name="password" placeholder="Ingresa tu contraseña"
+                                   autocomplete="current-password" required>
+                        </div>
+                    </div>
+                    <div class="login-options">
+                        <label class="remember-option" for="login-remember">
+                            <input type="checkbox" id="login-remember" name="remember">
+                            <span>Recordarme</span>
+                        </label>
+                        <a class="forgot-link" href="#recuperar-contrasena" aria-controls="forgot-help">¿Olvidaste tu contraseña?</a>
+                    </div>
+                    <p id="forgot-help" class="forgot-help" hidden>
+                        La recuperación de contraseña no está disponible todavía. Contacta al administrador del sistema.
+                    </p>
+                    <button class="login-submit" type="submit">
+                        Iniciar sesión
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M5 12h14m-6-6 6 6-6 6"/>
+                        </svg>
+                    </button>
+                </form>
+                <p class="auth-switch login-switch">¿Aún no tienes una cuenta? <a href="#form-registro">Regístrate</a></p>
+            </section>
+
+            <section id="panel-registro" class="auth-panel login-panel" role="tabpanel" aria-labelledby="tab-registro" hidden>
+                <div class="login-heading">
+                    <p class="login-eyebrow">ÚNETE A TU COMUNIDAD</p>
+                    <h1>Crea tu cuenta</h1>
+                    <p>Ayúdanos a construir una ciudad más segura.</p>
+                </div>
+                <div id="msg-registro" class="mensaje oculto" role="alert" aria-live="polite"></div>
+                <form class="formulario login-form" id="form-registro">
+                    <div class="login-field">
+                        <label for="reg-nombre">Nombre</label>
+                        <input type="text" id="reg-nombre" name="name" placeholder="Tu nombre completo" autocomplete="name" required>
+                    </div>
+                    <div class="login-field">
+                        <label for="reg-email">Correo electrónico</label>
+                        <input type="email" id="reg-email" name="email" placeholder="nombre@correo.com" autocomplete="email" required>
+                    </div>
+                    <div class="login-field">
+                        <label for="reg-password">Contraseña</label>
+                        <input type="password" id="reg-password" name="new-password" placeholder="Mínimo 6 caracteres"
+                               autocomplete="new-password" minlength="6" required>
+                    </div>
+                    <p class="registration-note">Las cuentas nuevas se crean como ciudadano. El rol administrador se asigna por personal autorizado.</p>
+                    <button class="login-submit" type="submit">Crear cuenta</button>
+                </form>
+                <p class="auth-switch login-switch">¿Ya tienes cuenta? <a href="#form-login">Inicia sesión</a></p>
+            </section>
+        </section>
+        <p class="login-footer">© Ciudad Segura · Cuidarnos es tarea de todos</p>
+    </main>
+
+    <script src="/js/api-config.js"></script>
+    <script src="/js/api.js"></script>
+    <script>
+        const authTabs = [
+            { tab: document.getElementById("tab-login"), panel: document.getElementById("panel-login"), hash: "#form-login" },
+            { tab: document.getElementById("tab-registro"), panel: document.getElementById("panel-registro"), hash: "#form-registro" },
+        ];
+
+        function seleccionarFormulario(hash = window.location.hash) {
+            const registroActivo = hash === "#form-registro";
+            authTabs.forEach(({ tab, panel, hash: tabHash }) => {
+                const activo = (tabHash === "#form-registro") === registroActivo;
+                tab.setAttribute("aria-selected", String(activo));
+                tab.setAttribute("tabindex", activo ? "0" : "-1");
+                panel.hidden = !activo;
+            });
+        }
+
+        document.querySelector(".auth-tabs").addEventListener("click", (event) => {
+            const tab = event.target.closest('a[role="tab"]');
+            if (!tab) return;
+            event.preventDefault();
+            window.location.hash = tab.getAttribute("href");
+        });
+
+        document.querySelector(".auth-tabs").addEventListener("keydown", (event) => {
+            const currentIndex = authTabs.findIndex(({ tab }) => tab === event.target);
+            if (currentIndex < 0 || !["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+            event.preventDefault();
+            const nextIndex = event.key === "Home" ? 0
+                : event.key === "End" ? authTabs.length - 1
+                : (currentIndex + (event.key === "ArrowRight" ? 1 : -1) + authTabs.length) % authTabs.length;
+            const nextTab = authTabs[nextIndex].tab;
+            nextTab.focus();
+            window.location.hash = nextTab.getAttribute("href");
+        });
+
+        document.querySelector(".forgot-link").addEventListener("click", (event) => {
+            event.preventDefault();
+            const help = document.getElementById("forgot-help");
+            help.hidden = !help.hidden;
+        });
+
+        window.addEventListener("hashchange", () => seleccionarFormulario());
+        seleccionarFormulario();
+
+        document.getElementById("form-login").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            ocultarMensaje("msg-login");
+            try {
+                const auth = await CiudadSeguraAPI.login({
+                    email: document.getElementById("login-email").value,
+                    password: document.getElementById("login-password").value,
+                });
+                Sesion.guardar(auth.usuario, auth.accessToken);
+                window.location.href = "/";
+            } catch (err) {
+                mostrarMensaje("msg-login", err.message);
+            }
+        });
+
+        document.getElementById("form-registro").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            ocultarMensaje("msg-registro");
+            try {
+                const auth = await CiudadSeguraAPI.registrar({
+                    nombre: document.getElementById("reg-nombre").value,
+                    email: document.getElementById("reg-email").value,
+                    password: document.getElementById("reg-password").value,
+                });
+                Sesion.guardar(auth.usuario, auth.accessToken);
+                mostrarMensaje("msg-registro", "Cuenta creada con éxito. Redirigiendo...", "exito");
+                setTimeout(() => window.location.href = "/", 900);
+            } catch (err) {
+                mostrarMensaje("msg-registro", err.message);
+            }
+        });
+    </script>
+</body>
+</html>

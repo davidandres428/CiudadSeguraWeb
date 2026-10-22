@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ciudad Segura — Alertas</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header class="topbar">
+        <h1>🛡️ Ciudad Segura</h1>
+        <nav class="menu">
+            <a href="/">Inicio</a>
+            <a href="/reportes">Reportes</a>
+            <a href="/zonas">Zonas de riesgo</a>
+            <a href="/alertas" class="activo">Alertas</a>
+            <a href="/usuarios">Usuarios</a>
+        </nav>
+        <div id="usuario-activo"></div>
+    </header>
+
+    <main>
+        <div class="tarjeta" id="tarjeta-form-alerta">
+            <h2 id="titulo-form">Nueva alerta</h2>
+            <div id="aviso-acceso-alerta" class="mensaje error oculto"></div>
+            <div id="msg-form" class="mensaje oculto"></div>
+            <form class="formulario" id="form-alerta">
+                <input type="hidden" id="alerta-id">
+                <div>
+                    <label for="alerta-titulo">Título</label>
+                    <input type="text" id="alerta-titulo" required>
+                </div>
+                <div>
+                    <label for="alerta-mensaje">Mensaje</label>
+                    <textarea id="alerta-mensaje" rows="3" required></textarea>
+                </div>
+                <div class="fila-form">
+                    <div>
+                        <label for="alerta-tipo">Tipo</label>
+                        <input type="text" id="alerta-tipo" placeholder="Ej: SEGURIDAD" required>
+                    </div>
+                    <div>
+                        <label for="alerta-severidad">Severidad</label>
+                        <select id="alerta-severidad" required>
+                            <option value="BAJA">Baja</option>
+                            <option value="MEDIA" selected>Media</option>
+                            <option value="ALTA">Alta</option>
+                            <option value="CRITICA">Crítica</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="alerta-zona">Zona de riesgo (opcional)</label>
+                        <select id="alerta-zona">
+                            <option value="">Ninguna</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="alerta-activa">Activa</label>
+                        <select id="alerta-activa">
+                            <option value="true">Sí</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="botones">
+                    <button type="submit" id="btn-alerta">Registrar alerta</button>
+                    <button type="button" class="secundario oculto" id="btn-cancelar-alerta" onclick="cancelarEdicionAlerta()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="tarjeta">
+            <h2>Alertas registradas</h2>
+            <div class="fila-form" style="margin-bottom: 14px;">
+                <div>
+                    <label for="filtro-activas">Mostrar</label>
+                    <select id="filtro-activas" onchange="cargarAlertas()">
+                        <option value="">Todas</option>
+                        <option value="true">Solo activas</option>
+                    </select>
+                </div>
+            </div>
+            <div id="msg-lista" class="mensaje oculto"></div>
+            <div class="tabla-desplazable" role="region" aria-label="Lista de alertas" tabindex="0">
+            <table>
+                <thead>
+                    <tr><th>ID</th><th>Título</th><th>Tipo</th><th>Severidad</th><th>Zona</th><th>Activa</th><th>Fecha</th><th>Acciones</th></tr>
+                </thead>
+                <tbody id="tabla-alertas"></tbody>
+            </table>
+            </div>
+        </div>
+    </main>
+
+    <script src="/js/api-config.js"></script>
+    <script src="/js/api.js"></script>
+    <script>
+        let zonasCache = [];
+        const alertasPorId = new Map();
+
+        function esAdministrador() {
+            return Sesion.obtener()?.rol === "ADMINISTRADOR";
+        }
+
+        async function cargarZonasSelect() {
+            try {
+                zonasCache = await CiudadSeguraAPI.listarZonas();
+                const select = document.getElementById("alerta-zona");
+                select.innerHTML = `<option value="">Ninguna</option>` +
+                    zonasCache.map(z => `<option value="${z.id}">${escaparHtml(z.nombre)} (${escaparHtml(z.nivelRiesgo)})</option>`).join("");
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function cargarAlertas() {
+            const activas = document.getElementById("filtro-activas").value;
+            const query = activas ? `?activas=${activas}` : "";
+            try {
+                const alertas = await CiudadSeguraAPI.listarAlertas(query);
+                const tbody = document.getElementById("tabla-alertas");
+                alertasPorId.clear();
+                alertas.forEach(alerta => alertasPorId.set(String(alerta.id), alerta));
+                tbody.innerHTML = alertas.map(a => `
+                    <tr>
+                        <td>${a.id}</td>
+                        <td>${escaparHtml(a.titulo)}</td>
+                        <td>${escaparHtml(a.tipo)}</td>
+                        <td>${escaparHtml(a.severidad || "MEDIA")}</td>
+                        <td>${escaparHtml(a.zonaRiesgo ? a.zonaRiesgo.nombre : "-")}</td>
+                        <td>${a.activa ? "Sí" : "No"}</td>
+                        <td>${formatearFecha(a.fechaCreacion)}</td>
+                        <td class="acciones-fila">${esAdministrador()
+                            ? `<button data-editar-alerta="${a.id}">Editar</button>
+                               <button class="peligro" data-eliminar-alerta="${a.id}">Eliminar</button>`
+                            : "—"}</td>
+                    </tr>`).join("") || `<tr><td colspan="8">No hay alertas.</td></tr>`;
+                tbody.querySelectorAll("[data-editar-alerta]").forEach(boton => {
+                    boton.addEventListener("click", () => editarAlerta(alertasPorId.get(boton.dataset.editarAlerta)));
+                });
+                tbody.querySelectorAll("[data-eliminar-alerta]").forEach(boton => {
+                    boton.addEventListener("click", () => eliminarAlerta(boton.dataset.eliminarAlerta));
+                });
+            } catch (err) {
+                mostrarMensaje("msg-lista", err.message);
+            }
+        }
+
+        function editarAlerta(a) {
+            document.getElementById("alerta-id").value = a.id;
+            document.getElementById("alerta-titulo").value = a.titulo;
+            document.getElementById("alerta-mensaje").value = a.mensaje;
+            document.getElementById("alerta-tipo").value = a.tipo;
+            document.getElementById("alerta-severidad").value = a.severidad || "MEDIA";
+            document.getElementById("alerta-zona").value = a.zonaRiesgo ? a.zonaRiesgo.id : "";
+            document.getElementById("alerta-activa").value = String(a.activa);
+            document.getElementById("titulo-form").textContent = "Editar alerta";
+            document.getElementById("btn-alerta").textContent = "Guardar cambios";
+            document.getElementById("btn-cancelar-alerta").classList.remove("oculto");
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        function cancelarEdicionAlerta() {
+            document.getElementById("form-alerta").reset();
+            document.getElementById("alerta-id").value = "";
+            document.getElementById("titulo-form").textContent = "Nueva alerta";
+            document.getElementById("btn-alerta").textContent = "Registrar alerta";
+            document.getElementById("btn-cancelar-alerta").classList.add("oculto");
+        }
+
+        document.getElementById("form-alerta").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            if (!Sesion.token()) {
+                window.location.href = "/login#form-login";
+                return;
+            }
+            if (!esAdministrador()) {
+                mostrarMensaje("msg-form", "La creación y gestión de alertas está reservada para administradores.");
+                return;
+            }
+            ocultarMensaje("msg-form");
+            const id = document.getElementById("alerta-id").value;
+            const zonaId = document.getElementById("alerta-zona").value || null;
+            const datos = {
+                titulo: document.getElementById("alerta-titulo").value,
+                mensaje: document.getElementById("alerta-mensaje").value,
+                tipo: document.getElementById("alerta-tipo").value,
+                severidad: document.getElementById("alerta-severidad").value,
+                activa: document.getElementById("alerta-activa").value === "true",
+            };
+            try {
+                if (id) {
+                    await CiudadSeguraAPI.actualizarAlerta(id, datos, zonaId);
+                } else {
+                    await CiudadSeguraAPI.crearAlerta(datos, zonaId);
+                }
+                cancelarEdicionAlerta();
+                cargarAlertas();
+            } catch (err) {
+                if (redirigirALoginSiSesionExpirada(err)) return;
+                mostrarMensaje("msg-form", err.message);
+            }
+        });
+
+        async function eliminarAlerta(id) {
+            if (!confirm("¿Eliminar esta alerta?")) return;
+            try {
+                await CiudadSeguraAPI.eliminarAlerta(id);
+                cargarAlertas();
+            } catch (err) {
+                mostrarMensaje("msg-lista", err.message);
+            }
+        }
+
+        if (!esAdministrador()) {
+            document.getElementById("form-alerta").classList.add("oculto");
+            const aviso = document.getElementById("aviso-acceso-alerta");
+            aviso.textContent = "La creación y gestión de alertas está reservada para administradores.";
+            aviso.classList.remove("oculto");
+        }
+        cargarZonasSelect();
+        cargarAlertas();
+    </script>
+</body>
+</html>

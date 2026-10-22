@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ciudad Segura</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="utility-topbar">
+        <div class="utility-topbar-contenido">
+            <a class="linea-emergencias" href="tel:123">🚨 Línea de atención: 123</a>
+            <a href="#atencion-ciudadano">PQRS (Peticiones, Quejas, Reclamos y Sugerencias)</a>
+        </div>
+    </div>
+    <header class="topbar">
+        <h1>🛡️ Ciudad Segura</h1>
+        <nav class="menu">
+            <a href="/" class="activo">Inicio</a>
+            <a href="/reportes">Reportes</a>
+            <a href="/zonas">Zonas de riesgo</a>
+            <a href="/alertas">Alertas</a>
+            <a href="/usuarios">Usuarios</a>
+        </nav>
+        <div id="usuario-activo"></div>
+    </header>
+
+    <main class="inicio-dashboard">
+        <section class="hero-banner" aria-labelledby="hero-titulo">
+            <div class="hero-contenido">
+                <p class="hero-etiqueta">Prevención · Atención · Comunidad</p>
+                <h2 id="hero-titulo">Plataforma de Seguridad Ciudadana</h2>
+                <p>Centralizamos la gestión de incidentes, monitoreo de zonas de riesgo y emisión de alertas en tiempo real para mantener una ciudad más segura.</p>
+            </div>
+        </section>
+
+        <section class="metricas-inicio" aria-label="Resumen de seguridad ciudadana">
+            <article class="metrica-inicio">
+                <h3>
+                    <span>Incidentes Reportados</span>
+                    <span class="icono-metrica icono-metrica--azul" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m3 11 18-5v12L3 13v-2Z"></path>
+                            <path d="M11.6 14.8 13 21h-4l-2-8"></path>
+                            <path d="M21 10v4"></path>
+                        </svg>
+                    </span>
+                </h3>
+                <strong id="metrica-reportes" data-fallback="128">128</strong>
+                <span class="badge-tendencia badge-tendencia--positivo">↓ -8% vs mes anterior</span>
+                <p>Registrados este mes</p>
+            </article>
+            <article class="metrica-inicio">
+                <h3>
+                    <span>Zonas Monitoreadas</span>
+                    <span class="icono-metrica icono-metrica--verde" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3V6Z"></path>
+                            <path d="M9 3v15"></path>
+                            <path d="M15 6v15"></path>
+                            <path d="M20 10c0 5-8 11-8 11s-8-6-8-11a8 8 0 1 1 16 0Z"></path>
+                            <circle cx="12" cy="10" r="2.5"></circle>
+                        </svg>
+                    </span>
+                </h3>
+                <strong id="metrica-zonas" data-fallback="15">15</strong>
+                <span class="badge-tendencia badge-tendencia--neutro">100% activas</span>
+                <p>En observación activa</p>
+            </article>
+            <article class="metrica-inicio">
+                <h3>
+                    <span>Alertas Emitidas</span>
+                    <span class="icono-metrica icono-metrica--naranja" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+                            <path d="M10 21h4"></path>
+                            <path d="M12 3V1"></path>
+                        </svg>
+                    </span>
+                </h3>
+                <strong id="metrica-alertas" data-fallback="3">3</strong>
+                <span class="badge-tendencia badge-tendencia--atendida">Atendidas</span>
+                <p>Alertas comunitarias vigentes</p>
+            </article>
+        </section>
+
+        <section class="servicios-ciudadanos" aria-label="Información y atención ciudadana">
+            <article class="panel-ciudadano" aria-labelledby="noticias-titulo">
+                <div class="panel-ciudadano-encabezado">
+                    <div>
+                        <p class="panel-eyebrow">Recomendaciones ciudadanas</p>
+                        <h2 id="noticias-titulo">Noticias y Comunicados</h2>
+                    </div>
+                </div>
+                <div class="lista-comunicados">
+                    <article class="comunicado">
+                        <time datetime="2026-10-20">20 de octubre de 2026</time>
+                        <h3>Verifica la información antes de compartirla</h3>
+                        <p>Consulta canales oficiales y evita difundir rumores que puedan generar alarma.</p>
+                    </article>
+                    <article class="comunicado">
+                        <time datetime="2026-10-16">16 de octubre de 2026</time>
+                        <h3>Reporta situaciones de riesgo</h3>
+                        <p>Comparte detalles claros y ubicación para facilitar la atención de los incidentes.</p>
+                    </article>
+                    <article class="comunicado">
+                        <time datetime="2026-10-12">12 de octubre de 2026</time>
+                        <h3>Identifica rutas y puntos de encuentro</h3>
+                        <p>Planifica tus recorridos y acuerda un punto de contacto con tu comunidad.</p>
+                    </article>
+                </div>
+            </article>
+
+            <article class="panel-ciudadano panel-atencion" id="atencion-ciudadano" aria-labelledby="atencion-titulo">
+                <p class="panel-eyebrow">Estamos para ayudarte</p>
+                <h2 id="atencion-titulo">Atención al Ciudadano &amp; PQRS</h2>
+                <p class="atencion-intro">Encuentra los canales para presentar peticiones, quejas, reclamos o sugerencias ante tu entidad.</p>
+                <button class="enlace-pqrs" type="button" id="abrir-pqrs">
+                    Radicar una PQRS <span aria-hidden="true">→</span>
+                </button>
+                <a class="enlace-oficial-pqrs" href="https://www.gov.co/" target="_blank" rel="noopener noreferrer">
+                    Consultar canales oficiales de PQRS <span aria-hidden="true">↗</span>
+                </a>
+                <div id="confirmacion-pqrs" class="mensaje oculto" role="status" aria-live="polite"></div>
+                <dialog id="dialogo-pqrs" aria-labelledby="titulo-pqrs">
+                    <div class="dialogo-encabezado">
+                        <h2 id="titulo-pqrs">Radicar petición, queja, reclamo o sugerencia</h2>
+                        <button type="button" class="secundario" id="cerrar-pqrs" aria-label="Cerrar formulario">Cerrar</button>
+                    </div>
+                    <p>Completa los datos para guardar tu solicitud y recibir el número de radicado.</p>
+                    <div id="mensaje-formulario-pqrs" class="mensaje oculto" role="alert"></div>
+                    <form class="formulario" id="formulario-pqrs">
+                        <div>
+                            <label for="pqrs-nombre">Nombre completo</label>
+                            <input id="pqrs-nombre" name="nombre" maxlength="120" autocomplete="name" required>
+                        </div>
+                        <div>
+                            <label for="pqrs-email">Correo electrónico</label>
+                            <input id="pqrs-email" name="email" type="email" maxlength="254" autocomplete="email" required>
+                        </div>
+                        <div>
+                            <label for="pqrs-tipo">Tipo de solicitud</label>
+                            <select id="pqrs-tipo" name="tipo" required>
+                                <option value="PETICION">Petición</option>
+                                <option value="QUEJA">Queja</option>
+                                <option value="RECLAMO">Reclamo</option>
+                                <option value="SUGERENCIA">Sugerencia</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="pqrs-asunto">Asunto</label>
+                            <input id="pqrs-asunto" name="asunto" maxlength="160" required>
+                        </div>
+                        <div>
+                            <label for="pqrs-detalle">Detalle</label>
+                            <textarea id="pqrs-detalle" name="detalle" rows="4" maxlength="4000" required></textarea>
+                        </div>
+                        <div class="botones">
+                            <button type="submit" id="enviar-pqrs">Enviar solicitud</button>
+                        </div>
+                    </form>
+                </dialog>
+                <div class="datos-atencion">
+                    <div>
+                        <h3>Línea de atención</h3>
+                        <a href="tel:123">123 <span>(emergencias)</span></a>
+                    </div>
+                    <div>
+                        <h3>Horario de orientación ciudadana</h3>
+                        <p>Lunes a viernes, 8:00 a. m. a 5:00 p. m.</p>
+                    </div>
+                </div>
+                <p class="nota-emergencias">Si se trata de una emergencia, comunícate con la línea 123.</p>
+            </article>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="site-footer-contenido">
+            <p>© 2026 Ciudad Segura — Sistema Integrado de Gestión de Seguridad Ciudadana</p>
+            <nav aria-label="Enlaces legales">
+                <a href="#terminos">Términos de servicio</a>
+                <a href="#privacidad">Privacidad</a>
+            </nav>
+            <span class="estado-sistema">Estado del sistema: Operativo</span>
+        </div>
+    </footer>
+
+    <script src="/js/api-config.js"></script>
+    <script src="/js/api.js"></script>
+    <script>
+        async function cargarMetricasInicio() {
+            const hoy = new Date();
+            const fechaIsoLocal = (fecha) => [
+                fecha.getFullYear(),
+                String(fecha.getMonth() + 1).padStart(2, "0"),
+                String(fecha.getDate()).padStart(2, "0"),
+            ].join("-");
+            const desde = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}-01`;
+            const hasta = fechaIsoLocal(hoy);
+            const metricas = [
+                ["metrica-reportes", () => CiudadSeguraAPI.contarReportes(desde, hasta), "reportes"],
+                ["metrica-zonas", CiudadSeguraAPI.contarZonas, "zonas"],
+                ["metrica-alertas", () => CiudadSeguraAPI.contarAlertas(true), "alertas"],
+            ];
+            const resultados = await Promise.allSettled(metricas.map(([, contar]) => contar()));
+            resultados.forEach((resultado, indice) => {
+                const [elementoId, , recurso] = metricas[indice];
+                const elemento = document.getElementById(elementoId);
+                if (resultado.status === "fulfilled" && Number.isFinite(resultado.value)) {
+                    elemento.textContent = String(resultado.value);
+                    return;
+                }
+                console.warn(`No se pudo actualizar el conteo de ${recurso}; se conserva el valor de referencia.`,
+                    resultado.status === "rejected" ? resultado.reason : resultado.value);
+            });
+        }
+
+        cargarMetricasInicio();
+
+        const dialogoPqrs = document.getElementById("dialogo-pqrs");
+        document.getElementById("abrir-pqrs").addEventListener("click", () => dialogoPqrs.showModal());
+        document.getElementById("cerrar-pqrs").addEventListener("click", () => dialogoPqrs.close());
+        document.getElementById("formulario-pqrs").addEventListener("submit", async (evento) => {
+            evento.preventDefault();
+            const boton = document.getElementById("enviar-pqrs");
+            boton.disabled = true;
+            ocultarMensaje("mensaje-formulario-pqrs");
+            ocultarMensaje("confirmacion-pqrs");
+            const datos = {
+                nombre: document.getElementById("pqrs-nombre").value,
+                email: document.getElementById("pqrs-email").value,
+                tipo: document.getElementById("pqrs-tipo").value,
+                asunto: document.getElementById("pqrs-asunto").value,
+                detalle: document.getElementById("pqrs-detalle").value,
+            };
+            try {
+                const radicacion = await CiudadSeguraAPI.radicarPqrs(datos);
+                document.getElementById("formulario-pqrs").reset();
+                dialogoPqrs.close();
+                mostrarMensaje("confirmacion-pqrs", `Solicitud radicada con el número ${radicacion.id}.`, "exito");
+            } catch (error) {
+                mostrarMensaje("mensaje-formulario-pqrs", error.message);
+            } finally {
+                boton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

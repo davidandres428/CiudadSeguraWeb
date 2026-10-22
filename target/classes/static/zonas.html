@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ciudad Segura — Zonas de riesgo</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header class="topbar">
+        <h1>🛡️ Ciudad Segura</h1>
+        <nav class="menu">
+            <a href="/">Inicio</a>
+            <a href="/reportes">Reportes</a>
+            <a href="/zonas" class="activo">Zonas de riesgo</a>
+            <a href="/alertas">Alertas</a>
+            <a href="/usuarios">Usuarios</a>
+        </nav>
+        <div id="usuario-activo"></div>
+    </header>
+
+    <main>
+        <div class="tarjeta" id="tarjeta-form-zona">
+            <h2 id="titulo-form">Nueva zona de riesgo</h2>
+            <div id="aviso-acceso-zona" class="mensaje error oculto"></div>
+            <div id="msg-form" class="mensaje oculto"></div>
+            <form class="formulario" id="form-zona">
+                <input type="hidden" id="zona-id">
+                <div>
+                    <label for="zona-nombre">Nombre</label>
+                    <input type="text" id="zona-nombre" required>
+                </div>
+                <div>
+                    <label for="zona-descripcion">Descripción</label>
+                    <textarea id="zona-descripcion" rows="2"></textarea>
+                </div>
+                <div class="fila-form">
+                    <div>
+                        <label for="zona-nivel">Nivel de riesgo</label>
+                        <select id="zona-nivel" required>
+                            <option value="BAJO">Bajo</option>
+                            <option value="MEDIO">Medio</option>
+                            <option value="ALTO">Alto</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="zona-lat">Latitud</label>
+                        <input type="number" step="any" id="zona-lat" required>
+                    </div>
+                    <div>
+                        <label for="zona-lng">Longitud</label>
+                        <input type="number" step="any" id="zona-lng" required>
+                    </div>
+                </div>
+                <div class="botones">
+                    <button type="submit" id="btn-zona">Registrar zona</button>
+                    <button type="button" class="secundario oculto" id="btn-cancelar-zona" onclick="cancelarEdicionZona()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="tarjeta">
+            <h2>Zonas registradas</h2>
+            <p>El mapa muestra las zonas de riesgo y los reportes registrados con coordenadas.</p>
+            <div id="mapa-zonas" class="mapa" aria-label="Mapa de reportes y zonas de riesgo"></div>
+            <div class="fila-form" style="margin-bottom: 14px;">
+                <div>
+                    <label for="filtro-nivel">Filtrar por nivel</label>
+                    <select id="filtro-nivel" onchange="cargarZonas()">
+                        <option value="">Todos</option>
+                        <option value="BAJO">Bajo</option>
+                        <option value="MEDIO">Medio</option>
+                        <option value="ALTO">Alto</option>
+                    </select>
+                </div>
+            </div>
+            <div id="msg-lista" class="mensaje oculto"></div>
+            <div class="tabla-desplazable" role="region" aria-label="Lista de zonas de riesgo" tabindex="0">
+            <table>
+                <thead>
+                    <tr><th>ID</th><th>Nombre</th><th>Nivel</th><th>Descripción</th><th>Acciones</th></tr>
+                </thead>
+                <tbody id="tabla-zonas"></tbody>
+            </table>
+            </div>
+        </div>
+    </main>
+
+    <script src="/js/api-config.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="/js/mapa-ciudad-segura.js"></script>
+    <script>
+        const zonasPorId = new Map();
+        const mapaZonas = MapaCiudadSegura.crear("mapa-zonas");
+
+        async function cargarZonas() {
+            const nivel = document.getElementById("filtro-nivel").value;
+            const query = nivel ? `?nivel=${nivel}` : "";
+            try {
+                const [zonas, reportes] = await Promise.all([
+                    CiudadSeguraAPI.listarZonas(query),
+                    CiudadSeguraAPI.listarReportes(),
+                ]);
+                mapaZonas.mostrarReportes(reportes);
+                mapaZonas.mostrarZonas(zonas, true);
+                const tbody = document.getElementById("tabla-zonas");
+                zonasPorId.clear();
+                zonas.forEach(zona => zonasPorId.set(String(zona.id), zona));
+                tbody.innerHTML = zonas.map(z => `
+                    <tr>
+                        <td>${z.id}</td>
+                        <td>${escaparHtml(z.nombre)}</td>
+                        <td><span class="badge ${z.nivelRiesgo}">${z.nivelRiesgo}</span></td>
+                        <td>${escaparHtml(z.descripcion || "-")}</td>
+                        <td class="acciones-fila">${esAdministrador()
+                            ? `<button data-editar-zona="${z.id}">Editar</button>
+                               <button class="peligro" data-eliminar-zona="${z.id}">Eliminar</button>`
+                            : "—"}</td>
+                    </tr>`).join("") || `<tr><td colspan="5">No hay zonas registradas.</td></tr>`;
+                tbody.querySelectorAll("[data-editar-zona]").forEach(boton => {
+                    boton.addEventListener("click", () => editarZona(zonasPorId.get(boton.dataset.editarZona)));
+                });
+                tbody.querySelectorAll("[data-eliminar-zona]").forEach(boton => {
+                    boton.addEventListener("click", () => eliminarZona(boton.dataset.eliminarZona));
+                });
+            } catch (err) {
+                mostrarMensaje("msg-lista", err.message);
+            }
+        }
+
+        function esAdministrador() {
+            return Sesion.obtener()?.rol === "ADMINISTRADOR";
+        }
+
+        function editarZona(z) {
+            document.getElementById("zona-id").value = z.id;
+            document.getElementById("zona-nombre").value = z.nombre;
+            document.getElementById("zona-descripcion").value = z.descripcion || "";
+            document.getElementById("zona-nivel").value = z.nivelRiesgo;
+            document.getElementById("zona-lat").value = z.latitud;
+            document.getElementById("zona-lng").value = z.longitud;
+            document.getElementById("titulo-form").textContent = "Editar zona de riesgo";
+            document.getElementById("btn-zona").textContent = "Guardar cambios";
+            document.getElementById("btn-cancelar-zona").classList.remove("oculto");
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        function cancelarEdicionZona() {
+            document.getElementById("form-zona").reset();
+            document.getElementById("zona-id").value = "";
+            document.getElementById("titulo-form").textContent = "Nueva zona de riesgo";
+            document.getElementById("btn-zona").textContent = "Registrar zona";
+            document.getElementById("btn-cancelar-zona").classList.add("oculto");
+        }
+
+        document.getElementById("form-zona").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            if (!Sesion.token()) {
+                window.location.href = "/login#form-login";
+                return;
+            }
+            if (!esAdministrador()) {
+                mostrarMensaje("msg-form", "La creación y gestión de zonas está reservada para administradores.");
+                return;
+            }
+            ocultarMensaje("msg-form");
+            const id = document.getElementById("zona-id").value;
+            const datos = {
+                nombre: document.getElementById("zona-nombre").value,
+                descripcion: document.getElementById("zona-descripcion").value,
+                nivelRiesgo: document.getElementById("zona-nivel").value,
+                latitud: parseFloat(document.getElementById("zona-lat").value),
+                longitud: parseFloat(document.getElementById("zona-lng").value),
+            };
+            try {
+                if (id) {
+                    await CiudadSeguraAPI.actualizarZona(id, datos);
+                } else {
+                    await CiudadSeguraAPI.crearZona(datos);
+                }
+                cancelarEdicionZona();
+                cargarZonas();
+            } catch (err) {
+                if (redirigirALoginSiSesionExpirada(err)) return;
+                mostrarMensaje("msg-form", err.message);
+            }
+        });
+
+        async function eliminarZona(id) {
+            if (!confirm("¿Eliminar esta zona? Las alertas asociadas quedarán sin zona.")) return;
+            try {
+                await CiudadSeguraAPI.eliminarZona(id);
+                cargarZonas();
+            } catch (err) {
+                mostrarMensaje("msg-lista", err.message);
+            }
+        }
+
+        if (!esAdministrador()) {
+            document.getElementById("form-zona").classList.add("oculto");
+            const aviso = document.getElementById("aviso-acceso-zona");
+            aviso.innerHTML = Sesion.token()
+                ? "La creación y gestión de zonas está reservada para administradores."
+                : 'Debes <a href="/login#form-login">iniciar sesión</a> para solicitar la creación de una zona.';
+            aviso.classList.remove("oculto");
+        }
+        cargarZonas();
+    </script>
+</body>
+</html>

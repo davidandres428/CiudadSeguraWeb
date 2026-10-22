@@ -1,0 +1,13 @@
+com\ciudadsegura\service\AuthServiceTest.class
+com\ciudadsegura\controller\GeolocalizacionApiTest.class
+com\ciudadsegura\e2e\AdministracionZonasAlertasFlujoE2ETest.class
+com\ciudadsegura\security\ProteccionDashboardTest.class
+com\ciudadsegura\e2e\ReportesFlujoE2ETest.class
+com\ciudadsegura\config\DataInitializerTest.class
+com\ciudadsegura\controller\SeedMasivoControllerTest.class
+com\ciudadsegura\controller\PrettyUrlControllerTest.class
+com\ciudadsegura\service\ReporteIncidenteMetricasTest.class
+com\ciudadsegura\service\ZonaRiesgoServiceTest.class
+com\ciudadsegura\controller\PqrsControllerTest.class
+com\ciudadsegura\e2e\AutenticacionFlujoE2ETest.class
+com\ciudadsegura\service\UsuarioServiceTest.class
