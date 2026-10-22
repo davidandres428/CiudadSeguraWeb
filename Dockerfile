@@ -1,20 +1,21 @@
-FROM maven:3.9.9-eclipse-temurin-21 AS build
-
-WORKDIR /workspace
-
-COPY pom.xml .
-RUN mvn -B dependency:go-offline
-
-COPY src ./src
-RUN mvn -B package -DskipTests
-
-FROM eclipse-temurin:25-jre
-
+# Etapa 1: Compilar el proyecto con Maven y Java 21
+FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
-ENV PORT=8081
-EXPOSE 8081
 
-COPY --from=build --chown=10001:10001 /workspace/target/ciudad-segura-0.0.1-SNAPSHOT.jar /app/app.jar
+# Copiar primero el archivo de dependencias y luego el código fuente
+COPY pom.xml .
+COPY src ./src
 
-USER 10001:10001
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+# Empaquetar la aplicación ignorando las pruebas
+RUN mvn clean package -DskipTests
+
+# Etapa 2: Ejecutar la aplicación con una imagen ligera de Java 21 (JRE)
+FROM eclipse-temurin:21-jre
+WORKDIR /app
+
+# Copiar el archivo jar generado desde la primera etapa
+COPY --from=build /app/target/*.jar app.jar
+
+# Exponer el puerto y ejecutar la aplicación
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"]
