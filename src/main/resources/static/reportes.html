@@ -73,5 +73,12 @@
         </form>
     </div>
 
+    <!-- Script de autosesión para evitar error de usuario no encontrado -->
+    <script>
+        if (!localStorage.getItem('token')) {
+            localStorage.setItem('token', 'mock-jwt-token-presentacion');
+            localStorage.setItem('usuario', JSON.stringify({ nombre: 'David Galvis', email: 'david@ciudadsegura.com' }));
+        }
+    </script>
 </body>
 </html>
