@@ -8,39 +8,39 @@
 </head>
 <body>
 
-    <nav class="navbar">
+    <nav class="navbar" style="background-color: #1e293b; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center;">
         <div class="logo"><strong>Ciudad Segura</strong></div>
         <div class="nav-links">
-            <a href="/inicio">Inicio</a>
-            <a href="/reportes" class="active">Reportes</a>
-            <a href="/zonas">Zonas de riesgo</a>
-            <a href="/alertas">Alertas</a>
-            <a href="/usuarios.html">Usuarios</a>
+            <a href="/inicio" style="color: white; text-decoration: none; margin-left: 20px;">Inicio</a>
+            <a href="/reportes" class="active" style="color: #38bdf8; text-decoration: none; margin-left: 20px; font-weight: bold;">Reportes</a>
+            <a href="/zonas" style="color: white; text-decoration: none; margin-left: 20px;">Zonas de riesgo</a>
+            <a href="/alertas" style="color: white; text-decoration: none; margin-left: 20px;">Alertas</a>
+            <a href="/usuarios.html" style="color: white; text-decoration: none; margin-left: 20px;">Usuarios</a>
         </div>
     </nav>
 
-    <div class="container" style="max-width: 900px; margin: 30px auto; background: white; padding: 30px; border-radius: 8px;">
+    <div class="container" style="max-width: 900px; margin: 30px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
         <h2>Nuevo reporte de incidente</h2>
         
         <form id="form-reporte">
             <div style="margin-bottom: 15px;">
-                <label for="titulo" style="display: block; margin-bottom: 5px; font-weight: 500;">Título</label>
+                <label for="titulo" style="display: block; margin-bottom: 5px; font-weight: 500; color: #334155;">Título</label>
                 <input type="text" id="titulo" name="titulo" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;" required>
             </div>
 
             <div style="margin-bottom: 15px;">
-                <label for="descripcion" style="display: block; margin-bottom: 5px; font-weight: 500;">Descripción</label>
+                <label for="descripcion" style="display: block; margin-bottom: 5px; font-weight: 500; color: #334155;">Descripción</label>
                 <textarea id="descripcion" name="descripcion" rows="3" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;" required></textarea>
             </div>
 
             <div style="margin-bottom: 15px;">
-                <label for="direccion" style="display: block; margin-bottom: 5px; font-weight: 500;">Dirección</label>
+                <label for="direccion" style="display: block; margin-bottom: 5px; font-weight: 500; color: #334155;">Dirección</label>
                 <input type="text" id="direccion" name="direccion" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;" required>
             </div>
 
             <div style="display: flex; gap: 15px; margin-bottom: 15px;">
                 <div style="flex: 1;">
-                    <label for="tipo" style="display: block; margin-bottom: 5px; font-weight: 500;">Tipo</label>
+                    <label for="tipo" style="display: block; margin-bottom: 5px; font-weight: 500; color: #334155;">Tipo</label>
                     <select id="tipo" name="tipo" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
                         <option value="Robo">Robo</option>
                         <option value="Asalto">Asalto</option>
@@ -48,7 +48,7 @@
                     </select>
                 </div>
                 <div style="flex: 1;">
-                    <label for="prioridad" style="display: block; margin-bottom: 5px; font-weight: 500;">Prioridad</label>
+                    <label for="prioridad" style="display: block; margin-bottom: 5px; font-weight: 500; color: #334155;">Prioridad</label>
                     <select id="prioridad" name="prioridad" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
                         <option value="Baja">Baja</option>
                         <option value="Media">Media</option>
@@ -57,14 +57,13 @@
                 </div>
             </div>
 
-            <!-- Nuevos campos de Ciudad y Barrio en lugar de latitud/longitud -->
             <div style="display: flex; gap: 15px; margin-bottom: 20px;">
                 <div style="flex: 1;">
-                    <label for="ciudad" style="display: block; margin-bottom: 5px; font-weight: 500;">Ciudad</label>
+                    <label for="ciudad" style="display: block; margin-bottom: 5px; font-weight: 500; color: #334155;">Ciudad</label>
                     <input type="text" id="ciudad" name="ciudad" placeholder="Ej. Madrid" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;" required>
                 </div>
                 <div style="flex: 1;">
-                    <label for="barrio" style="display: block; margin-bottom: 5px; font-weight: 500;">Barrio</label>
+                    <label for="barrio" style="display: block; margin-bottom: 5px; font-weight: 500; color: #334155;">Barrio</label>
                     <input type="text" id="barrio" name="barrio" placeholder="Ej. Centro" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;" required>
                 </div>
             </div>
