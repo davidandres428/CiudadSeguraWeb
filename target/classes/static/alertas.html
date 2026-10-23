@@ -3,70 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ciudad Segura - Alertas</title>
-    <link rel="stylesheet" href="/css/styles.css">
+    <title>Ciudad Segura — Alertas</title>
+    <link rel="stylesheet" href="/css/estilos.css">
 </head>
 <body>
-    <header class="topbar">
-        <h1>Ciudad Segura</h1>
-        <nav class="menu">
+
+    <nav class="navbar">
+        <div class="logo"><strong>Ciudad Segura</strong></div>
+        <div class="nav-links">
             <a href="/inicio">Inicio</a>
             <a href="/reportes">Reportes</a>
             <a href="/zonas">Zonas de riesgo</a>
-            <a href="/alertas" class="activo">Alertas</a>
-            <a href="/usuarios">Usuarios</a>
-        </nav>
-        <div id="usuario-activo"></div>
-    </header>
-
-    <main>
-        <div class="tarjeta">
-            <h2>Nueva alerta</h2>
-            <div id="msg-form" class="mensaje oculto"></div>
-            <form class="formulario" id="form-alerta">
-                <div>
-                    <label for="alerta-titulo">Título</label>
-                    <input type="text" id="alerta-titulo" required>
-                </div>
-                <div>
-                    <label for="alerta-mensaje">Mensaje / Descripción</label>
-                    <textarea id="alerta-mensaje" rows="3" required></textarea>
-                </div>
-                <div class="fila-doble">
-                    <div>
-                        <label for="alerta-tipo">Tipo</label>
-                        <select id="alerta-tipo">
-                            <option value="SEGURIDAD">Seguridad</option>
-                            <option value="EMERGENCIA">Emergencia</option>
-                            <option value="PREVENCION">Prevención</option>
-                            <option value="INFORMATIVA">Informativa</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="alerta-severidad">Severidad</label>
-                        <select id="alerta-severidad">
-                            <option value="BAJA">Baja</option>
-                            <option value="MEDIA">Media</option>
-                            <option value="ALTA">Alta</option>
-                            <option value="CRITICA">Crítica</option>
-                        </select>
-                    </div>
-                </div>
-                <button type="submit" class="boton primario">Emitir Alerta</button>
-            </form>
+            <a href="/alertas" class="active">Alertas</a>
+            <a href="/usuarios.html">Usuarios</a>
         </div>
+    </nav>
 
-        <div class="tarjeta">
-            <h2>Alertas registradas</h2>
-            <div id="msg-tabla" class="mensaje oculto"></div>
-            <div id="tabla-alertas-contenedor">
-                <p>Cargando lista de alertas...</p>
+    <div class="container" style="max-width: 900px; margin: 30px auto; background: white; padding: 30px; border-radius: 8px;">
+        <h2>Nueva alerta</h2>
+
+        <!-- Formulario visible de manera fija para la presentación -->
+        <form id="form-nueva-alerta">
+            <div style="margin-bottom: 15px;">
+                <label for="titulo" style="display: block; margin-bottom: 5px; font-weight: 500;">Título</label>
+                <input type="text" id="titulo" name="titulo" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;" required>
             </div>
-        </div>
-    </main>
 
-    <script src="/js/api.config.js"></script>
-    <script src="/js/api.js"></script>
-    <script src="/js/alertas.js"></script>
+            <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                <div style="flex: 1;">
+                    <label for="tipo" style="display: block; margin-bottom: 5px; font-weight: 500;">Tipo</label>
+                    <select id="tipo" name="tipo" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                        <option value="Seguridad">Seguridad</option>
+                        <option value="Clima">Clima</option>
+                        <option value="Tráfico">Tráfico</option>
+                        <option value="Emergencia">Emergencia</option>
+                    </select>
+                </div>
+                <div style="flex: 1;">
+                    <label for="severidad" style="display: block; margin-bottom: 5px; font-weight: 500;">Severidad</label>
+                    <select id="severidad" name="severidad" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                        <option value="Baja">Baja</option>
+                        <option value="Media">Media</option>
+                        <option value="Alta">Alta</option>
+                        <option value="Crítica">Crítica</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label for="mensaje" style="display: block; margin-bottom: 5px; font-weight: 500;">Mensaje / Descripción</label>
+                <textarea id="mensaje" name="mensaje" rows="3" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;" required></textarea>
+            </div>
+
+            <button type="submit" style="background-color: #0f172a; color: white; border: none; padding: 12px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">Emitir alerta</button>
+        </form>
+    </div>
+
 </body>
 </html>
