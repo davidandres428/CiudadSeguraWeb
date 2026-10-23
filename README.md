@@ -74,13 +74,17 @@ src/test/java/com/ciudadsegura/service/  -> pruebas unitarias (JUnit 5 + Mockito
 
 ### Ejecutar con Docker
 
-Construye la imagen multi-etapa y ejecuta el contenedor:
+Empaqueta localmente la aplicación, construye la imagen desde el JAR de la raíz y ejecuta el contenedor:
 ```bash
+mvn clean package -DskipTests
+cp target/ciudad-segura-0.0.1-SNAPSHOT.jar .
 docker build -t ciudad-segura .
-docker run --rm -p 8081:8081 ciudad-segura
+docker run --rm -p 8080:8080 ciudad-segura
 ```
-La aplicación queda disponible en `http://localhost:8081`. Este comando usa la configuración
-local predeterminada con H2 en memoria; los datos no persisten al detener el contenedor.
+La imagen ejecuta el JAR ya empaquetado y no compila durante el build de Docker. La aplicación
+queda disponible en `http://localhost:8080`; Render puede asignar el puerto mediante `PORT`.
+Este comando usa H2 en memoria; los datos no persisten al detener el contenedor. Al desplegar
+desde Docker en Render, incluye el JAR de la raíz en Git junto con el Dockerfile.
 
 ### Datos de demostración locales
 
