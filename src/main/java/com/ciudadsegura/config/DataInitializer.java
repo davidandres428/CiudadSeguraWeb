@@ -16,7 +16,6 @@ import com.ciudadsegura.repository.NoticiaRepository;
 import com.ciudadsegura.repository.ReporteIncidenteRepository;
 import com.ciudadsegura.repository.UsuarioRepository;
 import com.ciudadsegura.repository.ZonaRiesgoRepository;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -41,7 +40,6 @@ public class DataInitializer implements CommandLineRunner {
     private final AlertaRepository alertaRepository;
     private final NoticiaRepository noticiaRepository;
     private final PasswordEncoder passwordEncoder;
-    private final String adminPassword;
 
     public DataInitializer(
             UsuarioRepository usuarioRepository,
@@ -49,33 +47,36 @@ public class DataInitializer implements CommandLineRunner {
             ReporteIncidenteRepository reporteRepository,
             AlertaRepository alertaRepository,
             NoticiaRepository noticiaRepository,
-            PasswordEncoder passwordEncoder,
-            @Value("${app.seed.admin-password:}") String adminPassword) {
+            PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
         this.zonaRiesgoRepository = zonaRiesgoRepository;
         this.reporteRepository = reporteRepository;
         this.alertaRepository = alertaRepository;
         this.noticiaRepository = noticiaRepository;
         this.passwordEncoder = passwordEncoder;
-        this.adminPassword = adminPassword;
     }
 
     @Override
     @Transactional
     public void run(String... args) {
-        // ASIGNACIÓN DE ADMINISTRADOR A DANIEL
-        String correoAdmin = "danielgo34@gmail.com";
+        String correoAdmin = "david.andresgalvis@gmail.com";
+        String passwordFinal = "Admin123!";
 
+        // Buscar o crear al administrador principal
         Usuario usuario = usuarioRepository.findByEmail(correoAdmin).orElse(null);
 
-        if (usuario != null) {
+        if (usuario == null) {
+            usuario = new Usuario("David Andrés Galvis", correoAdmin, passwordEncoder.encode(passwordFinal));
             usuario.setRol(RolUsuario.ADMINISTRADOR);
-            usuarioRepository.save(usuario);
-            LOGGER.info("Se asignó con éxito el rol de ADMINISTRADOR a: " + correoAdmin);
+            LOGGER.info("ADMINISTRADOR CREADO DESDE CERO: " + correoAdmin);
         } else {
-            LOGGER.warn("El usuario " + correoAdmin + " aún no existe en la base de datos.");
+            usuario.setRol(RolUsuario.ADMINISTRADOR);
+            usuario.setPassword(passwordEncoder.encode(passwordFinal));
+            LOGGER.info("ADMINISTRADOR ACTUALIZADO EXITOSAMENTE: " + correoAdmin);
         }
+        usuarioRepository.save(usuario);
 
+        // Sembrado de Zonas, Reportes, Alertas y Noticias
         List<ZonaRiesgo> zonas = zonaRiesgoRepository.findAll();
         if (zonas.isEmpty()) {
             zonas = zonaRiesgoRepository.saveAll(crearZonas());
