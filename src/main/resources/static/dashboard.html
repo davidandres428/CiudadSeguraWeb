@@ -1,168 +1,51 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ciudad Segura — Dashboard</title>
+    <title>Ciudad Segura - Inicio</title>
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="topbar">
-        <h1>🛡️ Ciudad Segura</h1>
+        <h1>Ciudad Segura</h1>
         <nav class="menu">
-            <a href="/inicio">Inicio</a>
+            <a href="/inicio" class="activo">Inicio</a>
             <a href="/reportes">Reportes</a>
-            <a href="/dashboard" class="activo">Dashboard</a>
+            <a href="/zonas">Zonas de riesgo</a>
+            <a href="/alertas">Alertas</a>
+            <a href="/usuarios">Usuarios</a>
         </nav>
         <div id="usuario-activo"></div>
     </header>
 
-    <main>
-        <section class="tarjeta">
-            <h2>Dashboard de reportes</h2>
-            <p>Estadísticas y exportación para administradores.</p>
-            <div id="msg-dashboard" class="mensaje oculto" role="alert"></div>
-            <div id="contenido-dashboard" class="oculto">
-                <div class="fila-form filtro-dashboard">
-                    <div>
-                        <label for="fecha-desde">Desde</label>
-                        <input type="date" id="fecha-desde">
-                    </div>
-                    <div>
-                        <label for="fecha-hasta">Hasta</label>
-                        <input type="date" id="fecha-hasta">
-                    </div>
-                    <div class="botones">
-                        <button type="button" id="btn-aplicar-filtros">Actualizar</button>
-                        <button type="button" class="secundario" id="btn-descargar-csv">Exportar CSV</button>
-                    </div>
-                </div>
-                <div class="tarjeta estadistica-total">
-                    <span>Total de reportes en el período</span>
-                    <strong id="total-reportes">0</strong>
-                </div>
-                <div class="grid-graficos">
-                    <article class="tarjeta">
-                        <h3>Reportes por estado</h3>
-                        <canvas id="grafico-estados" aria-label="Gráfico de reportes por estado"></canvas>
-                    </article>
-                    <article class="tarjeta">
-                        <h3>Reportes por prioridad</h3>
-                        <canvas id="grafico-prioridades" aria-label="Gráfico de reportes por prioridad"></canvas>
-                    </article>
-                    <article class="tarjeta">
-                        <h3>Reportes por tipo de incidente</h3>
-                        <canvas id="grafico-tipos" aria-label="Gráfico de reportes por tipo"></canvas>
-                    </article>
-                </div>
+    <main class="contenedor-principal">
+        <section class="banner-bienvenida">
+            <span class="subtitulo">PREVENCIÓN · ATENCIÓN · COMUNIDAD</span>
+            <h2>Plataforma de Seguridad Ciudadana</h2>
+            <p>Centralizamos la gestión de incidentes, monitoreo de zonas de riesgo y emisión de alertas en tiempo real para mantener una ciudad más segura.</p>
+        </section>
+
+        <section class="tarjetas-resumen">
+            <div class="tarjeta-metrica">
+                <h3>Incidentes Reportados</h3>
+                <div class="numero" id="total-reportes">0</div>
+                <p>Registrados este mes</p>
+            </div>
+            <div class="tarjeta-metrica">
+                <h3>Zonas Monitoreadas</h3>
+                <div class="numero" id="total-zonas">0</div>
+                <p>En observación activa</p>
+            </div>
+            <div class="tarjeta-metrica">
+                <h3>Alertas Emitidas</h3>
+                <div class="numero" id="total-alertas">0</div>
+                <p>Alertas comunitarias vigentes</p>
             </div>
         </section>
     </main>
 
-    <script src="/js/api-config.js"></script>
+    <script src="/js/api.config.js"></script>
     <script src="/js/api.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
-    <script>
-        const usuarioDashboard = Sesion.obtener();
-        const graficos = {};
-        const etiquetas = {
-            estados: {
-                PENDIENTE: "Pendiente",
-                EN_REVISION: "En proceso",
-                RESUELTO: "Resuelto",
-                DESCARTADO: "Descartado",
-            },
-            prioridades: { ALTA: "Alta", MEDIA: "Media", BAJA: "Baja", URGENTE: "Urgente" },
-            tipos: {
-                ROBO: "Robo",
-                VANDALISMO: "Vandalismo",
-                ACCIDENTE: "Accidente",
-                DISTURBIO: "Disturbio",
-                ILUMINACION_DEFICIENTE: "Iluminación deficiente",
-                SOSPECHA: "Sospecha",
-                VENTA_ESTUPEFACIENTES: "Venta de estupefacientes",
-                RUIDO_EXCESIVO: "Ruido excesivo",
-            },
-        };
-
-        function parametrosFechas() {
-            const params = new URLSearchParams();
-            const desde = document.getElementById("fecha-desde").value;
-            const hasta = document.getElementById("fecha-hasta").value;
-            if (desde) params.set("desde", desde);
-            if (hasta) params.set("hasta", hasta);
-            const query = params.toString();
-            return query ? `?${query}` : "";
-        }
-
-        function actualizarGrafico(id, tipo, valores, titulos, colores) {
-            const datos = Object.keys(titulos).map((clave) => valores[clave] ?? 0);
-            if (graficos[id]) {
-                graficos[id].data.datasets[0].data = datos;
-                graficos[id].update();
-                return;
-            }
-            graficos[id] = new Chart(document.getElementById(id), {
-                type: tipo,
-                data: {
-                    labels: Object.values(titulos),
-                    datasets: [{ data: datos, backgroundColor: colores }],
-                },
-                options: {
-                    responsive: true,
-                    plugins: { legend: { position: tipo === "bar" ? "bottom" : "right" } },
-                    ...(tipo === "bar" ? { scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } } : {}),
-                },
-            });
-        }
-
-        async function cargarMetricas() {
-            const desde = document.getElementById("fecha-desde").value;
-            const hasta = document.getElementById("fecha-hasta").value;
-            if (desde && hasta && desde > hasta) {
-                mostrarMensaje("msg-dashboard", "La fecha inicial no puede ser posterior a la fecha final.");
-                return;
-            }
-            ocultarMensaje("msg-dashboard");
-            try {
-                const datos = await CiudadSeguraAPI.obtenerMetricas(parametrosFechas());
-                document.getElementById("total-reportes").textContent = datos.total;
-                actualizarGrafico("grafico-estados", "doughnut", datos.porEstado, etiquetas.estados,
-                    ["#d9822b", "#2c5282", "#2e7d32", "#78909c"]);
-                actualizarGrafico("grafico-prioridades", "bar", datos.porPrioridad, etiquetas.prioridades,
-                    ["#c0392b", "#d9822b", "#2e7d32", "#7b1fa2"]);
-                actualizarGrafico("grafico-tipos", "pie", datos.porTipo, etiquetas.tipos,
-                    ["#c0392b", "#7b1fa2", "#2c5282", "#d9822b", "#546e7a", "#00897b", "#6d4c41", "#3949ab"]);
-            } catch (err) {
-                mostrarMensaje("msg-dashboard", err.message);
-            }
-        }
-
-        document.getElementById("btn-aplicar-filtros").addEventListener("click", cargarMetricas);
-        document.getElementById("btn-descargar-csv").addEventListener("click", async () => {
-            try {
-                const blob = await CiudadSeguraAPI.exportarReportesCsv(parametrosFechas());
-                const enlace = document.createElement("a");
-                const url = URL.createObjectURL(blob);
-                enlace.href = url;
-                enlace.download = "reportes.csv";
-                enlace.click();
-                URL.revokeObjectURL(url);
-            } catch (err) {
-                mostrarMensaje("msg-dashboard", err.message);
-            }
-        });
-
-        if (!Sesion.token() || !usuarioDashboard) {
-            window.location.replace("/login#form-login");
-        } else if (usuarioDashboard.rol !== "ADMINISTRADOR") {
-            window.location.replace("/");
-        } else if (!window.Chart) {
-            mostrarMensaje("msg-dashboard", "No se pudo cargar Chart.js. Comprueba la conexión e inténtalo de nuevo.");
-        } else {
-            document.getElementById("contenido-dashboard").classList.remove("oculto");
-            cargarMetricas();
-        }
-    </script>
 </body>
 </html>

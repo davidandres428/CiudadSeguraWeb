@@ -3,26 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ciudad Segura — Usuarios</title>
+    <title>Ciudad Segura - Usuarios</title>
     <link rel="stylesheet" href="/css/styles.css">
-    <script src="/js/api-config.js"></script>
-    <script src="/js/api.js"></script>
-    <script>
-        const usuarioActual = Sesion.obtener();
-        if (!Sesion.token() || !["ADMINISTRADOR", "ROLE_ADMIN"].includes(usuarioActual?.rol)) {
-            window.location.replace("/login#form-login");
-        }
-    </script>
 </head>
 <body>
     <header class="topbar">
-        <h1>🛡️ Ciudad Segura</h1>
+        <h1>Ciudad Segura</h1>
         <nav class="menu">
             <a href="/inicio">Inicio</a>
             <a href="/reportes">Reportes</a>
             <a href="/zonas">Zonas de riesgo</a>
             <a href="/alertas">Alertas</a>
-            <a href="/usuarios" class="activo" hidden>Usuarios</a>
+            <a href="/usuarios" class="activo">Usuarios</a>
         </nav>
         <div id="usuario-activo"></div>
     </header>
@@ -30,118 +22,15 @@
     <main>
         <div class="tarjeta">
             <h2>Usuarios registrados</h2>
-            <p>Nuevos usuarios se crean desde <a href="/login">la página de registro</a>. Aquí puedes
-               consultar, actualizar y eliminar los usuarios existentes.</p>
+            <p>Gestión y administración de roles del sistema.</p>
             <div id="msg" class="mensaje oculto"></div>
-            <div class="tabla-desplazable" role="region" aria-label="Lista de usuarios" tabindex="0">
-            <table>
-                <thead>
-                    <tr><th>ID</th><th>Nombre</th><th>Email</th><th>Rol</th><th>Registrado</th><th>Acciones</th></tr>
-                </thead>
-                <tbody id="tabla-usuarios"></tbody>
-            </table>
+            <div id="tabla-usuarios-contenedor">
+                <p>Cargando lista de usuarios...</p>
             </div>
-        </div>
-
-        <div class="tarjeta oculto" id="tarjeta-editar">
-            <h2>Editar usuario</h2>
-            <form class="formulario" id="form-editar">
-                <input type="hidden" id="edit-id">
-                <div>
-                    <label for="edit-nombre">Nombre</label>
-                    <input type="text" id="edit-nombre" required>
-                </div>
-                <div>
-                    <label for="edit-email">Email</label>
-                    <input type="email" id="edit-email" required>
-                </div>
-                <div>
-                    <label for="edit-rol">Rol</label>
-                    <select id="edit-rol">
-                        <option value="CIUDADANO">ROLE_USER · Ciudadano</option>
-                        <option value="ADMINISTRADOR">ROLE_ADMIN · Administrador</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="edit-password">Nueva contraseña (opcional)</label>
-                    <input type="password" id="edit-password" minlength="6" autocomplete="new-password">
-                </div>
-                <div class="botones">
-                    <button type="submit">Guardar cambios</button>
-                    <button type="button" class="secundario" onclick="cancelarEdicion()">Cancelar</button>
-                </div>
-            </form>
         </div>
     </main>
 
-    <script>
-        async function cargarUsuarios() {
-            try {
-                const usuarios = await CiudadSeguraAPI.listarUsuarios();
-                usuariosCache = usuarios;
-                const tbody = document.getElementById("tabla-usuarios");
-                tbody.innerHTML = usuarios.map(u => `
-                    <tr>
-                        <td>${u.id}</td>
-                        <td>${escaparHtml(u.nombre)}</td>
-                        <td>${escaparHtml(u.email)}</td>
-                        <td>${u.rol === "ADMINISTRADOR" ? "ROLE_ADMIN · Administrador" : "ROLE_USER · Ciudadano"}</td>
-                        <td>${formatearFecha(u.fechaRegistro)}</td>
-                        <td class="acciones-fila">
-                            <button onclick="editar(${u.id})">Editar</button>
-                            <button class="peligro" onclick="eliminar(${u.id})">Eliminar</button>
-                        </td>
-                    </tr>`).join("") || `<tr><td colspan="6">No hay usuarios registrados.</td></tr>`;
-            } catch (err) {
-                mostrarMensaje("msg", err.message);
-            }
-        }
-
-        let usuariosCache = [];
-
-        function editar(id) {
-            const u = usuariosCache.find(x => x.id === id);
-            document.getElementById("edit-id").value = id;
-            document.getElementById("edit-nombre").value = u.nombre;
-            document.getElementById("edit-email").value = u.email;
-            document.getElementById("edit-rol").value = u.rol;
-            document.getElementById("edit-password").value = "";
-            document.getElementById("tarjeta-editar").classList.remove("oculto");
-            window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
-        }
-
-        function cancelarEdicion() {
-            document.getElementById("tarjeta-editar").classList.add("oculto");
-        }
-
-        document.getElementById("form-editar").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const id = document.getElementById("edit-id").value;
-            try {
-                await CiudadSeguraAPI.actualizarUsuario(id, {
-                    nombre: document.getElementById("edit-nombre").value,
-                    email: document.getElementById("edit-email").value,
-                    rol: document.getElementById("edit-rol").value,
-                    password: document.getElementById("edit-password").value || null,
-                });
-                cancelarEdicion();
-                cargarUsuarios();
-            } catch (err) {
-                mostrarMensaje("msg", err.message);
-            }
-        });
-
-        async function eliminar(id) {
-            if (!confirm("¿Eliminar este usuario?")) return;
-            try {
-                await CiudadSeguraAPI.eliminarUsuario(id);
-                cargarUsuarios();
-            } catch (err) {
-                mostrarMensaje("msg", err.message);
-            }
-        }
-
-        cargarUsuarios();
-    </script>
+    <script src="/js/api.config.js"></script>
+    <script src="/js/api.js"></script>
 </body>
 </html>

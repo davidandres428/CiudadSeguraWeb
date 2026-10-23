@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ciudad Segura — Reportes</title>
+    <title>Ciudad Segura - Reportes</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="topbar">
-        <h1>🛡️ Ciudad Segura</h1>
-        <a href="/usuarios">Usuarios</a>
+        <h1>Ciudad Segura</h1>
+        <nav class="menu">
             <a href="/inicio">Inicio</a>
             <a href="/reportes" class="activo">Reportes</a>
             <a href="/zonas">Zonas de riesgo</a>
             <a href="/alertas">Alertas</a>
-            <a href="/usuarios" hidden>Usuarios</a>
+            <a href="/usuarios">Usuarios</a>
         </nav>
         <div id="usuario-activo"></div>
     </header>
@@ -38,266 +38,48 @@
                 </div>
                 <div>
                     <label for="reporte-direccion">Dirección</label>
-                    <input type="text" id="reporte-direccion" maxlength="250" required>
+                    <input type="text" id="reporte-direccion" required>
                 </div>
-                <div class="fila-form">
+                <div class="fila-doble">
                     <div>
                         <label for="reporte-tipo">Tipo</label>
-                        <select id="reporte-tipo" required>
+                        <select id="reporte-tipo">
                             <option value="ROBO">Robo</option>
+                            <option value="ASALTO">Asalto</option>
                             <option value="VANDALISMO">Vandalismo</option>
                             <option value="ACCIDENTE">Accidente</option>
-                            <option value="DISTURBIO">Disturbio</option>
-                            <option value="ILUMINACION_DEFICIENTE">Iluminación deficiente</option>
-                            <option value="SOSPECHA">Sospecha</option>
-                            <option value="VENTA_ESTUPEFACIENTES">Venta de estupefacientes</option>
-                            <option value="RUIDO_EXCESIVO">Ruido excesivo</option>
+                            <option value="SOSPECHOSO">Sospechoso</option>
+                            <option value="OTRO">Otro</option>
                         </select>
                     </div>
                     <div>
                         <label for="reporte-prioridad">Prioridad</label>
-                        <select id="reporte-prioridad" required>
+                        <select id="reporte-prioridad">
                             <option value="BAJA">Baja</option>
                             <option value="MEDIA">Media</option>
                             <option value="ALTA">Alta</option>
-                            <option value="URGENTE">Urgente</option>
-                        </select>
-                    </div>
-                    <div id="grupo-estado" class="oculto">
-                        <label for="reporte-estado">Estado</label>
-                        <select id="reporte-estado">
-                            <option value="PENDIENTE">Pendiente</option>
-                            <option value="EN_REVISION">En revisión</option>
-                            <option value="RESUELTO">Resuelto</option>
-                            <option value="DESCARTADO">Descartado</option>
+                            <option value="CRITICA">Crítica</option>
                         </select>
                     </div>
                 </div>
-                <div class="fila-form">
+                <div class="fila-doble">
                     <div>
-                        <label for="reporte-lat">Latitud</label>
-                        <input type="number" step="any" min="-90" max="90" id="reporte-lat">
+                        <label for="reporte-latitud">Latitud</label>
+                        <input type="number" step="any" id="reporte-latitud" required readonly>
                     </div>
                     <div>
-                        <label for="reporte-lng">Longitud</label>
-                        <input type="number" step="any" min="-180" max="180" id="reporte-lng">
+                        <label for="reporte-longitud">Longitud</label>
+                        <input type="number" step="any" id="reporte-longitud" required readonly>
                     </div>
                 </div>
-                <div class="botones">
-                    <button type="submit" id="btn-reporte">Registrar reporte</button>
-                    <button type="button" class="secundario oculto" id="btn-cancelar-reporte" onclick="cancelarEdicionReporte()">Cancelar</button>
-                </div>
+                <button type="submit" class="boton primario">Registrar reporte</button>
             </form>
         </div>
-
-        <div class="tarjeta">
-            <h2>Reportes registrados</h2>
-            <p>Haz clic en el mapa para seleccionar la ubicación del reporte; haz clic en un marcador para consultar sus detalles.</p>
-            <div class="fila-form" style="margin-bottom: 14px;">
-                <div>
-                    <label for="filtro-estado">Filtrar por estado</label>
-                    <select id="filtro-estado">
-                        <option value="">Todos</option>
-                        <option value="PENDIENTE">Pendiente</option>
-                        <option value="EN_REVISION">En revisión</option>
-                        <option value="RESUELTO">Resuelto</option>
-                        <option value="DESCARTADO">Descartado</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="filtro-desde">Desde</label>
-                    <input type="date" id="filtro-desde">
-                </div>
-                <div>
-                    <label for="filtro-hasta">Hasta</label>
-                    <input type="date" id="filtro-hasta">
-                </div>
-                <div class="acciones-fila acciones-filtros">
-                    <button type="button" id="btn-filtrar">Filtrar</button>
-                    <button type="button" class="secundario oculto" id="btn-exportar-csv">Exportar CSV</button>
-                </div>
-            </div>
-            <div id="msg-lista" class="mensaje oculto"></div>
-            <div id="mapa-reportes" class="mapa" aria-label="Mapa de reportes de incidentes"></div>
-            <div class="tabla-desplazable" role="region" aria-label="Lista de reportes" tabindex="0">
-            <table>
-                <thead>
-                    <tr><th>ID</th><th>Título</th><th>Tipo</th><th>Prioridad</th><th>Dirección</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr>
-                </thead>
-                <tbody id="tabla-reportes"></tbody>
-            </table>
-            </div>
-        </div>
     </main>
-
-    <script src="/js/api-config.js"></script>
-    <script src="/js/api.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <script src="/js/mapa-ciudad-segura.js"></script>
-    <script>
-        const usuario = Sesion.obtener();
-        const reportesPorId = new Map();
-        let mapaReportes;
-
-        function puedeGestionarReporte(reporte) {
-            const usuario = Sesion.obtener();
-            return usuario?.rol === "ADMINISTRADOR"
-                || (usuario?.id != null && String(reporte.usuario?.id) === String(usuario.id));
-        }
-
-        function parametrosFiltroReportes() {
-            const params = new URLSearchParams();
-            const estado = document.getElementById("filtro-estado").value;
-            const desde = document.getElementById("filtro-desde").value;
-            const hasta = document.getElementById("filtro-hasta").value;
-            if (estado) params.set("estado", estado);
-            if (desde) params.set("desde", desde);
-            if (hasta) params.set("hasta", hasta);
-            const query = params.toString();
-            return query ? `?${query}` : "";
-        }
-
-        if (!usuario) {
-            document.getElementById("aviso-sesion").classList.remove("oculto");
-            document.getElementById("form-reporte").classList.add("oculto");
-        }
-
-        async function cargarReportes() {
-            try {
-                const [reportes, zonas] = await Promise.all([
-                    CiudadSeguraAPI.listarReportes(parametrosFiltroReportes()),
-                    CiudadSeguraAPI.listarZonas(),
-                ]);
-                const tbody = document.getElementById("tabla-reportes");
-                mapaReportes.mostrarReportes(reportes);
-                mapaReportes.mostrarZonas(zonas, true);
-                reportesPorId.clear();
-                reportes.forEach(reporte => reportesPorId.set(String(reporte.id), reporte));
-                tbody.innerHTML = reportes.map(r => `
-                    <tr>
-                        <td>${r.id}</td>
-                        <td>${escaparHtml(r.titulo)}</td>
-                        <td><span class="badge ${escaparHtml(r.tipo)}">${escaparHtml(r.tipo)}</span></td>
-                        <td>${escaparHtml(r.prioridad)}</td>
-                        <td>${escaparHtml(r.direccion)}</td>
-                        <td><span class="badge ${escaparHtml(r.estado)}">${escaparHtml(r.estado)}</span></td>
-                        <td>${formatearFecha(r.fechaReporte)}</td>
-                        <td class="acciones-fila">
-                            ${puedeGestionarReporte(r) ? `<button data-editar="${r.id}">Editar</button>
-                            <button class="peligro" data-eliminar="${r.id}">Eliminar</button>` : ""}
-                        </td>
-                    </tr>`).join("") || `<tr><td colspan="8">No hay reportes.</td></tr>`;
-                tbody.querySelectorAll("[data-editar]").forEach(boton => {
-                    boton.addEventListener("click", () => editarReporte(reportesPorId.get(boton.dataset.editar)));
-                });
-                tbody.querySelectorAll("[data-eliminar]").forEach(boton => {
-                    boton.addEventListener("click", () => eliminarReporte(boton.dataset.eliminar));
-                });
-            } catch (err) {
-                mostrarMensaje("msg-lista", err.message);
-            }
-        }
-
-        function editarReporte(r) {
-            document.getElementById("reporte-id").value = r.id;
-            document.getElementById("reporte-titulo").value = r.titulo;
-            document.getElementById("reporte-descripcion").value = r.descripcion;
-            document.getElementById("reporte-direccion").value = r.direccion;
-            document.getElementById("reporte-tipo").value = r.tipo;
-            document.getElementById("reporte-prioridad").value = r.prioridad;
-            document.getElementById("reporte-estado").value = r.estado;
-            document.getElementById("reporte-lat").value = r.latitud;
-            document.getElementById("reporte-lng").value = r.longitud;
-            if (r.latitud !== null && r.longitud !== null) {
-                mapaReportes.seleccionarCoordenadas(r.latitud, r.longitud);
-            }
-            if (usuario?.rol === "ADMINISTRADOR") {
-                document.getElementById("grupo-estado").classList.remove("oculto");
-            }
-            document.getElementById("btn-reporte").textContent = "Guardar cambios";
-            document.getElementById("btn-cancelar-reporte").classList.remove("oculto");
-            document.getElementById("form-reporte").classList.remove("oculto");
-            document.getElementById("aviso-sesion").classList.add("oculto");
-            window.scrollTo({ top: 0, behavior: "smooth" });
-        }
-
-        function cancelarEdicionReporte() {
-            document.getElementById("form-reporte").reset();
-            document.getElementById("reporte-id").value = "";
-            document.getElementById("grupo-estado").classList.add("oculto");
-            document.getElementById("btn-reporte").textContent = "Registrar reporte";
-            document.getElementById("btn-cancelar-reporte").classList.add("oculto");
-        }
-
-        document.getElementById("form-reporte").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            if (!Sesion.token()) {
-                window.location.href = "/login#form-login";
-                return;
-            }
-            ocultarMensaje("msg-form");
-            const id = document.getElementById("reporte-id").value;
-            const datos = {
-                titulo: document.getElementById("reporte-titulo").value,
-                descripcion: document.getElementById("reporte-descripcion").value,
-                direccion: document.getElementById("reporte-direccion").value,
-                tipo: document.getElementById("reporte-tipo").value,
-                prioridad: document.getElementById("reporte-prioridad").value,
-                estado: document.getElementById("reporte-estado").value,
-                latitud: document.getElementById("reporte-lat").value
-                    ? parseFloat(document.getElementById("reporte-lat").value) : null,
-                longitud: document.getElementById("reporte-lng").value
-                    ? parseFloat(document.getElementById("reporte-lng").value) : null,
-            };
-            try {
-                if (id) {
-                    await CiudadSeguraAPI.actualizarReporte(id, datos);
-                } else {
-                    await CiudadSeguraAPI.crearReporte(datos);
-                }
-                cancelarEdicionReporte();
-                await cargarReportes();
-            } catch (err) {
-                if (redirigirALoginSiSesionExpirada(err)) return;
-                mostrarMensaje("msg-form", err.message);
-            }
-        });
-
-        async function eliminarReporte(id) {
-            if (!confirm("¿Eliminar este reporte?")) return;
-            try {
-                await CiudadSeguraAPI.eliminarReporte(id);
-                cargarReportes();
-            } catch (err) {
-                mostrarMensaje("msg-lista", err.message);
-            }
-        }
-
-        document.getElementById("btn-filtrar").addEventListener("click", cargarReportes);
-        const botonExportarCsv = document.getElementById("btn-exportar-csv");
-        if (usuario?.rol === "ADMINISTRADOR" && Sesion.token()) {
-            botonExportarCsv.classList.remove("oculto");
-            botonExportarCsv.addEventListener("click", async () => {
-                try {
-                    const blob = await CiudadSeguraAPI.exportarReportesCsv(parametrosFiltroReportes());
-                    const url = URL.createObjectURL(blob);
-                    const enlace = document.createElement("a");
-                    enlace.href = url;
-                    enlace.download = "reportes.csv";
-                    enlace.click();
-                    URL.revokeObjectURL(url);
-                } catch (err) {
-                    mostrarMensaje("msg-lista", err.message);
-                }
-            });
-        }
-
-        mapaReportes = MapaCiudadSegura.crear("mapa-reportes", (latitud, longitud) => {
-            document.getElementById("reporte-lat").value = latitud.toFixed(6);
-            document.getElementById("reporte-lng").value = longitud.toFixed(6);
-        });
-        cargarReportes();
-    </script>
+    <script src="/js/api.config.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/reportes.js"></script>
 </body>
 </html>

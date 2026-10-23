@@ -1,45 +1,34 @@
 package com.ciudadsegura.controller;
 
-import com.ciudadsegura.dto.UsuarioResponse;
-import com.ciudadsegura.dto.UsuarioUpdateRequest;
-import com.ciudadsegura.service.UsuarioService;
-import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
+import com.ciudadsegura.model.Usuario;
+import com.ciudadsegura.model.enums.RolUsuario;
+import com.ciudadsegura.repository.UsuarioRepository;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-@RestController
-@RequestMapping("/api/usuarios")
+@Controller
+@RequestMapping("/usuarios")
 public class UsuarioController {
 
-    private final UsuarioService usuarioService;
+    private final UsuarioRepository usuarioRepository;
 
-    public UsuarioController(UsuarioService usuarioService) {
-        this.usuarioService = usuarioService;
+    public UsuarioController(UsuarioRepository usuarioRepository) {
+        this.usuarioRepository = usuarioRepository;
     }
 
     @GetMapping
-    public List<UsuarioResponse> listar() {
-        return usuarioService.listarTodos().stream()
-                .map(UsuarioResponse::new)
-                .collect(Collectors.toList());
+    public String listarUsuarios(Model model) {
+        model.addAttribute("usuarios", usuarioRepository.findAll());
+        model.addAttribute("roles", RolUsuario.values());
+        return "usuarios";
     }
 
-    @GetMapping("/{id}")
-    public UsuarioResponse buscarPorId(@PathVariable Long id) {
-        return new UsuarioResponse(usuarioService.buscarPorId(id));
-    }
-
-    @PutMapping("/{id}")
-    public UsuarioResponse actualizar(@PathVariable Long id, @Valid @RequestBody UsuarioUpdateRequest datos) {
-        return new UsuarioResponse(usuarioService.actualizar(id, datos));
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        usuarioService.eliminar(id);
-        return ResponseEntity.noContent().build();
+    @PostMapping("/{id}/rol")
+    public String cambiarRol(@PathVariable Long id, @RequestParam RolUsuario rol) {
+        Usuario usuario = usuarioRepository.findById(id).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        usuario.setRol(rol);
+        usuarioRepository.save(usuario);
+        return "redirect:/usuarios";
     }
 }
