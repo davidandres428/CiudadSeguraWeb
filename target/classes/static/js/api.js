@@ -143,7 +143,11 @@ function pintarUsuarioActivo() {
                 <a href="/login#form-registro" class="boton boton-registro">Registrarse</a>
             </span>`;
     }
-    if (usuario?.rol === "ADMINISTRADOR") {
+    const esAdministrador = usuario?.rol === "ADMINISTRADOR" || usuario?.rol === "ROLE_ADMIN";
+    document.querySelectorAll('a[href="/usuarios"]').forEach((enlace) => {
+        enlace.hidden = !esAdministrador;
+    });
+    if (esAdministrador) {
         const menu = document.querySelector("nav.menu");
         if (menu && !menu.querySelector('a[href="/dashboard"]')) {
             const enlaceDashboard = document.createElement("a");
@@ -151,9 +155,6 @@ function pintarUsuarioActivo() {
             enlaceDashboard.textContent = "Dashboard";
             menu.appendChild(enlaceDashboard);
         }
-    }
-    if (usuario?.rol !== "ADMINISTRADOR") {
-        document.querySelectorAll('a[href="/usuarios"]').forEach((enlace) => enlace.remove());
     }
 }
 

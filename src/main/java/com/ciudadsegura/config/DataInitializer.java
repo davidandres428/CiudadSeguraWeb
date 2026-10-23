@@ -29,10 +29,14 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component
 @ConditionalOnProperty(name = "app.seed.enabled", havingValue = "true")
 public class DataInitializer implements CommandLineRunner {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataInitializer.class);
 
     private final UsuarioRepository usuarioRepository;
     private final ZonaRiesgoRepository zonaRiesgoRepository;
@@ -62,19 +66,23 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
-        if (adminPassword == null || adminPassword.length() < 12) {
-            throw new IllegalStateException(
-                    "Define SEED_ADMIN_PASSWORD con al menos 12 caracteres para habilitar el sembrado seguro.");
-        }
-
         Usuario administrador = usuarioRepository.findByEmail(AuthService.ADMINISTRADOR_PRINCIPAL).orElse(null);
         if (administrador == null) {
+            String passwordInicial = adminPassword == null || adminPassword.isBlank()
+                    ? UUID.randomUUID().toString()
+                    : adminPassword;
             administrador = crearUsuario(
                     "David Andrés Galvis", AuthService.ADMINISTRADOR_PRINCIPAL,
-                    RolUsuario.ADMINISTRADOR, adminPassword);
+                    RolUsuario.ADMINISTRADOR, passwordInicial);
+            if (adminPassword == null || adminPassword.isBlank()) {
+                LOGGER.warn("Se creó la cuenta administradora principal sin contraseña conocida. "
+                        + "Configura SEED_ADMIN_PASSWORD para acceso por contraseña o usa OAuth con correo verificado.");
+            }
         } else {
             administrador.setRol(RolUsuario.ADMINISTRADOR);
-            administrador.setPassword(passwordEncoder.encode(adminPassword));
+            if (adminPassword != null && !adminPassword.isBlank()) {
+                administrador.setPassword(passwordEncoder.encode(adminPassword));
+            }
         }
         usuarioRepository.save(administrador);
 

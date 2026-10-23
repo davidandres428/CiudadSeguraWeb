@@ -9,7 +9,7 @@
     <script src="/js/api.js"></script>
     <script>
         const usuarioActual = Sesion.obtener();
-        if (!Sesion.token() || usuarioActual?.rol !== "ADMINISTRADOR") {
+        if (!Sesion.token() || !["ADMINISTRADOR", "ROLE_ADMIN"].includes(usuarioActual?.rol)) {
             window.location.replace("/login#form-login");
         }
     </script>
@@ -22,7 +22,7 @@
             <a href="/reportes">Reportes</a>
             <a href="/zonas">Zonas de riesgo</a>
             <a href="/alertas">Alertas</a>
-            <a href="/usuarios" class="activo">Usuarios</a>
+            <a href="/usuarios" class="activo" hidden>Usuarios</a>
         </nav>
         <div id="usuario-activo"></div>
     </header>

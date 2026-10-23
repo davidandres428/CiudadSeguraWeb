@@ -68,6 +68,25 @@ test("login adaptable ofrece acceso, recordatorio y ayuda de contraseña", async
     await expect(page.getByRole("heading", { name: "Inicia sesión" })).toBeVisible();
 });
 
+test("el enlace de gestión de usuarios solo se muestra a administradores", async ({ page }) => {
+    await page.goto("/inicio");
+    const enlaceUsuarios = page.locator('nav.menu a[href="/usuarios"]');
+    await expect(enlaceUsuarios).toBeHidden();
+
+    await page.evaluate(() => {
+        sessionStorage.setItem("cs_usuario", JSON.stringify({ nombre: "Admin", rol: "ROLE_ADMIN" }));
+        sessionStorage.setItem("cs_access_token", "token-ui-test");
+    });
+    await page.reload();
+    await expect(enlaceUsuarios).toBeVisible();
+
+    await page.evaluate(() => {
+        sessionStorage.setItem("cs_usuario", JSON.stringify({ nombre: "Ciudadano", rol: "CIUDADANO" }));
+    });
+    await page.reload();
+    await expect(enlaceUsuarios).toBeHidden();
+});
+
 test("registro ciudadano, acceso, creación de reporte y métricas en vivo", async ({ page }) => {
     await page.goto("/inicio");
     const fechaHoy = new Date();

@@ -87,12 +87,13 @@ desde Docker en Render, incluye el JAR de la raíz en Git junto con el Dockerfil
 
 ### Datos iniciales de demostración
 
-El inicializador está desactivado por defecto en desarrollo. Con el perfil `prod` se activa por
-defecto y requiere `SEED_ADMIN_PASSWORD` (mínimo 12 caracteres), configurada como secreto de entorno,
-nunca en el repositorio. En cada inicio completa las tablas vacías sin duplicar los datos existentes:
-15 zonas, 128 reportes georreferenciados, tres alertas activas y cinco comunicados. La cuenta
-administradora principal se crea o actualiza con el rol administrativo y una contraseña BCrypt derivada
-del secreto configurado. Crea los usuarios de demostración necesarios para asociar reportes.
+El inicializador está activado por defecto y puede desactivarse con `SEED_DATA_ENABLED=false`.
+No requiere que exista `SEED_ADMIN_PASSWORD` para arrancar. En cada inicio completa las
+tablas vacías sin duplicar los datos existentes: 15 zonas, 128 reportes georreferenciados, tres
+alertas activas y cinco comunicados. La cuenta administradora principal se crea o actualiza con el
+rol administrativo. Si se establece `SEED_ADMIN_PASSWORD` como secreto, se codifica con BCrypt y
+se aplica a la cuenta; sin esa variable, la contraseña existente se conserva, o se genera una
+contraseña aleatoria no conocida al crear la cuenta nueva. Crea los usuarios de demostración necesarios para asociar reportes.
 Las contraseñas de los ciudadanos de demostración se generan aleatoriamente y no son utilizables
 para iniciar sesión.
 
@@ -118,13 +119,15 @@ Docker con estas variables en Environment:
 | `SPRING_PROFILES_ACTIVE` | `prod` |
 | `PGHOST`, `PGPORT`, `PGDATABASE`, `PGUSER`, `PGPASSWORD` | Datos de conexión de la base Render PostgreSQL (preferiblemente su URL interna desglosada) |
 | `JWT_SECRET` | Secreto aleatorio de al menos 32 bytes |
-| `SEED_ADMIN_PASSWORD` | Contraseña administrativa privada de al menos 12 caracteres |
+| `SEED_ADMIN_PASSWORD` | Opcional, pero recomendado: contraseña privada de al menos 12 caracteres, no compartida |
 | `SEED_DATA_ENABLED` | `true` (valor por defecto en el perfil `prod`) |
 
 Render debe usar la base PostgreSQL, no H2 ni un disco dentro del contenedor, que no es persistente.
-En la aplicación, la contraseña administrativa configurada se guarda únicamente como BCrypt; no se
-establece ni se publica una contraseña fija compartida como `Admin123!`. La columna de rol de la entidad
-usa `ADMINISTRADOR`, que la seguridad de la aplicación traduce a la autoridad `ROLE_ADMIN`.
+La contraseña administrativa configurada se guarda únicamente como BCrypt; no se establece ni se
+publica una contraseña fija compartida como `Admin123!`. Sin ese secreto, usa el proveedor social
+con correo verificado si está habilitado, o configura `SEED_ADMIN_PASSWORD` para garantizar login
+tradicional. La columna de rol de la entidad usa `ADMINISTRADOR`, que la seguridad traduce a
+`ROLE_ADMIN`.
 
 ### Despliegue en Railway
 
