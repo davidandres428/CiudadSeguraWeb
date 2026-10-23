@@ -4,87 +4,74 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ciudad Segura - Reportes</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/estilos.css">
 </head>
 <body>
-    <header class="topbar">
-        <h1>Ciudad Segura</h1>
-        <nav class="menu">
+
+    <nav class="navbar">
+        <div class="logo"><strong>Ciudad Segura</strong></div>
+        <div class="nav-links">
             <a href="/inicio">Inicio</a>
-            <a href="/reportes" class="activo">Reportes</a>
+            <a href="/reportes" class="active">Reportes</a>
             <a href="/zonas">Zonas de riesgo</a>
             <a href="/alertas">Alertas</a>
-            <a href="/usuarios">Usuarios</a>
-        </nav>
-        <div id="usuario-activo"></div>
-    </header>
-
-    <main>
-        <div class="tarjeta" id="tarjeta-form">
-            <h2>Nuevo reporte de incidente</h2>
-            <div id="msg-form" class="mensaje oculto"></div>
-            <form class="formulario" id="form-reporte">
-                <div>
-                    <label for="reporte-titulo">Título</label>
-                    <input type="text" id="reporte-titulo" required>
-                </div>
-                <div>
-                    <label for="reporte-descripcion">Descripción</label>
-                    <textarea id="reporte-descripcion" rows="3" required></textarea>
-                </div>
-                <div>
-                    <label for="reporte-direccion">Dirección</label>
-                    <input type="text" id="reporte-direccion" required>
-                </div>
-                <div class="fila-doble">
-                    <div>
-                        <label for="reporte-tipo">Tipo</label>
-                        <select id="reporte-tipo">
-                            <option value="ROBO">Robo</option>
-                            <option value="ASALTO">Asalto</option>
-                            <option value="VANDALISMO">Vandalismo</option>
-                            <option value="ACCIDENTE">Accidente</option>
-                            <option value="SOSPECHOSO">Sospechoso</option>
-                            <option value="OTRO">Otro</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="reporte-prioridad">Prioridad</label>
-                        <select id="reporte-prioridad">
-                            <option value="BAJA">Baja</option>
-                            <option value="MEDIA">Media</option>
-                            <option value="ALTA">Alta</option>
-                            <option value="CRITICA">Crítica</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="fila-doble">
-                    <div>
-                        <label for="reporte-latitud">Latitud</label>
-                        <input type="number" step="any" id="reporte-latitud" required readonly>
-                    </div>
-                    <div>
-                        <label for="reporte-longitud">Longitud</label>
-                        <input type="number" step="any" id="reporte-longitud" required readonly>
-                    </div>
-                </div>
-                <button type="submit" class="boton primario">Registrar reporte</button>
-            </form>
+            <a href="/usuarios.html">Usuarios</a>
         </div>
+    </nav>
 
-        <div class="tarjeta">
-            <h2>Ubicación en el mapa</h2>
-            <p>Haz clic en el mapa para seleccionar las coordenadas del incidente.</p>
-            <div id="mapa-reporte" style="height: 400px; width: 100%; border-radius: 8px;"></div>
-        </div>
-    </main>
+    <div class="container" style="max-width: 900px; margin: 30px auto; background: white; padding: 30px; border-radius: 8px;">
+        <h2>Nuevo reporte de incidente</h2>
+        
+        <form id="form-reporte">
+            <div style="margin-bottom: 15px;">
+                <label for="titulo" style="display: block; margin-bottom: 5px; font-weight: 500;">Título</label>
+                <input type="text" id="titulo" name="titulo" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;" required>
+            </div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <script src="/js/api.config.js"></script>
-    <script src="/js/api.js"></script>
-    <script src="/js/reportes.js"></script>
+            <div style="margin-bottom: 15px;">
+                <label for="descripcion" style="display: block; margin-bottom: 5px; font-weight: 500;">Descripción</label>
+                <textarea id="descripcion" name="descripcion" rows="3" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;" required></textarea>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label for="direccion" style="display: block; margin-bottom: 5px; font-weight: 500;">Dirección</label>
+                <input type="text" id="direccion" name="direccion" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;" required>
+            </div>
+
+            <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                <div style="flex: 1;">
+                    <label for="tipo" style="display: block; margin-bottom: 5px; font-weight: 500;">Tipo</label>
+                    <select id="tipo" name="tipo" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                        <option value="Robo">Robo</option>
+                        <option value="Asalto">Asalto</option>
+                        <option value="Emergencia">Emergencia</option>
+                    </select>
+                </div>
+                <div style="flex: 1;">
+                    <label for="prioridad" style="display: block; margin-bottom: 5px; font-weight: 500;">Prioridad</label>
+                    <select id="prioridad" name="prioridad" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                        <option value="Baja">Baja</option>
+                        <option value="Media">Media</option>
+                        <option value="Alta">Alta</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Nuevos campos de Ciudad y Barrio en lugar de latitud/longitud -->
+            <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+                <div style="flex: 1;">
+                    <label for="ciudad" style="display: block; margin-bottom: 5px; font-weight: 500;">Ciudad</label>
+                    <input type="text" id="ciudad" name="ciudad" placeholder="Ej. Madrid" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;" required>
+                </div>
+                <div style="flex: 1;">
+                    <label for="barrio" style="display: block; margin-bottom: 5px; font-weight: 500;">Barrio</label>
+                    <input type="text" id="barrio" name="barrio" placeholder="Ej. Centro" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;" required>
+                </div>
+            </div>
+
+            <button type="submit" style="background-color: #0f172a; color: white; border: none; padding: 12px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">Registrar reporte</button>
+        </form>
+    </div>
+
 </body>
 </html>
