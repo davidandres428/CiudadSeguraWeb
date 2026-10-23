@@ -26,12 +26,10 @@ public class ReporteIncidenteService {
     public ReporteIncidente guardar(ReporteIncidente reporte, String emailUsuario) {
         Usuario usuario = null;
         
-        // Intenta buscar al usuario autenticado si se proporciona su correo
         if (emailUsuario != null && !emailUsuario.isEmpty()) {
             usuario = usuarioRepository.findByCorreo(emailUsuario).orElse(null);
         }
         
-        // Si no se encuentra, asigna el primer usuario disponible para evitar errores en la interfaz
         if (usuario == null) {
             usuario = usuarioRepository.findAll().stream().findFirst().orElse(null);
         }

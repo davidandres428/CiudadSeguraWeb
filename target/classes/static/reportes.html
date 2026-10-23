@@ -25,9 +25,7 @@
         <div class="tarjeta" id="tarjeta-form">
             <h2>Nuevo reporte de incidente</h2>
             <div id="msg-form" class="mensaje oculto"></div>
-            <div id="aviso-sesion" class="mensaje error oculto">Debes <a href="/login#form-login">iniciar sesión</a> para registrar un reporte.</div>
             <form class="formulario" id="form-reporte">
-                <input type="hidden" id="reporte-id">
                 <div>
                     <label for="reporte-titulo">Título</label>
                     <input type="text" id="reporte-titulo" required>
@@ -75,7 +73,14 @@
                 <button type="submit" class="boton primario">Registrar reporte</button>
             </form>
         </div>
+
+        <div class="tarjeta">
+            <h2>Ubicación en el mapa</h2>
+            <p>Haz clic en el mapa para seleccionar las coordenadas del incidente.</p>
+            <div id="mapa-reporte" style="height: 400px; width: 100%; border-radius: 8px;"></div>
+        </div>
     </main>
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="/js/api.config.js"></script>

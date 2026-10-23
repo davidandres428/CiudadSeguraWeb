@@ -1,29 +1,29 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Inicializar el mapa de Leaflet
-    const map = L.map('mapa-reporte').setView([4.60971, -74.08175], 13); // Coordenadas por defecto (Bogotá)
+    const mapElement = document.getElementById('mapa-reporte');
+    if (mapElement) {
+        const map = L.map('mapa-reporte').setView([4.60971, -74.08175], 13);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
 
-    let marker;
+        let marker;
 
-    // Permitir hacer clic en el mapa para seleccionar la ubicación
-    map.on('click', (e) => {
-        const lat = e.latlng.lat;
-        const lng = e.latlng.lng;
+        map.on('click', (e) => {
+            const lat = e.latlng.lat;
+            const lng = e.latlng.lng;
 
-        document.getElementById('reporte-latitud').value = lat;
-        document.getElementById('reporte-longitud').value = lng;
+            document.getElementById('reporte-latitud').value = lat;
+            document.getElementById('reporte-longitud').value = lng;
 
-        if (marker) {
-            marker.setLatLng([lat, lng]);
-        } else {
-            marker = L.marker([lat, lng]).addTo(map);
-        }
-    });
+            if (marker) {
+                marker.setLatLng([lat, lng]);
+            } else {
+                marker = L.marker([lat, lng]).addTo(map);
+            }
+        });
+    }
 
-    // Manejar el envío del formulario
     const formReporte = document.getElementById('form-reporte');
     if (formReporte) {
         formReporte.addEventListener('submit', async (e) => {
