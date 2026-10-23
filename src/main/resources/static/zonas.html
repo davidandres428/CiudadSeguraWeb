@@ -12,7 +12,7 @@
     <header class="topbar">
         <h1>🛡️ Ciudad Segura</h1>
         <nav class="menu">
-            <a href="/">Inicio</a>
+            <a href="/inicio">Inicio</a>
             <a href="/reportes">Reportes</a>
             <a href="/zonas" class="activo">Zonas de riesgo</a>
             <a href="/alertas">Alertas</a>
@@ -80,7 +80,7 @@
             <div class="tabla-desplazable" role="region" aria-label="Lista de zonas de riesgo" tabindex="0">
             <table>
                 <thead>
-                    <tr><th>ID</th><th>Nombre</th><th>Nivel</th><th>Descripción</th><th>Acciones</th></tr>
+                    <tr><th>ID</th><th>Nombre</th><th>Nivel</th><th>Descripción</th><th>Cámaras</th><th>Última inspección</th><th>Acciones</th></tr>
                 </thead>
                 <tbody id="tabla-zonas"></tbody>
             </table>
@@ -116,11 +116,13 @@
                         <td>${escaparHtml(z.nombre)}</td>
                         <td><span class="badge ${z.nivelRiesgo}">${z.nivelRiesgo}</span></td>
                         <td>${escaparHtml(z.descripcion || "-")}</td>
+                        <td>${escaparHtml(z.estadoCamaras || "Sin información")}</td>
+                        <td>${escaparHtml(z.ultimaInspeccion || "Sin registro")}</td>
                         <td class="acciones-fila">${esAdministrador()
                             ? `<button data-editar-zona="${z.id}">Editar</button>
                                <button class="peligro" data-eliminar-zona="${z.id}">Eliminar</button>`
                             : "—"}</td>
-                    </tr>`).join("") || `<tr><td colspan="5">No hay zonas registradas.</td></tr>`;
+                    </tr>`).join("") || `<tr><td colspan="7">No hay zonas registradas.</td></tr>`;
                 tbody.querySelectorAll("[data-editar-zona]").forEach(boton => {
                     boton.addEventListener("click", () => editarZona(zonasPorId.get(boton.dataset.editarZona)));
                 });
@@ -163,10 +165,6 @@
                 window.location.href = "/login#form-login";
                 return;
             }
-            if (!esAdministrador()) {
-                mostrarMensaje("msg-form", "La creación y gestión de zonas está reservada para administradores.");
-                return;
-            }
             ocultarMensaje("msg-form");
             const id = document.getElementById("zona-id").value;
             const datos = {
@@ -200,12 +198,10 @@
             }
         }
 
-        if (!esAdministrador()) {
+        if (!Sesion.token()) {
             document.getElementById("form-zona").classList.add("oculto");
             const aviso = document.getElementById("aviso-acceso-zona");
-            aviso.innerHTML = Sesion.token()
-                ? "La creación y gestión de zonas está reservada para administradores."
-                : 'Debes <a href="/login#form-login">iniciar sesión</a> para solicitar la creación de una zona.';
+            aviso.innerHTML = 'Debes <a href="/login#form-login">iniciar sesión</a> para registrar una zona.';
             aviso.classList.remove("oculto");
         }
         cargarZonas();

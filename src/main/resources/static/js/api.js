@@ -50,6 +50,7 @@ const CiudadSeguraAPI = {
     // --- Autenticación / Usuarios ---
     registrar: (datos) => apiFetch("/auth/registro", { method: "POST", body: JSON.stringify(datos) }),
     login: (datos) => apiFetch("/auth/login", { method: "POST", body: JSON.stringify(datos) }),
+    proveedoresSociales: () => apiFetch("/auth/social-providers"),
     radicarPqrs: (datos) => apiFetch("/pqrs", { method: "POST", body: JSON.stringify(datos) }),
     listarUsuarios: () => apiFetch("/usuarios"),
     obtenerUsuario: (id) => apiFetch(`/usuarios/${id}`),
@@ -99,6 +100,9 @@ const CiudadSeguraAPI = {
     crearAlerta: (datos, zonaRiesgoId) => apiFetch(`/alertas${zonaRiesgoId ? "?zonaRiesgoId=" + zonaRiesgoId : ""}`, { method: "POST", body: JSON.stringify(datos) }),
     actualizarAlerta: (id, datos, zonaRiesgoId) => apiFetch(`/alertas/${id}${zonaRiesgoId ? "?zonaRiesgoId=" + zonaRiesgoId : ""}`, { method: "PUT", body: JSON.stringify(datos) }),
     eliminarAlerta: (id) => apiFetch(`/alertas/${id}`, { method: "DELETE" }),
+
+    // --- Noticias y comunicados ---
+    listarNoticias: () => apiFetch("/noticias"),
 };
 
 // --- Sesión del ciudadano autenticado ---

@@ -80,6 +80,17 @@ class AuthServiceTest {
     }
 
     @Test
+    void registrar_noDebePermitirApropiarseDelCorreoDelAdministradorPrincipal() {
+        RegistroRequest request = new RegistroRequest();
+        request.setEmail("DAVID.ANDRESGALVIS@GMAIL.COM");
+        request.setNombre("Suplantador");
+        request.setPassword("secreto123");
+
+        assertThrows(EmailDuplicadoException.class, () -> authService.registrar(request));
+        verify(usuarioRepository, never()).save(any());
+    }
+
+    @Test
     void login_conCredencialesCorrectas_debeRetornarUsuario() {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         Usuario usuario = new Usuario("Laura", "laura@example.com", encoder.encode("miClave123"));
@@ -118,5 +129,30 @@ class AuthServiceTest {
         request.setPassword("cualquiera");
 
         assertThrows(CredencialesInvalidasException.class, () -> authService.login(request));
+    }
+
+    @Test
+    void login_delAdministradorPrincipal_debeAsignarRolAdministrador() {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        Usuario usuario = new Usuario(
+                "David", AuthService.ADMINISTRADOR_PRINCIPAL, encoder.encode("miClave123"));
+        LoginRequest request = new LoginRequest();
+        request.setEmail(AuthService.ADMINISTRADOR_PRINCIPAL);
+        request.setPassword("miClave123");
+        when(usuarioRepository.findByEmail(AuthService.ADMINISTRADOR_PRINCIPAL))
+                .thenReturn(Optional.of(usuario));
+        when(usuarioRepository.save(any(Usuario.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Usuario resultado = authService.login(request);
+
+        assertEquals(RolUsuario.ADMINISTRADOR, resultado.getRol());
+        verify(usuarioRepository).save(usuario);
+    }
+
+    @Test
+    void loginSocial_deAdministradorPrincipalExigeCorreoVerificado() {
+        assertThrows(CredencialesInvalidasException.class, () -> authService.loginSocial(
+                AuthService.ADMINISTRADOR_PRINCIPAL, "David", false));
+        verify(usuarioRepository, never()).save(any());
     }
 }

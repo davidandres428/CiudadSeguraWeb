@@ -27,7 +27,7 @@ funcionen de extremo a extremo.
 - Spring Web (API REST) + front-end estático (HTML, CSS y JavaScript puro) servido desde `src/main/resources/static`
 - Spring Data JPA + H2 para desarrollo local y PostgreSQL en el perfil `prod`
 - Spring Validation (`@NotBlank`, `@Email`, etc.)
-- Spring Security OAuth2 Resource Server y JWT HS256 para proteger métricas y exportación
+- Spring Security OAuth2 Client/Resource Server y JWT HS256 para el acceso social opcional y el control de permisos
 - BCrypt (`spring-security-crypto`) para cifrado de contraseñas
 - JUnit 5 + Mockito (pruebas unitarias de la capa de servicios)
 
@@ -67,9 +67,8 @@ src/test/java/com/ciudadsegura/service/  -> pruebas unitarias (JUnit 5 + Mockito
    ```bash
    .\mvnw.cmd spring-boot:run
    ```
-3. Abrir el navegador en `http://localhost:8081/` — ahí se carga el **menú principal** con acceso
-   a los módulos; la dirección permanece en la raíz.
-4. Para registrarte como ciudadano y poder crear reportes, entra a `http://localhost:8081/login`.
+3. Abrir `http://localhost:8081/` para llegar al **inicio de sesión**.
+4. El menú público está en `http://localhost:8081/inicio`; las cuentas autenticadas pueden crear reportes y zonas.
 5. Para desplegar el front-end por separado en Vercel, configura la URL base pública del back-end en `src/main/resources/static/js/api-config.js` (por ejemplo, `https://mi-api.example.com`, sin `/api` al final).
 
 ### Ejecutar con Docker
@@ -86,14 +85,18 @@ queda disponible en `http://localhost:8080`; Render puede asignar el puerto medi
 Este comando usa H2 en memoria; los datos no persisten al detener el contenedor. Al desplegar
 desde Docker en Render, incluye el JAR de la raíz en Git junto con el Dockerfile.
 
-### Datos de demostración locales
+### Datos iniciales de demostración
 
-El inicializador está desactivado por defecto y solo se carga sin perfil explícito o con el perfil
-`local` (nunca con `prod` ni otros perfiles). Para poblar una
-base local vacía con una cuenta administradora, tres ciudadanos, cuatro zonas, seis reportes y
-cuatro alertas, configura `SEED_DATA_ENABLED=true` y `SEED_ADMIN_PASSWORD` (mínimo 12 caracteres)
-al iniciar la aplicación. La contraseña no se guarda en el código; las contraseñas aleatorias de
-los ciudadanos de demostración no son utilizables para iniciar sesión.
+El inicializador está desactivado por defecto para proteger las bases de datos existentes.
+Para habilitarlo, configura `SEED_DATA_ENABLED=true` y `SEED_ADMIN_PASSWORD` (mínimo 12 caracteres)
+en el entorno antes del primer inicio. En Render, añade ambas variables en Environment; usa una
+contraseña administrativa privada y no la guardes en el repositorio. Los datos de demostración se
+insertan solo cuando las tablas de usuarios, zonas, reportes, alertas y noticias están vacías; el
+administrador principal también se aprovisiona si falta en una base existente con el seed habilitado.
+Funciona con el perfil `prod` si se habilita explícitamente. Crea tres ciudadanos,
+15 zonas con estado de cámaras e inspección, 128 reportes, tres alertas activas y cinco comunicados.
+Las contraseñas de los ciudadanos de demostración se generan aleatoriamente y no son utilizables
+para iniciar sesión.
 
 PowerShell:
 ```powershell
@@ -102,10 +105,10 @@ $env:SEED_ADMIN_PASSWORD = "elige-una-clave-local-segura"
 .\mvnw.cmd spring-boot:run
 ```
 
-Cuenta inicial de administrador: `admin.demo@ciudadsegura.local`. El sembrado se ejecuta solo si
-usuarios, zonas, reportes y alertas están todos vacíos; si cualquiera de esas tablas ya contiene
-datos, no modifica ninguna de ellas. Para volver a probarlo en local, usa una base H2 en memoria
-vacía o elimina explícitamente los datos locales.
+La cuenta principal de administración es `david.andresgalvis@gmail.com`. Los datos de demostración
+solo se siembran cuando usuarios, zonas, reportes, alertas y noticias están todos vacíos; una base
+con datos existentes no recibe las colecciones de prueba. Para volver a probarlo en local, usa una base H2 en
+memoria vacía o elimina explícitamente los datos locales.
 
 ### Despliegue en Railway
 
@@ -116,7 +119,16 @@ Configura también `JWT_SECRET` con un valor aleatorio de al menos 32 bytes. Rai
 `PORT` para el puerto de escucha. No guardes credenciales ni claves en el repositorio. La aplicación
 falla al iniciar si falta el secreto JWT en el perfil `prod`.
 
-> El registro público siempre crea cuentas `CIUDADANO`; el rol enviado por el cliente no se acepta para asignar privilegios. Una vez aprovisionada la primera cuenta administradora, un administrador puede consultar usuarios y asignar roles desde `usuarios.html`. Antes de habilitar el dashboard en una base existente, audita las cuentas que ya tengan rol `ADMINISTRADOR`. Los endpoints de métricas, CSV, usuarios y las escrituras de zonas/alertas requieren JWT de una cuenta administradora. Las escrituras de reportes requieren autenticación; los ciudadanos solo modifican/eliminan los propios y el servidor deriva el propietario desde el JWT. Las lecturas de reportes, zonas y alertas siguen siendo públicas.
+> El registro público siempre crea cuentas `CIUDADANO`; el rol enviado por el cliente no se acepta para asignar privilegios. La cuenta `david.andresgalvis@gmail.com` se reserva para el administrador principal y no se puede registrar ni modificar/eliminar desde la gestión de usuarios. En bases existentes, configura `SEED_DATA_ENABLED=true` y `SEED_ADMIN_PASSWORD` para aprovisionar esa cuenta; también puede iniciar sesión con una cuenta Google que reporte el correo como verificado. Los administradores gestionan los roles desde `usuarios.html`; no se permite quitar el rol del último administrador. Los endpoints de métricas, CSV, usuarios y las modificaciones/eliminaciones de zonas y alertas requieren autoridad administrativa. Crear reportes y zonas requiere autenticación; las lecturas de reportes, zonas y alertas son públicas.
+
+### Acceso social
+
+Google y Facebook se habilitan solo cuando se configuran sus credenciales como variables de entorno; nunca las guardes en el repositorio. En Render define `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `FACEBOOK_CLIENT_ID` y `FACEBOOK_CLIENT_SECRET` según los proveedores habilitados. Para Facebook, define también `FACEBOOK_API_VERSION` con una versión Graph API vigente en Meta (formato `vN.N`); el botón permanece oculto hasta que toda la configuración requerida esté presente. Registra estas URL de retorno:
+
+- Google: `https://ciudadseguraweb.onrender.com/login/oauth2/code/google`
+- Facebook: `https://ciudadseguraweb.onrender.com/login/oauth2/code/facebook`
+
+La aplicación muestra únicamente los proveedores configurados. Instagram se mantiene indicado como no disponible: no se simula una integración de autenticación que el servidor no tiene configurada.
 
 El mapa interactivo de reportes permite elegir coordenadas con un clic y presenta reportes y zonas guardadas. La página de zonas muestra las mismas capas sobre Leaflet/OpenStreetMap. El dashboard administrativo y la gestión de usuarios redirigen a usuarios sin el rol autorizado; las API también verifican los permisos en el servidor.
 

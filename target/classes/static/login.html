@@ -11,7 +11,7 @@
     <main class="login-screen">
         <section class="tarjeta auth-card login-card" aria-label="Acceso a Ciudad Segura">
             <header class="login-brand">
-                <a class="login-brand-mark" href="/" aria-label="Ciudad Segura, ir al inicio">
+                <a class="login-brand-mark" href="/inicio" aria-label="Ciudad Segura, ir al inicio">
                     <svg viewBox="0 0 48 48" aria-hidden="true">
                         <path d="M24 4 40 10v12c0 10-6.7 17.5-16 22C14.7 39.5 8 32 8 22V10l16-6Z" fill="currentColor"/>
                         <path d="m16 24 5.2 5.2L32.5 18" fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5"/>
@@ -75,6 +75,22 @@
                         </svg>
                     </button>
                 </form>
+                <section class="social-login" id="social-login" aria-label="Acceso con redes sociales" hidden>
+                    <p class="social-login-divider"><span>O continúa con</span></p>
+                    <div class="social-login-buttons">
+                        <a class="social-login-button" id="social-google" href="/oauth2/authorization/google" hidden>
+                            Continuar con Google
+                        </a>
+                        <a class="social-login-button" id="social-facebook" href="/oauth2/authorization/facebook" hidden>
+                            Continuar con Facebook
+                        </a>
+                        <button class="social-login-button social-login-unavailable" type="button" disabled
+                                title="Instagram no está configurado como proveedor de acceso en esta aplicación">
+                            Instagram no disponible
+                        </button>
+                    </div>
+                    <p id="social-login-help" class="registration-note"></p>
+                </section>
                 <p class="auth-switch login-switch">¿Aún no tienes una cuenta? <a href="#form-registro">Regístrate</a></p>
             </section>
 
@@ -115,6 +131,46 @@
             { tab: document.getElementById("tab-login"), panel: document.getElementById("panel-login"), hash: "#form-login" },
             { tab: document.getElementById("tab-registro"), panel: document.getElementById("panel-registro"), hash: "#form-registro" },
         ];
+
+        const oauthQuery = window.location.hash.startsWith("#oauth?")
+            ? new URLSearchParams(window.location.hash.slice("#oauth?".length))
+            : null;
+        if (oauthQuery?.has("accessToken") && oauthQuery.has("id")) {
+            const usuario = {
+                id: Number(oauthQuery.get("id")),
+                nombre: oauthQuery.get("nombre"),
+                email: oauthQuery.get("email"),
+                rol: oauthQuery.get("rol"),
+                fechaRegistro: oauthQuery.get("fechaRegistro"),
+            };
+            Sesion.guardar(usuario, oauthQuery.get("accessToken"));
+            window.history.replaceState(null, "", "/login");
+            window.location.replace("/reportes");
+        }
+
+        async function configurarAccesoSocial() {
+            const contenedor = document.getElementById("social-login");
+            const ayuda = document.getElementById("social-login-help");
+            try {
+                const proveedores = await CiudadSeguraAPI.proveedoresSociales();
+                let activo = false;
+                for (const proveedor of ["google", "facebook"]) {
+                    if (proveedores[proveedor]) {
+                        document.getElementById(`social-${proveedor}`).hidden = false;
+                        activo = true;
+                    }
+                }
+                contenedor.hidden = false;
+                ayuda.textContent = activo
+                    ? "Los proveedores sociales disponibles dependen de la configuración segura del servidor."
+                    : "Google y Facebook aparecerán aquí cuando se configuren sus credenciales en el servidor.";
+            } catch (error) {
+                contenedor.hidden = false;
+                ayuda.textContent = `No se pudo consultar la configuración social: ${error.message}`;
+            }
+        }
+
+        configurarAccesoSocial();
 
         function seleccionarFormulario(hash = window.location.hash) {
             const registroActivo = hash === "#form-registro";
@@ -163,7 +219,7 @@
                     password: document.getElementById("login-password").value,
                 });
                 Sesion.guardar(auth.usuario, auth.accessToken);
-                window.location.href = "/";
+                window.location.href = "/reportes";
             } catch (err) {
                 mostrarMensaje("msg-login", err.message);
             }
@@ -180,7 +236,7 @@
                 });
                 Sesion.guardar(auth.usuario, auth.accessToken);
                 mostrarMensaje("msg-registro", "Cuenta creada con éxito. Redirigiendo...", "exito");
-                setTimeout(() => window.location.href = "/", 900);
+                setTimeout(() => window.location.href = "/reportes", 900);
             } catch (err) {
                 mostrarMensaje("msg-registro", err.message);
             }

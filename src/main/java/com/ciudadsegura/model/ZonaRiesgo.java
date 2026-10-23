@@ -7,6 +7,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "zonas_riesgo")
 public class ZonaRiesgo {
@@ -38,6 +40,12 @@ public class ZonaRiesgo {
     @DecimalMax(value = "180.0", message = "La longitud debe estar entre -180 y 180")
     @Column(nullable = false)
     private Double longitud;
+
+    @Column(name = "estado_camaras", length = 80)
+    private String estadoCamaras;
+
+    @Column(name = "ultima_inspeccion")
+    private LocalDate ultimaInspeccion;
 
     public ZonaRiesgo() {
     }
@@ -88,5 +96,21 @@ public class ZonaRiesgo {
 
     public void setLongitud(Double longitud) {
         this.longitud = longitud;
+    }
+
+    public String getEstadoCamaras() {
+        return estadoCamaras;
+    }
+
+    public void setEstadoCamaras(String estadoCamaras) {
+        this.estadoCamaras = estadoCamaras;
+    }
+
+    public LocalDate getUltimaInspeccion() {
+        return ultimaInspeccion;
+    }
+
+    public void setUltimaInspeccion(LocalDate ultimaInspeccion) {
+        this.ultimaInspeccion = ultimaInspeccion;
     }
 }

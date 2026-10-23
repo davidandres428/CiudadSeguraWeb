@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
+import static org.hamcrest.Matchers.hasItems;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -36,7 +37,7 @@ class AdministracionZonasAlertasFlujoE2ETest {
     private JwtEncoder jwtEncoder;
 
     @Test
-    void mutacionesDeZonasYAlertasExigenAdminYActualizanConteosPublicos() throws Exception {
+    void ciudadanosCreanZonasYAdministradoresGestionanAlertas() throws Exception {
         String ciudadano = crearToken("ciudadano@example.com", "CIUDADANO");
         String administrador = crearToken("admin@example.com", "ADMINISTRADOR");
 
@@ -64,7 +65,7 @@ class AdministracionZonasAlertasFlujoE2ETest {
                         .content("""
                                 {"nombre":"Zona denegada","nivelRiesgo":"ALTO","latitud":4.6,"longitud":-74.1}
                                 """))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isCreated());
         mockMvc.perform(post("/api/alertas")
                         .header("Authorization", "Bearer " + ciudadano)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -92,13 +93,13 @@ class AdministracionZonasAlertasFlujoE2ETest {
 
         mockMvc.perform(get("/api/zonas-riesgo"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].nombre").value("Zona E2E"));
+                .andExpect(jsonPath("$[*].nombre", hasItems("Zona denegada", "Zona E2E")));
         mockMvc.perform(get("/api/alertas"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].titulo").value("Alerta E2E"));
         mockMvc.perform(get("/api/zonas-riesgo/count"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").value(1));
+                .andExpect(jsonPath("$").value(2));
         mockMvc.perform(get("/api/alertas/count"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").value(1));

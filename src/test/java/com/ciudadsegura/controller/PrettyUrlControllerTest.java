@@ -23,17 +23,20 @@ class PrettyUrlControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    void raiz_sirveInicioSinRedireccionar() throws Exception {
+    void raiz_redirigeAlLogin() throws Exception {
         mockMvc.perform(get("/"))
-                .andExpect(status().isOk())
-                .andExpect(forwardedUrl("/index.html"));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(header().string("Location", "/login"));
     }
 
     @Test
-    void indexHtml_redirigeALaRaizYConservaLaConsulta() throws Exception {
+    void portadaSirveElMenuYIndexHtmlRedirigeConservandoLaConsulta() throws Exception {
+        mockMvc.perform(get("/inicio"))
+                .andExpect(status().isOk())
+                .andExpect(forwardedUrl("/index.html"));
         mockMvc.perform(get("/index.html").queryParam("origen", "enlace"))
                 .andExpect(status().isPermanentRedirect())
-                .andExpect(header().string("Location", "/?origen=enlace"));
+                .andExpect(header().string("Location", "/inicio?origen=enlace"));
     }
 
     @Test

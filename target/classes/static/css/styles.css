@@ -449,6 +449,22 @@ p { color: var(--texto-suave); }
     font-weight: 700;
 }
 
+.comunicado-categoria {
+    display: inline-block;
+    margin-right: 8px;
+    color: var(--acento);
+    font-size: 0.67rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.comunicados-estado {
+    margin: 0;
+    color: var(--texto-suave);
+    font-size: 0.85rem;
+}
+
 .comunicado h3,
 .datos-atencion h3 {
     margin: 4px 0;
@@ -1366,6 +1382,66 @@ body.login-page {
     margin: -3px 0 0 !important;
     color: #718195;
     font-size: 0.76rem;
+}
+
+.social-login {
+    margin-top: 18px;
+}
+
+.social-login-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 14px;
+    color: #8291a1;
+    font-size: 0.75rem;
+}
+
+.social-login-divider::before,
+.social-login-divider::after {
+    height: 1px;
+    flex: 1;
+    background: #e4ebf1;
+    content: "";
+}
+
+.social-login-buttons {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 9px;
+}
+
+.social-login-button {
+    display: flex;
+    min-height: 43px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #dce5eb;
+    border-radius: 10px;
+    color: #30465a;
+    background: #fff;
+    font: inherit;
+    font-size: 0.83rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.social-login-button:hover,
+.social-login-button:focus-visible {
+    border-color: #7bb9bd;
+    background: #f6fbfb;
+}
+
+.social-login-unavailable,
+.social-login-unavailable:disabled {
+    color: #8291a1;
+    background: #f7f9fb;
+    cursor: not-allowed;
+}
+
+.social-login .registration-note {
+    margin-top: 10px !important;
+    text-align: center;
 }
 
 @media (min-width: 520px) {

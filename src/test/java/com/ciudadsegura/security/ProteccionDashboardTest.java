@@ -103,12 +103,58 @@ class ProteccionDashboardTest {
     }
 
     @Test
-    void mutacionesDeZonasYAlertas_soloDebenPermitirAdministradores() throws Exception {
+    @Transactional
+    void gestionDeRoles_requiereAdminYPermiteCambiarCiudadanoAAdministrador() throws Exception {
+        Usuario ciudadano = guardarUsuario("cambio-rol@example.com", RolUsuario.CIUDADANO);
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put(
+                                "/api/usuarios/{id}", ciudadano.getId())
+                        .header("Authorization", "Bearer " + crearToken("CIUDADANO"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"nombre":"Usuario de prueba","email":"cambio-rol@example.com",
+                                 "rol":"ADMINISTRADOR"}
+                                """))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put(
+                                "/api/usuarios/{id}", ciudadano.getId())
+                        .header("Authorization", "Bearer " + crearToken("ADMINISTRADOR"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"nombre":"Usuario de prueba","email":"cambio-rol@example.com",
+                                 "rol":"ADMINISTRADOR"}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.rol").value("ADMINISTRADOR"));
+    }
+
+    @Test
+    void estadoDeProveedoresSociales_noExponeCredenciales() throws Exception {
+        mockMvc.perform(get("/api/auth/social-providers"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.google").value(false))
+                .andExpect(jsonPath("$.facebook").value(false))
+                .andExpect(jsonPath("$.instagram").value(false));
+    }
+
+    @Test
+    void ciudadanosPuedenCrearZonasPeroSoloAdministradoresPuedenAdministrarZonasYAlertas() throws Exception {
         String tokenCiudadano = crearToken("CIUDADANO");
         String tokenAdmin = crearToken("ADMINISTRADOR");
 
-        mockMvc.perform(post("/api/zonas-riesgo").header("Authorization", "Bearer " + tokenCiudadano))
-                .andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/zonas-riesgo")
+                        .header("Authorization", "Bearer " + tokenCiudadano)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"nombre":"Zona ciudadano","nivelRiesgo":"MEDIO","latitud":4.61,"longitud":-74.08}
+                                """))
+                .andExpect(status().isCreated());
+        mockMvc.perform(post("/api/zonas-riesgo")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"nombre":"Zona anónima","nivelRiesgo":"MEDIO","latitud":4.61,"longitud":-74.08}
+                                """))
+                .andExpect(status().isUnauthorized());
         mockMvc.perform(put("/api/zonas-riesgo/1").header("Authorization", "Bearer " + tokenCiudadano))
                 .andExpect(status().isForbidden());
         mockMvc.perform(delete("/api/zonas-riesgo/1").header("Authorization", "Bearer " + tokenCiudadano))

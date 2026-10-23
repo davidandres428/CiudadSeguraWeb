@@ -2,11 +2,14 @@ const { test, expect } = require("@playwright/test");
 
 test("rutas limpias sirven las vistas y las URLs HTML redirigen", async ({ page, request }) => {
     await page.goto("/");
-    await expect(page).toHaveURL(/\/$/);
+    await expect(page).toHaveURL(/\/login$/);
+    await expect(page).toHaveTitle("Iniciar sesión | Ciudad Segura");
+
+    await page.goto("/inicio");
     await expect(page).toHaveTitle("Ciudad Segura");
 
     await page.goto("/index.html?origen=e2e");
-    await expect(page).toHaveURL(/\/\?origen=e2e$/);
+    await expect(page).toHaveURL(/\/inicio\?origen=e2e$/);
 
     await page.goto("/reportes");
     await expect(page).toHaveURL(/\/reportes$/);
@@ -21,6 +24,27 @@ test("rutas limpias sirven las vistas y las URLs HTML redirigen", async ({ page,
     expect(assetResponse.status()).toBe(200);
 });
 
+test("la portada muestra noticias desde la API como contenido de texto", async ({ page }) => {
+    await page.route("**/api/noticias", (route) => route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([{
+            titulo: "<img src=x onerror=alert(1)> Comunicado comunitario",
+            categoria: "Comunidad",
+            contenido: "Jornada informativa de prevención ciudadana.",
+            fechaPublicacion: "2026-10-20T09:30:00",
+        }]),
+    }));
+
+    await page.goto("/inicio");
+
+    const comunicado = page.locator("#lista-comunicados .comunicado");
+    await expect(comunicado).toHaveCount(1);
+    await expect(comunicado).toContainText("Comunicado comunitario");
+    await expect(comunicado.locator("img")).toHaveCount(0);
+    await expect(comunicado.locator("time")).toContainText("20 de octubre de 2026");
+});
+
 test("login adaptable ofrece acceso, recordatorio y ayuda de contraseña", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto("/login");
@@ -31,6 +55,7 @@ test("login adaptable ofrece acceso, recordatorio y ayuda de contraseña", async
     await expect(page.locator("#login-password")).toBeVisible();
     await expect(page.getByRole("checkbox", { name: "Recordarme" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Iniciar sesión" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Instagram no disponible" })).toBeDisabled();
     await page.getByRole("link", { name: "¿Olvidaste tu contraseña?" }).click();
     await expect(page.locator("#forgot-help")).toBeVisible();
 
@@ -44,7 +69,7 @@ test("login adaptable ofrece acceso, recordatorio y ayuda de contraseña", async
 });
 
 test("registro ciudadano, acceso, creación de reporte y métricas en vivo", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/inicio");
     const fechaHoy = new Date();
     const fechaLocal = (fecha) => [
         fecha.getFullYear(),
@@ -80,7 +105,7 @@ test("registro ciudadano, acceso, creación de reporte y métricas en vivo", asy
     await page.locator("#reg-email").fill(`e2e-${Date.now()}@example.com`);
     await page.locator("#reg-password").fill("ClaveSegura123");
     await page.getByRole("button", { name: "Crear cuenta" }).click();
-    await expect(page).toHaveURL(/\/$/);
+    await expect(page).toHaveURL(/\/reportes$/);
     await expect(page.locator("#usuario-activo")).toContainText("Prueba navegador");
 
     await page.goto("/reportes");
@@ -100,12 +125,20 @@ test("registro ciudadano, acceso, creación de reporte y métricas en vivo", asy
         .toBeGreaterThan(0);
 
     await page.goto("/zonas");
-    await expect(page.locator("#form-zona")).toBeHidden();
-    await expect(page.locator("#aviso-acceso-zona")).toContainText("reservada para administradores");
+    await expect(page.locator("#form-zona")).toBeVisible();
+    await expect(page.locator("#aviso-acceso-zona")).toBeHidden();
+    const nombreZona = `Zona ciudadana ${Date.now()}`;
+    await page.locator("#zona-nombre").fill(nombreZona);
+    await page.locator("#zona-descripcion").fill("Zona registrada por ciudadanía.");
+    await page.locator("#zona-nivel").selectOption("MEDIO");
+    await page.locator("#zona-lat").fill("4.61");
+    await page.locator("#zona-lng").fill("-74.08");
+    await page.getByRole("button", { name: "Registrar zona" }).click();
+    await expect(page.locator("#tabla-zonas")).toContainText(nombreZona);
     await expect.poll(async () => page.locator("#mapa-zonas .leaflet-marker-icon").count())
         .toBeGreaterThan(0);
 
-    await page.goto("/");
+    await page.goto("/inicio");
     await expect(page.locator("#metrica-reportes")).toHaveText(String(reportesAntes + 1));
     await page.getByRole("button", { name: "Salir" }).click();
     await expect(page).toHaveURL(/\/login$/);

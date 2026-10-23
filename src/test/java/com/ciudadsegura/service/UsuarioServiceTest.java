@@ -14,6 +14,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Optional;
 
+import static com.ciudadsegura.model.enums.RolUsuario.ADMINISTRADOR;
+import static com.ciudadsegura.model.enums.RolUsuario.CIUDADANO;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -109,18 +111,47 @@ class UsuarioServiceTest {
 
     @Test
     void eliminar_conIdInexistente_debeLanzarExcepcion() {
-        when(usuarioRepository.existsById(5L)).thenReturn(false);
+        when(usuarioRepository.findById(5L)).thenReturn(Optional.empty());
 
         assertThrows(RecursoNoEncontradoException.class, () -> usuarioService.eliminar(5L));
-        verify(usuarioRepository, never()).deleteById(any());
+        verify(usuarioRepository, never()).delete(any(Usuario.class));
     }
 
     @Test
     void eliminar_conIdExistente_debeEliminarUsuario() {
-        when(usuarioRepository.existsById(1L)).thenReturn(true);
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
 
         usuarioService.eliminar(1L);
 
-        verify(usuarioRepository, times(1)).deleteById(1L);
+        verify(usuarioRepository, times(1)).delete(usuario);
+    }
+
+    @Test
+    void actualizar_noDebeQuitarElRolAlUltimoAdministrador() {
+        usuario.setRol(ADMINISTRADOR);
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.countByRol(ADMINISTRADOR)).thenReturn(1L);
+        UsuarioUpdateRequest datos = new UsuarioUpdateRequest();
+        datos.setNombre(usuario.getNombre());
+        datos.setEmail(usuario.getEmail());
+        datos.setRol(CIUDADANO);
+
+        assertThrows(org.springframework.web.server.ResponseStatusException.class,
+                () -> usuarioService.actualizar(1L, datos));
+        verify(usuarioRepository, never()).save(any(Usuario.class));
+    }
+
+    @Test
+    void actualizar_noDebeModificarLaCuentaPrincipal() {
+        usuario.setEmail(AuthService.ADMINISTRADOR_PRINCIPAL);
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+        UsuarioUpdateRequest datos = new UsuarioUpdateRequest();
+        datos.setNombre(usuario.getNombre());
+        datos.setEmail(usuario.getEmail());
+        datos.setRol(CIUDADANO);
+
+        assertThrows(org.springframework.web.server.ResponseStatusException.class,
+                () -> usuarioService.actualizar(1L, datos));
+        verify(usuarioRepository, never()).save(any(Usuario.class));
     }
 }

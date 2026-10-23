@@ -16,12 +16,17 @@ public class PrettyUrlController {
 
     @GetMapping("/")
     public String inicio() {
+        return "redirect:/login";
+    }
+
+    @GetMapping("/inicio")
+    public String portada() {
         return "forward:/index.html";
     }
 
     @GetMapping("/index.html")
     public Object redirigirIndex(HttpServletRequest request) {
-        return rutaHtml("index.html", "/", request);
+        return rutaHtml("index.html", "/inicio", request);
     }
 
     @GetMapping("/reportes")
@@ -84,7 +89,7 @@ public class PrettyUrlController {
         return rutaHtml("login.html", "/login", request);
     }
 
-    @GetMapping({"/reportes/", "/zonas/", "/alertas/", "/usuarios/", "/dashboard/", "/login/"})
+    @GetMapping({"/inicio/", "/reportes/", "/zonas/", "/alertas/", "/usuarios/", "/dashboard/", "/login/"})
     public ResponseEntity<Void> redirigirBarraFinal(HttpServletRequest request) {
         String ruta = request.getRequestURI();
         return redirigir(ruta.substring(0, ruta.length() - 1), request);

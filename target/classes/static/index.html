@@ -16,7 +16,7 @@
     <header class="topbar">
         <h1>🛡️ Ciudad Segura</h1>
         <nav class="menu">
-            <a href="/" class="activo">Inicio</a>
+            <a href="/inicio" class="activo">Inicio</a>
             <a href="/reportes">Reportes</a>
             <a href="/zonas">Zonas de riesgo</a>
             <a href="/alertas">Alertas</a>
@@ -92,22 +92,8 @@
                         <h2 id="noticias-titulo">Noticias y Comunicados</h2>
                     </div>
                 </div>
-                <div class="lista-comunicados">
-                    <article class="comunicado">
-                        <time datetime="2026-10-20">20 de octubre de 2026</time>
-                        <h3>Verifica la información antes de compartirla</h3>
-                        <p>Consulta canales oficiales y evita difundir rumores que puedan generar alarma.</p>
-                    </article>
-                    <article class="comunicado">
-                        <time datetime="2026-10-16">16 de octubre de 2026</time>
-                        <h3>Reporta situaciones de riesgo</h3>
-                        <p>Comparte detalles claros y ubicación para facilitar la atención de los incidentes.</p>
-                    </article>
-                    <article class="comunicado">
-                        <time datetime="2026-10-12">12 de octubre de 2026</time>
-                        <h3>Identifica rutas y puntos de encuentro</h3>
-                        <p>Planifica tus recorridos y acuerda un punto de contacto con tu comunidad.</p>
-                    </article>
+                <div class="lista-comunicados" id="lista-comunicados" aria-live="polite">
+                    <p class="comunicados-estado">Cargando comunicados...</p>
                 </div>
             </article>
 
@@ -217,6 +203,42 @@
         }
 
         cargarMetricasInicio();
+
+        async function cargarNoticiasInicio() {
+            const lista = document.getElementById("lista-comunicados");
+            try {
+                const noticias = await CiudadSeguraAPI.listarNoticias();
+                lista.replaceChildren();
+                noticias.forEach((noticia) => {
+                    const articulo = document.createElement("article");
+                    articulo.className = "comunicado";
+                    const categoria = document.createElement("span");
+                    categoria.className = "comunicado-categoria";
+                    categoria.textContent = noticia.categoria;
+                    const fecha = document.createElement("time");
+                    fecha.dateTime = noticia.fechaPublicacion;
+                    fecha.textContent = new Intl.DateTimeFormat("es-CO", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                    }).format(new Date(noticia.fechaPublicacion));
+                    const titulo = document.createElement("h3");
+                    titulo.textContent = noticia.titulo;
+                    const contenido = document.createElement("p");
+                    contenido.textContent = noticia.contenido;
+                    articulo.append(categoria, fecha, titulo, contenido);
+                    lista.append(articulo);
+                });
+                if (noticias.length === 0) {
+                    lista.textContent = "No hay comunicados publicados por el momento.";
+                }
+            } catch (error) {
+                console.error("No se pudieron cargar las noticias y comunicados.", error);
+                lista.textContent = "No fue posible cargar los comunicados. Intenta de nuevo más tarde.";
+            }
+        }
+
+        cargarNoticiasInicio();
 
         const dialogoPqrs = document.getElementById("dialogo-pqrs");
         document.getElementById("abrir-pqrs").addEventListener("click", () => dialogoPqrs.showModal());

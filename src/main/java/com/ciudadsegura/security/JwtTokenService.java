@@ -1,6 +1,7 @@
 package com.ciudadsegura.security;
 
 import com.ciudadsegura.model.Usuario;
+import com.ciudadsegura.model.enums.RolUsuario;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
@@ -29,12 +30,17 @@ public class JwtTokenService {
 
     public String crearToken(Usuario usuario) {
         Instant ahora = Instant.now();
+        String autoridad = switch (usuario.getRol()) {
+            case ADMINISTRADOR -> "ROLE_ADMIN";
+            case CIUDADANO -> "ROLE_USER";
+        };
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("ciudad-segura")
                 .issuedAt(ahora)
                 .expiresAt(ahora.plus(expirationMinutes, ChronoUnit.MINUTES))
                 .subject(usuario.getEmail())
-                .claim("scope", usuario.getRol().name())
+                .claim("scope", autoridad)
+                .claim("role", autoridad)
                 .claim("userId", usuario.getId())
                 .build();
 

@@ -10,7 +10,7 @@
     <script>
         const usuarioActual = Sesion.obtener();
         if (!Sesion.token() || usuarioActual?.rol !== "ADMINISTRADOR") {
-            window.location.replace("/");
+            window.location.replace("/login#form-login");
         }
     </script>
 </head>
@@ -18,7 +18,7 @@
     <header class="topbar">
         <h1>🛡️ Ciudad Segura</h1>
         <nav class="menu">
-            <a href="/">Inicio</a>
+            <a href="/inicio">Inicio</a>
             <a href="/reportes">Reportes</a>
             <a href="/zonas">Zonas de riesgo</a>
             <a href="/alertas">Alertas</a>
@@ -58,8 +58,8 @@
                 <div>
                     <label for="edit-rol">Rol</label>
                     <select id="edit-rol">
-                        <option value="CIUDADANO">Ciudadano</option>
-                        <option value="ADMINISTRADOR">Administrador</option>
+                        <option value="CIUDADANO">ROLE_USER · Ciudadano</option>
+                        <option value="ADMINISTRADOR">ROLE_ADMIN · Administrador</option>
                     </select>
                 </div>
                 <div>
@@ -85,7 +85,7 @@
                         <td>${u.id}</td>
                         <td>${escaparHtml(u.nombre)}</td>
                         <td>${escaparHtml(u.email)}</td>
-                        <td>${escaparHtml(u.rol)}</td>
+                        <td>${u.rol === "ADMINISTRADOR" ? "ROLE_ADMIN · Administrador" : "ROLE_USER · Ciudadano"}</td>
                         <td>${formatearFecha(u.fechaRegistro)}</td>
                         <td class="acciones-fila">
                             <button onclick="editar(${u.id})">Editar</button>

@@ -5,6 +5,7 @@ C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\s
 C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\controller\AlertaController.java
 C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\controller\ApiNotFoundController.java
 C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\controller\AuthController.java
+C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\controller\NoticiaController.java
 C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\controller\PqrsController.java
 C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\controller\PrettyUrlController.java
 C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\controller\ReporteIncidenteController.java
@@ -17,6 +18,7 @@ C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\s
 C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\dto\PqrsResponse.java
 C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\dto\RegistroRequest.java
 C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\dto\ReporteMetricasResponse.java
+C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\dto\RolUsuarioRequest.java
 C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\dto\SeedMasivoResponse.java
 C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\dto\UsuarioResponse.java
 C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\dto\UsuarioUpdateRequest.java
@@ -35,12 +37,14 @@ C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\s
 C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\model\enums\TipoPqrs.java
 C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\model\enums\TipoReporte.java
 C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\model\LoteSemilla.java
+C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\model\Noticia.java
 C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\model\RadicacionPqrs.java
 C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\model\ReporteIncidente.java
 C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\model\Usuario.java
 C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\model\ZonaRiesgo.java
 C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\repository\AlertaRepository.java
 C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\repository\LoteSemillaRepository.java
+C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\repository\NoticiaRepository.java
 C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\repository\RadicacionPqrsRepository.java
 C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\repository\ReporteIncidenteRepository.java
 C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\repository\ReporteIncidenteRepositoryCustom.java
@@ -48,6 +52,8 @@ C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\s
 C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\repository\UsuarioRepository.java
 C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\repository\ZonaRiesgoRepository.java
 C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\security\JwtTokenService.java
+C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\security\OAuthClientConfig.java
+C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\security\OAuthLoginSuccessHandler.java
 C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\security\SecurityConfig.java
 C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\service\AlertaService.java
 C:\Users\DAVID\Adso\CiudadSegura\01Backend\ciudad-seguraGA8-220501096-AA1-EV01\src\main\java\com\ciudadsegura\service\AuthService.java

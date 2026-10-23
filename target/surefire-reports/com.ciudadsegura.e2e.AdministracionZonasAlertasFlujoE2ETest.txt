@@ -1,0 +1,32 @@
+-------------------------------------------------------------------------------
+Test set: com.ciudadsegura.e2e.AdministracionZonasAlertasFlujoE2ETest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.207 s <<< FAILURE! -- in com.ciudadsegura.e2e.AdministracionZonasAlertasFlujoE2ETest
+com.ciudadsegura.e2e.AdministracionZonasAlertasFlujoE2ETest -- Time elapsed: 0.207 s <<< ERROR!
+java.lang.IllegalStateException: Failed to find merged annotation for @org.springframework.test.context.BootstrapWith(org.springframework.boot.test.context.SpringBootTestContextBootstrapper.class)
+	at org.springframework.util.Assert.state(Assert.java:102)
+	at org.springframework.test.context.TestContextAnnotationUtils$AnnotationDescriptor.<init>(TestContextAnnotationUtils.java:521)
+	at org.springframework.test.context.TestContextAnnotationUtils.findAnnotationDescriptor(TestContextAnnotationUtils.java:262)
+	at org.springframework.test.context.TestContextAnnotationUtils.findAnnotationDescriptor(TestContextAnnotationUtils.java:225)
+	at org.springframework.test.context.BootstrapUtils.resolveExplicitTestContextBootstrapper(BootstrapUtils.java:174)
+	at org.springframework.test.context.BootstrapUtils.resolveTestContextBootstrapper(BootstrapUtils.java:150)
+	at org.springframework.test.context.BootstrapUtils.resolveTestContextBootstrapper(BootstrapUtils.java:126)
+	at org.springframework.test.context.TestContextManager.<init>(TestContextManager.java:126)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:330)
+	at org.springframework.test.context.junit.jupiter.SpringExtension.getTestContextManager(SpringExtension.java:466)
+	at org.springframework.test.context.junit.jupiter.SpringExtension.beforeAll(SpringExtension.java:209)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1612)
+	Suppressed: java.lang.IllegalStateException: Failed to find merged annotation for @org.springframework.test.context.BootstrapWith(org.springframework.boot.test.context.SpringBootTestContextBootstrapper.class)
+		at org.springframework.util.Assert.state(Assert.java:102)
+		at org.springframework.test.context.TestContextAnnotationUtils$AnnotationDescriptor.<init>(TestContextAnnotationUtils.java:521)
+		at org.springframework.test.context.TestContextAnnotationUtils.findAnnotationDescriptor(TestContextAnnotationUtils.java:262)
+		at org.springframework.test.context.TestContextAnnotationUtils.findAnnotationDescriptor(TestContextAnnotationUtils.java:225)
+		at org.springframework.test.context.BootstrapUtils.resolveExplicitTestContextBootstrapper(BootstrapUtils.java:174)
+		at org.springframework.test.context.BootstrapUtils.resolveTestContextBootstrapper(BootstrapUtils.java:150)
+		at org.springframework.test.context.BootstrapUtils.resolveTestContextBootstrapper(BootstrapUtils.java:126)
+		at org.springframework.test.context.TestContextManager.<init>(TestContextManager.java:126)
+		at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:330)
+		at org.springframework.test.context.junit.jupiter.SpringExtension.getTestContextManager(SpringExtension.java:466)
+		at org.springframework.test.context.junit.jupiter.SpringExtension.afterAll(SpringExtension.java:220)
+		... 1 more
+

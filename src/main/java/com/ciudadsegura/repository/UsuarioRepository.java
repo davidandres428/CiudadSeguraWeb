@@ -1,6 +1,7 @@
 package com.ciudadsegura.repository;
 
 import com.ciudadsegura.model.Usuario;
+import com.ciudadsegura.model.enums.RolUsuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
@@ -10,4 +11,6 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     Optional<Usuario> findByEmail(String email);
 
     boolean existsByEmail(String email);
+
+    long countByRol(RolUsuario rol);
 }

@@ -45,6 +45,12 @@ public class ZonaRiesgoService {
         zona.setNivelRiesgo(datos.getNivelRiesgo());
         zona.setLatitud(datos.getLatitud());
         zona.setLongitud(datos.getLongitud());
+        if (datos.getEstadoCamaras() != null) {
+            zona.setEstadoCamaras(datos.getEstadoCamaras());
+        }
+        if (datos.getUltimaInspeccion() != null) {
+            zona.setUltimaInspeccion(datos.getUltimaInspeccion());
+        }
         return zonaRiesgoRepository.save(zona);
     }
 
