@@ -3,34 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ciudad Segura - Usuarios</title>
-    <link rel="stylesheet" href="/css/styles.css">
+    <title>Ciudad Segura - Usuarios Registrados</title>
+    <link rel="stylesheet" href="/css/estilos.css">
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 0; }
+        .navbar { background-color: #1e293b; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .nav-links a { color: white; text-decoration: none; margin-left: 20px; font-weight: 500; }
+        .nav-links a:hover, .nav-links a.active { color: #38bdf8; }
+        .container { max-width: 1000px; margin: 40px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        h2 { color: #1e293b; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        th { background-color: #f8fafc; color: #475569; font-weight: bold; }
+        tr:hover { background-color: #f1f5f9; }
+    </style>
 </head>
 <body>
-    <header class="topbar">
-        <h1>Ciudad Segura</h1>
-        <nav class="menu">
+
+    <nav class="navbar">
+        <div class="logo"><strong>Ciudad Segura</strong></div>
+        <div class="nav-links">
             <a href="/inicio">Inicio</a>
             <a href="/reportes">Reportes</a>
             <a href="/zonas">Zonas de riesgo</a>
             <a href="/alertas">Alertas</a>
-            <a href="/usuarios" class="activo">Usuarios</a>
-        </nav>
-        <div id="usuario-activo"></div>
-    </header>
-
-    <main>
-        <div class="tarjeta">
-            <h2>Usuarios registrados</h2>
-            <p>Gestión y administración de roles del sistema.</p>
-            <div id="msg" class="mensaje oculto"></div>
-            <div id="tabla-usuarios-contenedor">
-                <p>Cargando lista de usuarios...</p>
-            </div>
+            <a href="/usuarios.html" class="active">Usuarios</a>
         </div>
-    </main>
+    </nav>
 
-    <script src="/js/api.config.js"></script>
-    <script src="/js/api.js"></script>
+    <div class="container">
+        <h2>Usuarios Registrados en el Sistema</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Correo Electrónico</th>
+                    <th>Rol</th>
+                </tr>
+            </thead>
+            <tbody id="tabla-usuarios-body">
+                <tr>
+                    <td colspan="4" style="text-align: center;">Cargando usuarios...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script src="/js/usuarios.js"></script>
 </body>
 </html>
