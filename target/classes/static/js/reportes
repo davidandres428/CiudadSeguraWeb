@@ -1,0 +1,71 @@
+document.addEventListener('DOMContentLoaded', () => {
+    // Inicializar el mapa de Leaflet
+    const map = L.map('mapa-reporte').setView([4.60971, -74.08175], 13); // Coordenadas por defecto (Bogotá)
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    let marker;
+
+    // Permitir hacer clic en el mapa para seleccionar la ubicación
+    map.on('click', (e) => {
+        const lat = e.latlng.lat;
+        const lng = e.latlng.lng;
+
+        document.getElementById('reporte-latitud').value = lat;
+        document.getElementById('reporte-longitud').value = lng;
+
+        if (marker) {
+            marker.setLatLng([lat, lng]);
+        } else {
+            marker = L.marker([lat, lng]).addTo(map);
+        }
+    });
+
+    // Manejar el envío del formulario
+    const formReporte = document.getElementById('form-reporte');
+    if (formReporte) {
+        formReporte.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const latitud = document.getElementById('reporte-latitud').value;
+            const longitud = document.getElementById('reporte-longitud').value;
+
+            if (!latitud || !longitud) {
+                alert('Por favor selecciona una ubicación en el mapa.');
+                return;
+            }
+
+            const nuevoReporte = {
+                titulo: document.getElementById('reporte-titulo').value,
+                descripcion: document.getElementById('reporte-descripcion').value,
+                direccion: document.getElementById('reporte-direccion').value,
+                tipo: document.getElementById('reporte-tipo').value,
+                prioridad: document.getElementById('reporte-prioridad').value,
+                latitud: parseFloat(latitud),
+                longitud: parseFloat(longitud)
+            };
+
+            try {
+                const respuesta = await fetch('/api/reportes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(nuevoReporte)
+                });
+
+                if (respuesta.ok) {
+                    alert('¡Reporte registrado exitosamente!');
+                    window.location.reload();
+                } else {
+                    alert('Error al registrar el reporte.');
+                }
+            } catch (error) {
+                console.error('Error de red:', error);
+                alert('No se pudo conectar con el servidor.');
+            }
+        });
+    }
+});
