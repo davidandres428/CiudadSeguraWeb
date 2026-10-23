@@ -16,7 +16,6 @@ import com.ciudadsegura.repository.NoticiaRepository;
 import com.ciudadsegura.repository.ReporteIncidenteRepository;
 import com.ciudadsegura.repository.UsuarioRepository;
 import com.ciudadsegura.repository.ZonaRiesgoRepository;
-import com.ciudadsegura.service.AuthService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -46,6 +45,9 @@ public class DataInitializer implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
     private final String adminPassword;
 
+    // CORREO FIJO DE TU CUENTA ADMINISTRADORA
+    private static final String CORREO_ADMIN = "david.andresgalvis@gmail.com";
+
     public DataInitializer(
             UsuarioRepository usuarioRepository,
             ZonaRiesgoRepository zonaRiesgoRepository,
@@ -66,22 +68,16 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
-        Usuario administrador = usuarioRepository.findByEmail(AuthService.ADMINISTRADOR_PRINCIPAL).orElse(null);
+        // Buscar o crear al administrador usando tu correo exacto de Gmail
+        Usuario administrador = usuarioRepository.findByEmail(CORREO_ADMIN).orElse(null);
+        String passwordFinal = (adminPassword == null || adminPassword.isBlank()) ? "Admin123!" : adminPassword;
+
         if (administrador == null) {
-            String passwordInicial = adminPassword == null || adminPassword.isBlank()
-                    ? "Admin123!"
-                    : adminPassword;
-            administrador = crearUsuario(
-                    "David Andrés Galvis", AuthService.ADMINISTRADOR_PRINCIPAL,
-                    RolUsuario.ADMINISTRADOR, passwordInicial);
-            if (adminPassword == null || adminPassword.isBlank()) {
-                LOGGER.info("Se creó la cuenta administradora principal con la contraseña por defecto: Admin123!");
-            }
+            administrador = crearUsuario("David Andrés Galvis", CORREO_ADMIN, RolUsuario.ADMINISTRADOR, passwordFinal);
+            LOGGER.info("Se creó la cuenta administradora principal para: " + CORREO_ADMIN);
         } else {
             administrador.setRol(RolUsuario.ADMINISTRADOR);
-            if (adminPassword != null && !adminPassword.isBlank()) {
-                administrador.setPassword(passwordEncoder.encode(adminPassword));
-            }
+            administrador.setPassword(passwordEncoder.encode(passwordFinal));
         }
         usuarioRepository.save(administrador);
 
@@ -277,6 +273,6 @@ public class DataInitializer implements CommandLineRunner {
             double latitud,
             double longitud,
             String estadoCamaras,
-            int diasDesdeInspeccion) {
+            int diasInspeccion) {
     }
 }
