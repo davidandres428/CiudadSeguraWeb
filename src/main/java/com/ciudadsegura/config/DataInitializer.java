@@ -18,7 +18,6 @@ import com.ciudadsegura.repository.UsuarioRepository;
 import com.ciudadsegura.repository.ZonaRiesgoRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component
-@ConditionalOnProperty(name = "app.seed.enabled", havingValue = "true")
 public class DataInitializer implements CommandLineRunner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataInitializer.class);
@@ -65,21 +63,18 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
-        String correoAdmin = "david.andresgalvis@gmail.com";
-        String passwordFinal = "Admin123!";
+        // ASIGNACIÓN DE ADMINISTRADOR A DANIEL
+        String correoAdmin = "danielgo34@gmail.com";
 
-        Usuario administrador = usuarioRepository.findByEmail(correoAdmin).orElse(null);
+        Usuario usuario = usuarioRepository.findByEmail(correoAdmin).orElse(null);
 
-        if (administrador == null) {
-            administrador = new Usuario("David Andrés Galvis", correoAdmin, passwordEncoder.encode(passwordFinal));
-            administrador.setRol(RolUsuario.ADMINISTRADOR);
-            LOGGER.info("Se creó el usuario administrador: " + correoAdmin);
+        if (usuario != null) {
+            usuario.setRol(RolUsuario.ADMINISTRADOR);
+            usuarioRepository.save(usuario);
+            LOGGER.info("Se asignó con éxito el rol de ADMINISTRADOR a: " + correoAdmin);
         } else {
-            administrador.setRol(RolUsuario.ADMINISTRADOR);
-            administrador.setPassword(passwordEncoder.encode(passwordFinal));
-            LOGGER.info("Se actualizó la contraseña del administrador: " + correoAdmin);
+            LOGGER.warn("El usuario " + correoAdmin + " aún no existe en la base de datos.");
         }
-        usuarioRepository.save(administrador);
 
         List<ZonaRiesgo> zonas = zonaRiesgoRepository.findAll();
         if (zonas.isEmpty()) {
