@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Usuarios - Ciudad Segura</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+    <!-- Barra de Navegación -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
+        <a class="navbar-brand" href="/">Ciudad Segura</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="/inicio">Inicio</a></li>
+                <li class="nav-item"><a class="nav-link" href="/reportes">Reportes</a></li>
+                <li class="nav-item"><a class="nav-link" href="/zonas-riesgo">Zonas de riesgo</a></li>
+                <li class="nav-item"><a class="nav-link" href="/alertas">Alertas</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/usuarios">Usuarios</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Contenido Principal -->
+    <div class="container mt-5">
+        <h2 class="mb-4">Gestión de Usuarios Registrados</h2>
+        
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <table class="table table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Correo Electrónico</th>
+                            <th>Rol Actual</th>
+                            <th>Cambiar Rol</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="u : ${usuarios}">
+                            <td th:text="${u.nombre}">Nombre</td>
+                            <td th:text="${u.email}">correo@test.com</td>
+                            <td>
+                                <span class="badge bg-secondary" th:text="${u.rol}">ROL</span>
+                            </td>
+                            <td>
+                                <form th:action="@{/usuarios/{id}/rol(id=${u.id})}" method="post" class="d-flex gap-2">
+                                    <select name="rol" class="form-select form-select-sm w-auto">
+                                        <option th:each="r : ${roles}" 
+                                                th:value="${r}" 
+                                                th:text="${r}" 
+                                                th:selected="${r == u.rol}">ROL</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-sm btn-primary">Actualizar</button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

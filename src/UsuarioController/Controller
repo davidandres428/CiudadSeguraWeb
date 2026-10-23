@@ -1,0 +1,37 @@
+package com.ciudadsegura.controller;
+
+import com.ciudadsegura.model.Usuario;
+import com.ciudadsegura.model.enums.RolUsuario;
+import com.ciudadsegura.repository.UsuarioRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+
+@Controller
+@RequestMapping("/usuarios")
+public class UsuarioController {
+
+    private final UsuarioRepository usuarioRepository;
+
+    public UsuarioController(UsuarioRepository usuarioRepository) {
+        this.usuarioRepository = usuarioRepository;
+    }
+
+    // Mostrar la lista de usuarios y el desplegable de roles
+    @GetMapping
+    public String listarUsuarios(Model model) {
+        model.addAttribute("usuarios", usuarioRepository.findAll());
+        model.addAttribute("roles", RolUsuario.values());
+        return "usuarios"; // Nombre de la vista HTML que crearemos
+    }
+
+    // Cambiar el rol de un usuario desde el desplegable
+    @PostMapping("/{id}/rol")
+    public String cambiarRol(@PathVariable Long id, @RequestParam RolUsuario rol) {
+        Usuario usuario = usuarioRepository.findById(id).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        usuario.setRol(rol);
+        usuarioRepository.save(usuario);
+        return "redirect:/usuarios";
+    }
+}
