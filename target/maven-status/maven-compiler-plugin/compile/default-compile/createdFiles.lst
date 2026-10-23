@@ -24,7 +24,6 @@ com\ciudadsegura\controller\AlertaController.class
 com\ciudadsegura\dto\PqrsRequest.class
 com\ciudadsegura\config\DataInitializer$1.class
 com\ciudadsegura\model\enums\EstadoPqrs.class
-com\ciudadsegura\config\DataInitializer.class
 com\ciudadsegura\service\SeedMasivoService$ReporteSpec.class
 com\ciudadsegura\service\UsuarioService.class
 com\ciudadsegura\security\JwtTokenService.class

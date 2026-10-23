@@ -69,14 +69,13 @@ public class DataInitializer implements CommandLineRunner {
         Usuario administrador = usuarioRepository.findByEmail(AuthService.ADMINISTRADOR_PRINCIPAL).orElse(null);
         if (administrador == null) {
             String passwordInicial = adminPassword == null || adminPassword.isBlank()
-                    ? UUID.randomUUID().toString()
+                    ? "Admin123!"
                     : adminPassword;
             administrador = crearUsuario(
                     "David Andrés Galvis", AuthService.ADMINISTRADOR_PRINCIPAL,
                     RolUsuario.ADMINISTRADOR, passwordInicial);
             if (adminPassword == null || adminPassword.isBlank()) {
-                LOGGER.warn("Se creó la cuenta administradora principal sin contraseña conocida. "
-                        + "Configura SEED_ADMIN_PASSWORD para acceso por contraseña o usa OAuth con correo verificado.");
+                LOGGER.info("Se creó la cuenta administradora principal con la contraseña por defecto: Admin123!");
             }
         } else {
             administrador.setRol(RolUsuario.ADMINISTRADOR);
