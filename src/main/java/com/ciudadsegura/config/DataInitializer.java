@@ -62,48 +62,53 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
-        boolean inicializarDatos = baseDeDatosVacia();
-        Usuario administrador = usuarioRepository.findByEmail(AuthService.ADMINISTRADOR_PRINCIPAL).orElse(null);
-        if (administrador == null && (adminPassword == null || adminPassword.length() < 12)) {
-            if (inicializarDatos) {
-                throw new IllegalStateException(
-                        "Define SEED_ADMIN_PASSWORD con al menos 12 caracteres para habilitar los datos de prueba.");
-            }
-            return;
+        if (adminPassword == null || adminPassword.length() < 12) {
+            throw new IllegalStateException(
+                    "Define SEED_ADMIN_PASSWORD con al menos 12 caracteres para habilitar el sembrado seguro.");
         }
+
+        Usuario administrador = usuarioRepository.findByEmail(AuthService.ADMINISTRADOR_PRINCIPAL).orElse(null);
         if (administrador == null) {
             administrador = crearUsuario(
                     "David Andrés Galvis", AuthService.ADMINISTRADOR_PRINCIPAL,
                     RolUsuario.ADMINISTRADOR, adminPassword);
-        } else if (administrador.getRol() != RolUsuario.ADMINISTRADOR) {
+        } else {
             administrador.setRol(RolUsuario.ADMINISTRADOR);
+            administrador.setPassword(passwordEncoder.encode(adminPassword));
         }
         usuarioRepository.save(administrador);
-        if (!inicializarDatos) {
-            return;
+
+        List<ZonaRiesgo> zonas = zonaRiesgoRepository.findAll();
+        if (zonas.isEmpty()) {
+            zonas = zonaRiesgoRepository.saveAll(crearZonas());
         }
 
-        Usuario ciudadanoUno = crearUsuario(
-                "Laura Méndez", "laura.mendez@ciudadsegura.test", RolUsuario.CIUDADANO, UUID.randomUUID().toString());
-        Usuario ciudadanoDos = crearUsuario(
-                "Andrés Castillo", "andres.castillo@ciudadsegura.test", RolUsuario.CIUDADANO, UUID.randomUUID().toString());
-        Usuario ciudadanoTres = crearUsuario(
-                "Camila Rojas", "camila.rojas@ciudadsegura.test", RolUsuario.CIUDADANO, UUID.randomUUID().toString());
-        usuarioRepository.saveAll(List.of(administrador, ciudadanoUno, ciudadanoDos, ciudadanoTres));
+        if (reporteRepository.count() == 0) {
+            List<Usuario> ciudadanos = asegurarCiudadanosDemostracion();
+            reporteRepository.saveAll(crearReportes(ciudadanos, zonas));
+        }
 
-        List<ZonaRiesgo> zonas = zonaRiesgoRepository.saveAll(crearZonas());
-        reporteRepository.saveAll(crearReportes(
-                List.of(ciudadanoUno, ciudadanoDos, ciudadanoTres), zonas));
-        alertaRepository.saveAll(crearAlertas(zonas));
-        noticiaRepository.saveAll(crearNoticias());
+        if (alertaRepository.count() == 0) {
+            alertaRepository.saveAll(crearAlertas(zonas));
+        }
+        if (noticiaRepository.count() == 0) {
+            noticiaRepository.saveAll(crearNoticias());
+        }
     }
 
-    private boolean baseDeDatosVacia() {
-        return usuarioRepository.count() == 0
-                && zonaRiesgoRepository.count() == 0
-                && reporteRepository.count() == 0
-                && alertaRepository.count() == 0
-                && noticiaRepository.count() == 0;
+    private List<Usuario> asegurarCiudadanosDemostracion() {
+        List<Usuario> ciudadanos = new ArrayList<>();
+        String[][] datos = {
+                {"Laura Méndez", "laura.mendez@ciudadsegura.test"},
+                {"Andrés Castillo", "andres.castillo@ciudadsegura.test"},
+                {"Camila Rojas", "camila.rojas@ciudadsegura.test"}
+        };
+        for (String[] dato : datos) {
+            Usuario ciudadano = usuarioRepository.findByEmail(dato[1]).orElseGet(() ->
+                    crearUsuario(dato[0], dato[1], RolUsuario.CIUDADANO, UUID.randomUUID().toString()));
+            ciudadanos.add(usuarioRepository.save(ciudadano));
+        }
+        return ciudadanos;
     }
 
     private Usuario crearUsuario(String nombre, String email, RolUsuario rol, String password) {
@@ -145,6 +150,9 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private List<ReporteIncidente> crearReportes(List<Usuario> usuarios, List<ZonaRiesgo> zonas) {
+        if (zonas.isEmpty()) {
+            throw new IllegalStateException("No es posible sembrar reportes sin zonas disponibles.");
+        }
         TipoReporte[] tipos = {
                 TipoReporte.ROBO, TipoReporte.VANDALISMO, TipoReporte.DISTURBIO,
                 TipoReporte.ACCIDENTE, TipoReporte.ILUMINACION_DEFICIENTE,
@@ -207,10 +215,10 @@ public class DataInitializer implements CommandLineRunner {
                         "PREVENTIVA", SeveridadAlerta.ALTA, zonas.get(0), 0),
                 crearAlerta("Atención a cierres y desvíos viales",
                         "Se recomienda planear el recorrido y seguir las indicaciones de movilidad en los accesos del sector.",
-                        "VIAL", SeveridadAlerta.MEDIA, zonas.get(4), 1),
+                        "VIAL", SeveridadAlerta.MEDIA, zonas.get(Math.min(4, zonas.size() - 1)), 1),
                 crearAlerta("Recomendación por lluvias y tormenta eléctrica",
                         "Evita permanecer bajo árboles durante la tormenta y reporta encharcamientos que afecten el paso peatonal.",
-                        "CLIMATICA", SeveridadAlerta.ALTA, zonas.get(9), 0));
+                        "CLIMATICA", SeveridadAlerta.ALTA, zonas.get(Math.min(9, zonas.size() - 1)), 0));
     }
 
     private Alerta crearAlerta(

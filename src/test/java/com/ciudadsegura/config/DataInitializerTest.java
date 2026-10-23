@@ -60,7 +60,7 @@ class DataInitializerTest {
 
     @Test
     @Transactional
-    void inicializaDatosGeograficosVariadosYNoDuplicaNiPueblaUnaBaseParcial() {
+    void completaCadaTablaVaciaSinDuplicarDatosExistentes() {
         assertEquals(4, usuarioRepository.count());
         assertEquals(15, zonaRiesgoRepository.count());
         assertEquals(128, reporteRepository.count());
@@ -121,6 +121,15 @@ class DataInitializerTest {
         assertEquals(3, alertaRepository.count());
         assertEquals(5, noticiaRepository.count());
 
+        reporteRepository.deleteAll();
+        alertaRepository.deleteAll();
+        zonaRiesgoRepository.deleteAll();
+        dataInitializer.run();
+        assertEquals(15, zonaRiesgoRepository.count());
+        assertEquals(128, reporteRepository.count());
+        assertEquals(3, alertaRepository.count());
+        assertEquals(5, noticiaRepository.count());
+
         noticiaRepository.deleteAll();
         alertaRepository.deleteAll();
         reporteRepository.deleteAll();
@@ -133,14 +142,18 @@ class DataInitializerTest {
 
         dataInitializer.run();
 
-        assertEquals(2, usuarioRepository.count());
-        assertEquals(0, zonaRiesgoRepository.count());
-        assertEquals(0, reporteRepository.count());
-        assertEquals(0, alertaRepository.count());
-        assertEquals(0, noticiaRepository.count());
+        assertEquals(5, usuarioRepository.count());
+        assertEquals(15, zonaRiesgoRepository.count());
+        assertEquals(128, reporteRepository.count());
+        assertEquals(3, alertaRepository.count());
+        assertEquals(5, noticiaRepository.count());
         assertNotNull(usuarioRepository.findByEmail("existente@example.test").orElse(null));
-        assertEquals(RolUsuario.ADMINISTRADOR, usuarioRepository
-                .findByEmail("david.andresgalvis@gmail.com").orElseThrow().getRol());
+        Usuario adminInicializado = usuarioRepository.findByEmail("david.andresgalvis@gmail.com").orElseThrow();
+        assertEquals(RolUsuario.ADMINISTRADOR, adminInicializado.getRol());
+        assertTrue(passwordEncoder.matches("local-seed-test-password", adminInicializado.getPassword()));
+        assertEquals(4, usuarioRepository.findAll().stream()
+                .filter(usuario -> usuario.getRol() == RolUsuario.CIUDADANO)
+                .count());
         assertFalse(passwordEncoder.matches("local-seed-test-password", existente.getPassword()));
     }
 }

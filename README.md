@@ -87,14 +87,12 @@ desde Docker en Render, incluye el JAR de la raíz en Git junto con el Dockerfil
 
 ### Datos iniciales de demostración
 
-El inicializador está desactivado por defecto para proteger las bases de datos existentes.
-Para habilitarlo, configura `SEED_DATA_ENABLED=true` y `SEED_ADMIN_PASSWORD` (mínimo 12 caracteres)
-en el entorno antes del primer inicio. En Render, añade ambas variables en Environment; usa una
-contraseña administrativa privada y no la guardes en el repositorio. Los datos de demostración se
-insertan solo cuando las tablas de usuarios, zonas, reportes, alertas y noticias están vacías; el
-administrador principal también se aprovisiona si falta en una base existente con el seed habilitado.
-Funciona con el perfil `prod` si se habilita explícitamente. Crea tres ciudadanos,
-15 zonas con estado de cámaras e inspección, 128 reportes, tres alertas activas y cinco comunicados.
+El inicializador está desactivado por defecto en desarrollo. Con el perfil `prod` se activa por
+defecto y requiere `SEED_ADMIN_PASSWORD` (mínimo 12 caracteres), configurada como secreto de entorno,
+nunca en el repositorio. En cada inicio completa las tablas vacías sin duplicar los datos existentes:
+15 zonas, 128 reportes georreferenciados, tres alertas activas y cinco comunicados. La cuenta
+administradora principal se crea o actualiza con el rol administrativo y una contraseña BCrypt derivada
+del secreto configurado. Crea los usuarios de demostración necesarios para asociar reportes.
 Las contraseñas de los ciudadanos de demostración se generan aleatoriamente y no son utilizables
 para iniciar sesión.
 
@@ -105,10 +103,28 @@ $env:SEED_ADMIN_PASSWORD = "elige-una-clave-local-segura"
 .\mvnw.cmd spring-boot:run
 ```
 
-La cuenta principal de administración es `david.andresgalvis@gmail.com`. Los datos de demostración
-solo se siembran cuando usuarios, zonas, reportes, alertas y noticias están todos vacíos; una base
-con datos existentes no recibe las colecciones de prueba. Para volver a probarlo en local, usa una base H2 en
-memoria vacía o elimina explícitamente los datos locales.
+La cuenta principal de administración es `david.andresgalvis@gmail.com`. Si una tabla de datos de
+demostración está vacía, esa colección se restaura aunque las demás ya tengan registros. Para volver
+a probarlo en local, usa una base H2 en memoria o configura PostgreSQL para conservar datos entre reinicios.
+
+### Persistencia en Render
+
+H2 en memoria es solo para desarrollo local: sus datos se pierden al reiniciar el proceso. Para mantener
+los registros en Render, crea y conecta una base **Render PostgreSQL** persistente y configura el servicio
+Docker con estas variables en Environment:
+
+| Variable | Valor |
+|---|---|
+| `SPRING_PROFILES_ACTIVE` | `prod` |
+| `PGHOST`, `PGPORT`, `PGDATABASE`, `PGUSER`, `PGPASSWORD` | Datos de conexión de la base Render PostgreSQL (preferiblemente su URL interna desglosada) |
+| `JWT_SECRET` | Secreto aleatorio de al menos 32 bytes |
+| `SEED_ADMIN_PASSWORD` | Contraseña administrativa privada de al menos 12 caracteres |
+| `SEED_DATA_ENABLED` | `true` (valor por defecto en el perfil `prod`) |
+
+Render debe usar la base PostgreSQL, no H2 ni un disco dentro del contenedor, que no es persistente.
+En la aplicación, la contraseña administrativa configurada se guarda únicamente como BCrypt; no se
+establece ni se publica una contraseña fija compartida como `Admin123!`. La columna de rol de la entidad
+usa `ADMINISTRADOR`, que la seguridad de la aplicación traduce a la autoridad `ROLE_ADMIN`.
 
 ### Despliegue en Railway
 
