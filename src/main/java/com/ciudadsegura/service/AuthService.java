@@ -7,7 +7,7 @@ import com.ciudadsegura.exception.EmailDuplicadoException;
 import com.ciudadsegura.model.Usuario;
 import com.ciudadsegura.model.enums.RolUsuario;
 import com.ciudadsegura.repository.UsuarioRepository;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Locale;
@@ -19,23 +19,28 @@ public class AuthService {
     public static final String ADMINISTRADOR_PRINCIPAL = "david.andresgalvis@gmail.com";
 
     private final UsuarioRepository usuarioRepository;
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final PasswordEncoder passwordEncoder;
 
-    public AuthService(UsuarioRepository usuarioRepository) {
+    public AuthService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public Usuario registrar(RegistroRequest request) {
-        if (ADMINISTRADOR_PRINCIPAL.equalsIgnoreCase(request.getEmail().trim())) {
-            throw new EmailDuplicadoException(
-                    "Este correo está reservado para la cuenta de administración principal.");
-        }
         if (usuarioRepository.existsByEmail(request.getEmail())) {
             throw new EmailDuplicadoException("Ya existe un usuario registrado con el email " + request.getEmail());
         }
+        
         String hash = passwordEncoder.encode(request.getPassword());
         Usuario usuario = new Usuario(request.getNombre(), request.getEmail(), hash);
-        usuario.setRol(RolUsuario.CIUDADANO);
+        
+        // Si es el primer usuario de la base de datos, se convierte en Administrador automáticamente
+        if (usuarioRepository.count() == 0) {
+            usuario.setRol(RolUsuario.ADMINISTRADOR);
+        } else {
+            usuario.setRol(RolUsuario.CIUDADANO);
+        }
+        
         return usuarioRepository.save(usuario);
     }
 
@@ -46,38 +51,29 @@ public class AuthService {
         if (!passwordEncoder.matches(request.getPassword(), usuario.getPassword())) {
             throw new CredencialesInvalidasException("Email o contraseña incorrectos");
         }
-        if (ADMINISTRADOR_PRINCIPAL.equalsIgnoreCase(usuario.getEmail())
-                && usuario.getRol() != RolUsuario.ADMINISTRADOR) {
-            usuario.setRol(RolUsuario.ADMINISTRADOR);
-            usuario = usuarioRepository.save(usuario);
-        }
+
         return usuario;
     }
 
     public Usuario loginSocial(String email, String nombre, boolean correoVerificado) {
         if (email == null || email.isBlank()) {
-            throw new CredencialesInvalidasException(
-                    "El proveedor social no compartió un correo electrónico.");
-        }
-        String correo = email.trim().toLowerCase(Locale.ROOT);
-        boolean administradorPrincipal =
-                ADMINISTRADOR_PRINCIPAL.equalsIgnoreCase(correo);
-        if (administradorPrincipal && !correoVerificado) {
-            throw new CredencialesInvalidasException(
-                    "La cuenta principal requiere un correo verificado por el proveedor.");
+            throw new CredencialesInvalidasException("El proveedor social no compartió un correo electrónico.");
         }
 
-        Usuario usuario = usuarioRepository.findByEmail(correo).orElseGet(() -> {
-            Usuario nuevo = new Usuario(
-                    nombre == null || nombre.isBlank() ? correo : nombre.trim(),
-                    correo,
-                    passwordEncoder.encode(UUID.randomUUID().toString()));
-            nuevo.setRol(administradorPrincipal ? RolUsuario.ADMINISTRADOR : RolUsuario.CIUDADANO);
+        String correo = email.trim().toLowerCase(Locale.ROOT);
+        
+        return usuarioRepository.findByEmail(correo).orElseGet(() -> {
+            Usuario nuevo = new Usuario();
+            nuevo.setNombre(nombre == null || nombre.isBlank() ? correo : nombre.trim());
+            nuevo.setEmail(correo);
+            nuevo.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
+            
+            if (usuarioRepository.count() == 0) {
+                nuevo.setRol(RolUsuario.ADMINISTRADOR);
+            } else {
+                nuevo.setRol(RolUsuario.CIUDADANO);
+            }
             return usuarioRepository.save(nuevo);
         });
-        if (administradorPrincipal && usuario.getRol() != RolUsuario.ADMINISTRADOR) {
-            usuario.setRol(RolUsuario.ADMINISTRADOR);
-        }
-        return usuarioRepository.save(usuario);
     }
 }

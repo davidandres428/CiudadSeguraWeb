@@ -32,6 +32,27 @@ public class UsuarioService {
                 .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado con id " + id));
     }
 
+    // NUEVO MÉTODO DE REGISTRO CON ADMINISTRADOR AUTOMÁTICO PARA EL PRIMERO
+    public Usuario registrar(String nombre, String email, String password) {
+        if (usuarioRepository.existsByEmail(email)) {
+            throw new EmailDuplicadoException("Ya existe un usuario registrado con el email " + email);
+        }
+        
+        Usuario usuario = new Usuario();
+        usuario.setNombre(nombre);
+        usuario.setEmail(email);
+        usuario.setPassword(passwordEncoder.encode(password));
+        
+        // Si no hay usuarios en la base de datos, el primero es ADMINISTRADOR
+        if (usuarioRepository.count() == 0) {
+            usuario.setRol(RolUsuario.ADMINISTRADOR);
+        } else {
+            usuario.setRol(RolUsuario.CIUDADANO);
+        }
+        
+        return usuarioRepository.save(usuario);
+    }
+
     public Usuario actualizar(Long id, UsuarioUpdateRequest datos) {
         Usuario usuario = buscarPorId(id);
         protegerCuentaPrincipal(usuario);
@@ -72,11 +93,3 @@ public class UsuarioService {
         }
         usuario.setRol(rol);
     }
-
-    private void protegerCuentaPrincipal(Usuario usuario) {
-        if (AuthService.ADMINISTRADOR_PRINCIPAL.equalsIgnoreCase(usuario.getEmail())) {
-            throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN, "La cuenta de administración principal no se puede modificar ni eliminar.");
-        }
-    }
-}
