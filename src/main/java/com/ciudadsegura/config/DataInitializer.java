@@ -45,9 +45,6 @@ public class DataInitializer implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
     private final String adminPassword;
 
-    // CORREO FIJO DE TU CUENTA ADMINISTRADORA
-    private static final String CORREO_ADMIN = "david.andresgalvis@gmail.com";
-
     public DataInitializer(
             UsuarioRepository usuarioRepository,
             ZonaRiesgoRepository zonaRiesgoRepository,
@@ -68,16 +65,19 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
-        // Buscar o crear al administrador usando tu correo exacto de Gmail
-        Usuario administrador = usuarioRepository.findByEmail(CORREO_ADMIN).orElse(null);
-        String passwordFinal = (adminPassword == null || adminPassword.isBlank()) ? "Admin123!" : adminPassword;
+        String correoAdmin = "david.andresgalvis@gmail.com";
+        String passwordFinal = "Admin123!";
+
+        Usuario administrador = usuarioRepository.findByEmail(correoAdmin).orElse(null);
 
         if (administrador == null) {
-            administrador = crearUsuario("David Andrés Galvis", CORREO_ADMIN, RolUsuario.ADMINISTRADOR, passwordFinal);
-            LOGGER.info("Se creó la cuenta administradora principal para: " + CORREO_ADMIN);
+            administrador = new Usuario("David Andrés Galvis", correoAdmin, passwordEncoder.encode(passwordFinal));
+            administrador.setRol(RolUsuario.ADMINISTRADOR);
+            LOGGER.info("Se creó el usuario administrador: " + correoAdmin);
         } else {
             administrador.setRol(RolUsuario.ADMINISTRADOR);
             administrador.setPassword(passwordEncoder.encode(passwordFinal));
+            LOGGER.info("Se actualizó la contraseña del administrador: " + correoAdmin);
         }
         usuarioRepository.save(administrador);
 
@@ -273,6 +273,6 @@ public class DataInitializer implements CommandLineRunner {
             double latitud,
             double longitud,
             String estadoCamaras,
-            int diasInspeccion) {
+            int diasDesdeInspeccion) {
     }
 }
