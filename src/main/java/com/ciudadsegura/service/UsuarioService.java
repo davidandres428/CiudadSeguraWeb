@@ -1,6 +1,7 @@
 package com.ciudadsegura.service;
 
 import com.ciudadsegura.model.Usuario;
+import com.ciudadsegura.model.enums.RolUsuario;
 import com.ciudadsegura.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,9 +35,10 @@ public class UsuarioService {
         // Encriptar contraseña antes de guardar
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
         
-        // Asignar rol por defecto para todos
-        if (usuario.getRol() == null || usuario.getRol().isEmpty()) {
-            usuario.setRol("USUARIO");
+       public Usuario registrarUsuario(Usuario usuario) {
+        // Asignar rol por defecto para todos de forma segura
+        if (usuario.getRol() == null) {
+            usuario.setRol(RolUsuario.USUARIO);
         }
         
         return usuarioRepository.save(usuario);
