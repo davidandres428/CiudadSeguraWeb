@@ -1,95 +1,62 @@
 package com.ciudadsegura.service;
 
-import com.ciudadsegura.dto.UsuarioUpdateRequest;
-import com.ciudadsegura.exception.EmailDuplicadoException;
-import com.ciudadsegura.exception.RecursoNoEncontradoException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import com.ciudadsegura.model.Usuario;
-import com.ciudadsegura.model.enums.RolUsuario;
 import com.ciudadsegura.repository.UsuarioRepository;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UsuarioService {
 
-    private final UsuarioRepository usuarioRepository;
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
-    public UsuarioService(UsuarioRepository usuarioRepository) {
-        this.usuarioRepository = usuarioRepository;
-    }
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-    public List<Usuario> listarTodos() {
+    public List<Usuario> obtenerTodos() {
         return usuarioRepository.findAll();
     }
 
-    public Usuario buscarPorId(Long id) {
-        return usuarioRepository.findById(id)
-                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado con id " + id));
+    public Optional<Usuario> obtenerPorId(Long id) {
+        return usuarioRepository.findById(id);
     }
 
-    // NUEVO MÉTODO DE REGISTRO CON ADMINISTRADOR AUTOMÁTICO PARA EL PRIMERO
-    public Usuario registrar(String nombre, String email, String password) {
-        if (usuarioRepository.existsByEmail(email)) {
-            throw new EmailDuplicadoException("Ya existe un usuario registrado con el email " + email);
-        }
+    public Optional<Usuario> obtenerPorEmail(String email) {
+        return usuarioRepository.findByEmail(email);
+    }
+
+    public Usuario registrarUsuario(Usuario usuario) {
+        // Encriptar contraseña antes de guardar
+        usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
         
-        Usuario usuario = new Usuario();
-        usuario.setNombre(nombre);
-        usuario.setEmail(email);
-        usuario.setPassword(passwordEncoder.encode(password));
-        
-        // Si no hay usuarios en la base de datos, el primero es ADMINISTRADOR
-        if (usuarioRepository.count() == 0) {
-            usuario.setRol(RolUsuario.ADMINISTRADOR);
-        } else {
-            usuario.setRol(RolUsuario.CIUDADANO);
+        // Asignar rol por defecto para todos
+        if (usuario.getRol() == null || usuario.getRol().isEmpty()) {
+            usuario.setRol("USUARIO");
         }
         
         return usuarioRepository.save(usuario);
     }
 
-    public Usuario actualizar(Long id, UsuarioUpdateRequest datos) {
-        Usuario usuario = buscarPorId(id);
-        protegerCuentaPrincipal(usuario);
-        usuario.setNombre(datos.getNombre());
-        if (!usuario.getEmail().equalsIgnoreCase(datos.getEmail())
-                && usuarioRepository.existsByEmail(datos.getEmail())) {
-            throw new EmailDuplicadoException("Ya existe un usuario registrado con el email " + datos.getEmail());
+    public Usuario actualizarUsuario(Long id, Usuario usuarioDetalles) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        usuario.setNombre(usuarioDetalles.getNombre());
+        usuario.setEmail(usuarioDetalles.getEmail());
+        
+        if (usuarioDetalles.getPassword() != null && !usuarioDetalles.getPassword().isEmpty()) {
+            usuario.setPassword(passwordEncoder.encode(usuarioDetalles.getPassword()));
         }
-        usuario.setEmail(datos.getEmail());
-        if (datos.getRol() != null) {
-            cambiarRol(usuario, datos.getRol());
-        }
-        if (datos.getPassword() != null && !datos.getPassword().isBlank()) {
-            usuario.setPassword(passwordEncoder.encode(datos.getPassword()));
-        }
+
         return usuarioRepository.save(usuario);
     }
 
-    public void eliminar(Long id) {
-        Usuario usuario = buscarPorId(id);
-        protegerCuentaPrincipal(usuario);
-        if (usuario.getRol() == RolUsuario.ADMINISTRADOR
-                && usuarioRepository.countByRol(RolUsuario.ADMINISTRADOR) <= 1) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT, "No se puede eliminar el último administrador.");
-        }
-        usuarioRepository.delete(usuario);
+    public void eliminarUsuario(Long id) {
+        usuarioRepository.deleteById(id);
     }
-
-    private void cambiarRol(Usuario usuario, RolUsuario rol) {
-        if (rol == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El rol es obligatorio.");
-        }
-        if (usuario.getRol() == RolUsuario.ADMINISTRADOR && rol != RolUsuario.ADMINISTRADOR
-                && usuarioRepository.countByRol(RolUsuario.ADMINISTRADOR) <= 1) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT, "No se puede quitar el rol al último administrador.");
-        }
-        usuario.setRol(rol);
-    }
+}
