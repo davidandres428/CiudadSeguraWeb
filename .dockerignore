@@ -4,5 +4,6 @@
 .vscode
 e2e-tests
 target
+*.jar
 src.zip
 *.log
