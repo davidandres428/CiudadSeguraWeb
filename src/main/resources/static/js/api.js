@@ -55,6 +55,7 @@ const CiudadSeguraAPI = {
     listarUsuarios: () => apiFetch("/usuarios"),
     obtenerUsuario: (id) => apiFetch(`/usuarios/${id}`),
     actualizarUsuario: (id, datos) => apiFetch(`/usuarios/${id}`, { method: "PUT", body: JSON.stringify(datos) }),
+    cambiarRolUsuario: (id, rol) => apiFetch(`/usuarios/${id}/rol?${new URLSearchParams({ rol })}`, { method: "PUT" }),
     eliminarUsuario: (id) => apiFetch(`/usuarios/${id}`, { method: "DELETE" }),
 
     // --- Reportes de incidentes ---
