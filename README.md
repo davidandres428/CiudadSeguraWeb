@@ -81,7 +81,9 @@ docker run --rm -p 8080:8080 ciudad-segura
 El Dockerfile compila el proyecto con Maven y Java 25 antes de copiar el JAR resultante a la
 imagen de ejecución. Así, cada despliegue de Render usa el código del commit actual y no un JAR
 antiguo guardado en la raíz del repositorio. La aplicación queda disponible en
-`http://localhost:8080`; Render puede asignar el puerto mediante `PORT`.
+`http://localhost:8080`; Render puede asignar el puerto mediante `PORT`. La imagen activa el
+perfil `prod`, por lo que requiere las variables de PostgreSQL, `JWT_SECRET` y, para iniciar
+sesión como administrador, `SEED_ADMIN_PASSWORD`.
 
 ### Datos iniciales de demostración
 
@@ -115,7 +117,7 @@ Docker con estas variables en Environment:
 
 | Variable | Valor |
 |---|---|
-| `SPRING_PROFILES_ACTIVE` | `prod` |
+| `SPRING_PROFILES_ACTIVE` | `prod` (también se activa por defecto en la imagen Docker) |
 | `PGHOST`, `PGPORT`, `PGDATABASE`, `PGUSER`, `PGPASSWORD` | Datos de conexión de la base Render PostgreSQL (preferiblemente su URL interna desglosada) |
 | `JWT_SECRET` | Secreto aleatorio de al menos 32 bytes |
 | `SEED_ADMIN_PASSWORD` | Opcional, pero recomendado: contraseña privada de al menos 12 caracteres, no compartida |
