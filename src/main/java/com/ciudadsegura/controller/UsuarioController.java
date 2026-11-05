@@ -1,34 +1,23 @@
 package com.ciudadsegura.controller;
 
-import com.ciudadsegura.model.Usuario;
 import com.ciudadsegura.model.enums.RolUsuario;
-import com.ciudadsegura.repository.UsuarioRepository;
+import com.ciudadsegura.service.UsuarioService;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/usuarios")
 public class UsuarioController {
 
-    private final UsuarioRepository usuarioRepository;
+    private final UsuarioService usuarioService;
 
-    public UsuarioController(UsuarioRepository usuarioRepository) {
-        this.usuarioRepository = usuarioRepository;
-    }
-
-    @GetMapping
-    public String listarUsuarios(Model model) {
-        model.addAttribute("usuarios", usuarioRepository.findAll());
-        model.addAttribute("roles", RolUsuario.values());
-        return "usuarios";
+    public UsuarioController(UsuarioService usuarioService) {
+        this.usuarioService = usuarioService;
     }
 
     @PostMapping("/{id}/rol")
     public String cambiarRol(@PathVariable Long id, @RequestParam RolUsuario rol) {
-        Usuario usuario = usuarioRepository.findById(id).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        usuario.setRol(rol);
-        usuarioRepository.save(usuario);
+        usuarioService.cambiarRol(id, rol);
         return "redirect:/usuarios";
     }
 }

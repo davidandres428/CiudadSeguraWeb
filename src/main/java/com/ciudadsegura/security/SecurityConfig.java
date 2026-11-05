@@ -106,6 +106,7 @@ public class SecurityConfig {
                 .requestMatchers("/*.html", "/css/**", "/js/**").permitAll()
                 .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
                 .requestMatchers("/api/usuarios/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/usuarios", "/usuarios/**").hasAuthority("ROLE_ADMIN")
                 .requestMatchers("/api/reportes/metricas", "/api/reportes/exportar/csv")
                     .hasAuthority("ROLE_ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/reportes").authenticated()

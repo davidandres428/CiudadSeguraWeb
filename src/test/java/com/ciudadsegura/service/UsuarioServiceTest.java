@@ -10,6 +10,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,6 +20,7 @@ import static com.ciudadsegura.model.enums.RolUsuario.ADMINISTRADOR;
 import static com.ciudadsegura.model.enums.RolUsuario.CIUDADANO;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -25,6 +28,9 @@ class UsuarioServiceTest {
 
     @Mock
     private UsuarioRepository usuarioRepository;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     @InjectMocks
     private UsuarioService usuarioService;
@@ -35,6 +41,8 @@ class UsuarioServiceTest {
     void setUp() {
         usuario = new Usuario("Ana Torres", "ana@example.com", "hashDeEjemplo");
         usuario.setId(1L);
+        lenient().when(passwordEncoder.encode(any(CharSequence.class)))
+                .thenAnswer(invocation -> new BCryptPasswordEncoder().encode(invocation.getArgument(0)));
     }
 
     @Test

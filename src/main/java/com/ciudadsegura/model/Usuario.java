@@ -33,7 +33,7 @@ public class Usuario {
     private String password;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "rol", nullable = false)
     private RolUsuario rol = RolUsuario.CIUDADANO;
 
     @Column(name = "fecha_registro", nullable = false, updatable = false)
@@ -51,6 +51,9 @@ public class Usuario {
     @PrePersist
     public void prePersist() {
         this.fechaRegistro = LocalDateTime.now();
+        if (this.rol == null) {
+            this.rol = RolUsuario.CIUDADANO;
+        }
     }
 
     public Long getId() {

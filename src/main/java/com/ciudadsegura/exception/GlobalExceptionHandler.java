@@ -66,6 +66,13 @@ public class GlobalExceptionHandler {
         return construir(HttpStatus.FORBIDDEN, ex.getMessage());
     }
 
+    @ExceptionHandler(org.springframework.web.server.ResponseStatusException.class)
+    public ResponseEntity<ErrorResponse> manejarEstadoHttp(
+            org.springframework.web.server.ResponseStatusException ex) {
+        return ResponseEntity.status(ex.getStatusCode())
+                .body(new ErrorResponse(ex.getStatusCode().value(), ex.getReason()));
+    }
+
     @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
     public ResponseEntity<Map<String, String>> manejarIntegridad(org.springframework.dao.DataIntegrityViolationException ex) {
         return construirError(HttpStatus.CONFLICT, "Operación no permitida",

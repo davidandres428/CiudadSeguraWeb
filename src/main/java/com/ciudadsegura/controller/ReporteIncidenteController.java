@@ -92,6 +92,6 @@ public class ReporteIncidenteController {
 
     private boolean esAdministrador(Authentication authentication) {
         return authentication.getAuthorities().stream()
-                .anyMatch(authority -> "SCOPE_ADMINISTRADOR".equals(authority.getAuthority()));
+                .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
     }
 }

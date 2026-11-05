@@ -126,6 +126,9 @@ class ProteccionDashboardTest {
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.rol").value("ADMINISTRADOR"));
+
+        org.junit.jupiter.api.Assertions.assertEquals(RolUsuario.ADMINISTRADOR,
+                usuarioRepository.findById(ciudadano.getId()).orElseThrow().getRol());
     }
 
     @Test

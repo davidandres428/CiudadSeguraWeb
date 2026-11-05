@@ -14,11 +14,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,8 +30,21 @@ class AuthServiceTest {
     @Mock
     private UsuarioRepository usuarioRepository;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     @InjectMocks
     private AuthService authService;
+
+    @BeforeEach
+    void configurarCodificador() {
+        BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder();
+        lenient().when(passwordEncoder.encode(any(CharSequence.class)))
+                .thenAnswer(invocation -> bcrypt.encode(invocation.getArgument(0)));
+        lenient().when(passwordEncoder.matches(any(CharSequence.class), anyString()))
+                .thenAnswer(invocation -> bcrypt.matches(
+                        invocation.getArgument(0), invocation.getArgument(1)));
+    }
 
     @Test
     void registrar_conEmailNuevo_debeCifrarLaContrasenaYGuardar() {
