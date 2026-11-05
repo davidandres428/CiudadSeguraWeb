@@ -2,6 +2,7 @@ package com.ciudadsegura.service;
 
 import com.ciudadsegura.dto.ReporteMetricasResponse;
 import com.ciudadsegura.exception.RecursoNoEncontradoException;
+import com.ciudadsegura.exception.CredencialesInvalidasException;
 import com.ciudadsegura.model.ReporteIncidente;
 import com.ciudadsegura.model.Usuario;
 import com.ciudadsegura.model.enums.EstadoReporte;
@@ -101,14 +102,22 @@ public class ReporteIncidenteService {
 
     @Transactional
     public ReporteIncidente crear(ReporteIncidente datos, String emailUsuario) {
-        Usuario usuario = usuarioRepository.findByEmail(emailUsuario)
-                .orElseThrow(() -> new RecursoNoEncontradoException(
-                        "No existe un usuario registrado para asociar el reporte"));
+        Usuario usuario = buscarUsuarioAutenticado(emailUsuario);
 
         ReporteIncidente reporte = new ReporteIncidente();
         copiarDatosEditables(datos, reporte);
         reporte.setUsuario(usuario);
         return reporteIncidenteRepository.save(reporte);
+    }
+
+    private Usuario buscarUsuarioAutenticado(String emailUsuario) {
+        if (emailUsuario == null || emailUsuario.isBlank()) {
+            throw new CredencialesInvalidasException(
+                    "No se pudo identificar al usuario autenticado para asociar el registro.");
+        }
+        return usuarioRepository.findByEmail(emailUsuario)
+                .orElseThrow(() -> new RecursoNoEncontradoException(
+                        "No existe un usuario registrado para asociar el registro."));
     }
 
     @Transactional

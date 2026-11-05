@@ -2,7 +2,9 @@ package com.ciudadsegura.service;
 
 import com.ciudadsegura.exception.RecursoNoEncontradoException;
 import com.ciudadsegura.model.ZonaRiesgo;
+import com.ciudadsegura.model.Usuario;
 import com.ciudadsegura.model.enums.NivelRiesgo;
+import com.ciudadsegura.repository.UsuarioRepository;
 import com.ciudadsegura.repository.ZonaRiesgoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,10 +26,14 @@ class ZonaRiesgoServiceTest {
     @Mock
     private ZonaRiesgoRepository zonaRiesgoRepository;
 
+    @Mock
+    private UsuarioRepository usuarioRepository;
+
     @InjectMocks
     private ZonaRiesgoService zonaRiesgoService;
 
     private ZonaRiesgo zona;
+    private Usuario creador;
 
     @BeforeEach
     void setUp() {
@@ -37,6 +43,7 @@ class ZonaRiesgoServiceTest {
         zona.setNivelRiesgo(NivelRiesgo.ALTO);
         zona.setLatitud(4.598);
         zona.setLongitud(-74.076);
+        creador = new Usuario("Usuario", "usuario@example.com", "clave-segura");
     }
 
     @Test
@@ -51,12 +58,23 @@ class ZonaRiesgoServiceTest {
 
     @Test
     void crear_debeGuardarLaZona() {
+        when(usuarioRepository.findByEmail("usuario@example.com")).thenReturn(Optional.of(creador));
         when(zonaRiesgoRepository.save(any(ZonaRiesgo.class))).thenReturn(zona);
 
-        ZonaRiesgo resultado = zonaRiesgoService.crear(zona);
+        ZonaRiesgo resultado = zonaRiesgoService.crear(zona, "usuario@example.com");
 
         assertEquals("Centro histórico", resultado.getNombre());
-        verify(zonaRiesgoRepository, times(1)).save(zona);
+        org.mockito.ArgumentCaptor<ZonaRiesgo> captor = org.mockito.ArgumentCaptor.forClass(ZonaRiesgo.class);
+        verify(zonaRiesgoRepository, times(1)).save(captor.capture());
+        assertEquals(creador, captor.getValue().getCreador());
+        assertEquals("Centro histórico", captor.getValue().getNombre());
+    }
+
+    @Test
+    void crear_sinUsuarioAutenticado_debeFallarAntesDeGuardar() {
+        assertThrows(com.ciudadsegura.exception.CredencialesInvalidasException.class,
+                () -> zonaRiesgoService.crear(zona, null));
+        verify(zonaRiesgoRepository, never()).save(any());
     }
 
     @Test

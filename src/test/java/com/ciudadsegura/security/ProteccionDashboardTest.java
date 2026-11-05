@@ -8,7 +8,9 @@ import com.ciudadsegura.model.enums.EstadoReporte;
 import com.ciudadsegura.model.enums.PrioridadReporte;
 import com.ciudadsegura.model.enums.TipoReporte;
 import com.ciudadsegura.repository.ReporteIncidenteRepository;
+import com.ciudadsegura.repository.AlertaRepository;
 import com.ciudadsegura.repository.UsuarioRepository;
+import com.ciudadsegura.repository.ZonaRiesgoRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -50,6 +52,12 @@ class ProteccionDashboardTest {
 
     @Autowired
     private ReporteIncidenteRepository reporteRepository;
+
+    @Autowired
+    private ZonaRiesgoRepository zonaRiesgoRepository;
+
+    @Autowired
+    private AlertaRepository alertaRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -141,9 +149,10 @@ class ProteccionDashboardTest {
     }
 
     @Test
-    void ciudadanosPuedenCrearZonasPeroSoloAdministradoresPuedenAdministrarZonasYAlertas() throws Exception {
+    void ciudadanosPuedenCrearZonasYAlertasPeroSoloAdministradoresPuedenAdministrarlas() throws Exception {
         String tokenCiudadano = crearToken("CIUDADANO");
         String tokenAdmin = crearToken("ADMINISTRADOR");
+        Usuario creador = guardarUsuario("prueba@example.com", RolUsuario.CIUDADANO);
 
         mockMvc.perform(post("/api/zonas-riesgo")
                         .header("Authorization", "Bearer " + tokenCiudadano)
@@ -151,7 +160,12 @@ class ProteccionDashboardTest {
                         .content("""
                                 {"nombre":"Zona ciudadano","nivelRiesgo":"MEDIO","latitud":4.61,"longitud":-74.08}
                                 """))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.nombre").value("Zona ciudadano"));
+        org.junit.jupiter.api.Assertions.assertEquals(creador.getId(),
+                zonaRiesgoRepository.findAll().stream()
+                        .filter(zona -> "Zona ciudadano".equals(zona.getNombre()))
+                        .findFirst().orElseThrow().getCreador().getId());
         mockMvc.perform(post("/api/zonas-riesgo")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -162,8 +176,18 @@ class ProteccionDashboardTest {
                 .andExpect(status().isForbidden());
         mockMvc.perform(delete("/api/zonas-riesgo/1").header("Authorization", "Bearer " + tokenCiudadano))
                 .andExpect(status().isForbidden());
-        mockMvc.perform(post("/api/alertas").header("Authorization", "Bearer " + tokenCiudadano))
-                .andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/alertas")
+                        .header("Authorization", "Bearer " + tokenCiudadano)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"titulo":"Alerta ciudadano","mensaje":"Mensaje","tipo":"SEGURIDAD"}
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.titulo").value("Alerta ciudadano"));
+        org.junit.jupiter.api.Assertions.assertEquals(creador.getId(),
+                alertaRepository.findAll().stream()
+                        .filter(alerta -> "Alerta ciudadano".equals(alerta.getTitulo()))
+                        .findFirst().orElseThrow().getCreador().getId());
         mockMvc.perform(put("/api/alertas/1").header("Authorization", "Bearer " + tokenCiudadano))
                 .andExpect(status().isForbidden());
         mockMvc.perform(delete("/api/alertas/1").header("Authorization", "Bearer " + tokenCiudadano))
@@ -173,9 +197,9 @@ class ProteccionDashboardTest {
                         .header("Authorization", "Bearer " + tokenAdmin)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"nombre":"Zona admin","nivelRiesgo":"ALTO","latitud":4.6,"longitud":-74.1}
-                                """))
-                .andExpect(status().isCreated());
+                                        {"nombre":"Zona admin","nivelRiesgo":"ALTO","latitud":4.6,"longitud":-74.1}
+                                        """))
+                        .andExpect(status().isCreated());
         mockMvc.perform(post("/api/alertas")
                         .header("Authorization", "Bearer " + tokenAdmin)
                         .contentType(MediaType.APPLICATION_JSON)

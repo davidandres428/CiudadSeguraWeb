@@ -47,6 +47,9 @@ class ReportesFlujoE2ETest {
         Usuario usuario = usuarioRepository.save(
                 new Usuario("Reporte E2E", "reportes-e2e@example.com", "hash-no-usado"));
         String token = crearToken(usuario.getEmail(), RolUsuario.CIUDADANO);
+        long reportesIniciales = Long.parseLong(mockMvc.perform(get("/api/reportes/count"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString());
         String reporte = """
                 {"titulo":"Incidente de prueba","descripcion":"Validación API end-to-end",
                 "tipo":"VANDALISMO","prioridad":"MEDIA","direccion":"Carrera 20"}
@@ -72,7 +75,7 @@ class ReportesFlujoE2ETest {
                 .andExpect(jsonPath("$[0].id").value(id));
         mockMvc.perform(get("/api/reportes/count"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").value(1));
+                .andExpect(jsonPath("$").value(reportesIniciales + 1));
     }
 
     private String crearToken(String email, RolUsuario rol) {

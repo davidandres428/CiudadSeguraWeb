@@ -156,4 +156,21 @@ class DataInitializerTest {
                 .count());
         assertFalse(passwordEncoder.matches("local-seed-test-password", existente.getPassword()));
     }
+
+    @Test
+    @Transactional
+    void actualizaNombreRolYContrasenaDelAdministradorExistente() {
+        Usuario admin = usuarioRepository.findByEmail("david.andresgalvis@gmail.com").orElseThrow();
+        admin.setNombre("Nombre anterior");
+        admin.setRol(RolUsuario.CIUDADANO);
+        admin.setPassword(passwordEncoder.encode("contrasena-anterior"));
+        usuarioRepository.save(admin);
+
+        dataInitializer.run();
+
+        Usuario actualizado = usuarioRepository.findByEmail("david.andresgalvis@gmail.com").orElseThrow();
+        assertEquals("David Andrés Galvis Jaime", actualizado.getNombre());
+        assertEquals(RolUsuario.ADMINISTRADOR, actualizado.getRol());
+        assertTrue(passwordEncoder.matches("local-seed-test-password", actualizado.getPassword()));
+    }
 }

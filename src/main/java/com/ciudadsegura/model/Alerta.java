@@ -1,5 +1,6 @@
 package com.ciudadsegura.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ciudadsegura.model.enums.SeveridadAlerta;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -39,6 +40,11 @@ public class Alerta {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "zona_riesgo_id")
     private ZonaRiesgo zonaRiesgo;
+
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "creado_por_id")
+    private Usuario creador;
 
     public Alerta() {
     }
@@ -115,5 +121,13 @@ public class Alerta {
 
     public void setZonaRiesgo(ZonaRiesgo zonaRiesgo) {
         this.zonaRiesgo = zonaRiesgo;
+    }
+
+    public Usuario getCreador() {
+        return creador;
+    }
+
+    public void setCreador(Usuario creador) {
+        this.creador = creador;
     }
 }

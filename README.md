@@ -90,10 +90,11 @@ desde Docker en Render, incluye el JAR de la raíz en Git junto con el Dockerfil
 El inicializador está activado por defecto y puede desactivarse con `SEED_DATA_ENABLED=false`.
 No requiere que exista `SEED_ADMIN_PASSWORD` para arrancar. En cada inicio completa las
 tablas vacías sin duplicar los datos existentes: 15 zonas, 128 reportes georreferenciados, tres
-alertas activas y cinco comunicados. La cuenta administradora principal se crea o actualiza con el
-rol administrativo. Si se establece `SEED_ADMIN_PASSWORD` como secreto, se codifica con BCrypt y
-se aplica a la cuenta; sin esa variable, la contraseña existente se conserva, o se genera una
-contraseña aleatoria no conocida al crear la cuenta nueva. Crea los usuarios de demostración necesarios para asociar reportes.
+alertas activas y cinco comunicados. La cuenta `David Andrés Galvis Jaime`
+(`david.andresgalvis@gmail.com`) se crea o actualiza con el rol administrador. Configura
+`SEED_ADMIN_PASSWORD` como secreto para codificar con BCrypt y aplicar la contraseña administrativa;
+si no se configura, se conserva la contraseña existente o se genera una aleatoria no conocida al
+crear una cuenta nueva. Crea los usuarios de demostración necesarios para asociar reportes.
 Las contraseñas de los ciudadanos de demostración se generan aleatoriamente y no son utilizables
 para iniciar sesión.
 
@@ -124,7 +125,7 @@ Docker con estas variables en Environment:
 
 Render debe usar la base PostgreSQL, no H2 ni un disco dentro del contenedor, que no es persistente.
 La contraseña administrativa configurada se guarda únicamente como BCrypt; no se establece ni se
-publica una contraseña fija compartida como `Admin123!`. Sin ese secreto, usa el proveedor social
+publica una contraseña fija compartida. Sin ese secreto, usa el proveedor social
 con correo verificado si está habilitado, o configura `SEED_ADMIN_PASSWORD` para garantizar login
 tradicional. La columna de rol de la entidad usa `ADMINISTRADOR`, que la seguridad traduce a
 `ROLE_ADMIN`.

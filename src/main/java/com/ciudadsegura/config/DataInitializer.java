@@ -16,6 +16,7 @@ import com.ciudadsegura.repository.NoticiaRepository;
 import com.ciudadsegura.repository.ReporteIncidenteRepository;
 import com.ciudadsegura.repository.UsuarioRepository;
 import com.ciudadsegura.repository.ZonaRiesgoRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -40,6 +41,7 @@ public class DataInitializer implements CommandLineRunner {
     private final AlertaRepository alertaRepository;
     private final NoticiaRepository noticiaRepository;
     private final PasswordEncoder passwordEncoder;
+    private final String adminPassword;
 
     public DataInitializer(
             UsuarioRepository usuarioRepository,
@@ -47,32 +49,38 @@ public class DataInitializer implements CommandLineRunner {
             ReporteIncidenteRepository reporteRepository,
             AlertaRepository alertaRepository,
             NoticiaRepository noticiaRepository,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            @Value("${app.seed.admin-password:${SEED_ADMIN_PASSWORD:}}") String adminPassword) {
         this.usuarioRepository = usuarioRepository;
         this.zonaRiesgoRepository = zonaRiesgoRepository;
         this.reporteRepository = reporteRepository;
         this.alertaRepository = alertaRepository;
         this.noticiaRepository = noticiaRepository;
         this.passwordEncoder = passwordEncoder;
+        this.adminPassword = adminPassword;
     }
 
     @Override
     @Transactional
     public void run(String... args) {
+        String nombreAdmin = "David Andrés Galvis Jaime";
         String correoAdmin = "david.andresgalvis@gmail.com";
-        String passwordFinal = "Admin123!";
 
-        // Buscar o crear al administrador principal
         Usuario usuario = usuarioRepository.findByEmail(correoAdmin).orElse(null);
 
         if (usuario == null) {
-            usuario = new Usuario("David Andrés Galvis", correoAdmin, passwordEncoder.encode(passwordFinal));
-            usuario.setRol(RolUsuario.ADMINISTRADOR);
+            String passwordInicial = adminPassword.isBlank()
+                    ? UUID.randomUUID().toString()
+                    : adminPassword;
+            usuario = new Usuario(nombreAdmin, correoAdmin, passwordEncoder.encode(passwordInicial));
             LOGGER.info("ADMINISTRADOR CREADO DESDE CERO: " + correoAdmin);
         } else {
-            usuario.setRol(RolUsuario.ADMINISTRADOR);
-            usuario.setPassword(passwordEncoder.encode(passwordFinal));
             LOGGER.info("ADMINISTRADOR ACTUALIZADO EXITOSAMENTE: " + correoAdmin);
+        }
+        usuario.setNombre(nombreAdmin);
+        usuario.setRol(RolUsuario.ADMINISTRADOR);
+        if (!adminPassword.isBlank()) {
+            usuario.setPassword(passwordEncoder.encode(adminPassword));
         }
         usuarioRepository.save(usuario);
 

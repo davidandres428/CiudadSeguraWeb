@@ -63,6 +63,9 @@ class AutenticacionFlujoE2ETest {
                                 "tipo":"ROBO","prioridad":"ALTA","direccion":"Calle E2E 10"}
                                 """))
                 .andExpect(status().isUnauthorized());
+        long reportesIniciales = Long.parseLong(mockMvc.perform(get("/api/reportes/count"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString());
 
         MvcResult reporteResult = mockMvc.perform(post("/api/reportes")
                         .header("Authorization", "Bearer " + token)
@@ -83,7 +86,8 @@ class AutenticacionFlujoE2ETest {
         MvcResult countResult = mockMvc.perform(get("/api/reportes/count"))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertEquals(1, Long.parseLong(countResult.getResponse().getContentAsString()));
+        assertEquals(reportesIniciales + 1,
+                Long.parseLong(countResult.getResponse().getContentAsString()));
     }
 
     private String extraerCampo(String json, String nombre) {

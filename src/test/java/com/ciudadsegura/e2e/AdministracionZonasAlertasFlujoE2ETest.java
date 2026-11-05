@@ -1,6 +1,10 @@
 package com.ciudadsegura.e2e;
 
 import com.ciudadsegura.CiudadSeguraApplication;
+import com.ciudadsegura.model.Usuario;
+import com.ciudadsegura.repository.AlertaRepository;
+import com.ciudadsegura.repository.UsuarioRepository;
+import com.ciudadsegura.repository.ZonaRiesgoRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,6 +22,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 import static org.hamcrest.Matchers.hasItems;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -36,17 +41,30 @@ class AdministracionZonasAlertasFlujoE2ETest {
     @Autowired
     private JwtEncoder jwtEncoder;
 
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private ZonaRiesgoRepository zonaRiesgoRepository;
+
+    @Autowired
+    private AlertaRepository alertaRepository;
+
     @Test
     void ciudadanosCreanZonasYAdministradoresGestionanAlertas() throws Exception {
         String ciudadano = crearToken("ciudadano@example.com", "CIUDADANO");
         String administrador = crearToken("admin@example.com", "ADMINISTRADOR");
+        guardarUsuario("ciudadano@example.com");
+        guardarUsuario("admin@example.com");
+        long zonasIniciales = zonaRiesgoRepository.count();
+        long alertasIniciales = alertaRepository.count();
 
         mockMvc.perform(get("/api/zonas-riesgo/count"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").value(0));
+                .andExpect(jsonPath("$").value(zonasIniciales));
         mockMvc.perform(get("/api/alertas/count"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").value(0));
+                .andExpect(jsonPath("$").value(alertasIniciales));
         mockMvc.perform(post("/api/zonas-riesgo")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -63,6 +81,22 @@ class AdministracionZonasAlertasFlujoE2ETest {
                         .header("Authorization", "Bearer " + ciudadano)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
+                                {"descripcion":"Faltan campos requeridos"}
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detalles").exists());
+        mockMvc.perform(post("/api/alertas")
+                        .header("Authorization", "Bearer " + ciudadano)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"mensaje":"Falta título","tipo":"SEGURIDAD"}
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detalles").exists());
+        mockMvc.perform(post("/api/zonas-riesgo")
+                        .header("Authorization", "Bearer " + ciudadano)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
                                 {"nombre":"Zona denegada","nivelRiesgo":"ALTO","latitud":4.6,"longitud":-74.1}
                                 """))
                 .andExpect(status().isCreated());
@@ -72,7 +106,15 @@ class AdministracionZonasAlertasFlujoE2ETest {
                         .content("""
                                 {"titulo":"Alerta denegada","mensaje":"Sin permisos","tipo":"SEGURIDAD","activa":true}
                                 """))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.titulo").value("Alerta denegada"));
+
+        assertEquals("ciudadano@example.com", zonaRiesgoRepository.findAll().stream()
+                .filter(zona -> "Zona denegada".equals(zona.getNombre()))
+                .findFirst().orElseThrow().getCreador().getEmail());
+        assertEquals("ciudadano@example.com", alertaRepository.findAll().stream()
+                .filter(alerta -> "Alerta denegada".equals(alerta.getTitulo()))
+                .findFirst().orElseThrow().getCreador().getEmail());
 
         mockMvc.perform(post("/api/zonas-riesgo")
                         .header("Authorization", "Bearer " + administrador)
@@ -96,13 +138,13 @@ class AdministracionZonasAlertasFlujoE2ETest {
                 .andExpect(jsonPath("$[*].nombre", hasItems("Zona denegada", "Zona E2E")));
         mockMvc.perform(get("/api/alertas"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].titulo").value("Alerta E2E"));
+                .andExpect(jsonPath("$[*].titulo", hasItems("Alerta denegada", "Alerta E2E")));
         mockMvc.perform(get("/api/zonas-riesgo/count"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").value(2));
+                .andExpect(jsonPath("$").value(zonasIniciales + 2));
         mockMvc.perform(get("/api/alertas/count"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").value(1));
+                .andExpect(jsonPath("$").value(alertasIniciales + 2));
     }
 
     @Test
@@ -127,5 +169,9 @@ class AdministracionZonasAlertasFlujoE2ETest {
                 .build();
         return jwtEncoder.encode(JwtEncoderParameters.from(
                 JwsHeader.with(MacAlgorithm.HS256).build(), claims)).getTokenValue();
+    }
+
+    private void guardarUsuario(String email) {
+        usuarioRepository.save(new Usuario("Usuario de prueba", email, "clave-segura"));
     }
 }

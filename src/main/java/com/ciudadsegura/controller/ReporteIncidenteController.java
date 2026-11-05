@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.charset.StandardCharsets;
@@ -73,8 +74,8 @@ public class ReporteIncidenteController {
     @PostMapping
     public ResponseEntity<ReporteIncidente> crear(@Valid @RequestBody ReporteIncidente reporte,
                                                    @AuthenticationPrincipal Jwt jwt) {
-        ReporteIncidente creado = reporteService.crear(reporte, jwt.getSubject());
-        return ResponseEntity.status(HttpStatus.CREATED).body(creado);
+        ReporteIncidente creado = reporteService.crear(reporte, obtenerEmailAutenticado(jwt));
+        return ResponseEntity.created(java.net.URI.create("/api/reportes/" + creado.getId())).body(creado);
     }
 
     @PutMapping("/{id}")
@@ -93,5 +94,13 @@ public class ReporteIncidenteController {
     private boolean esAdministrador(Authentication authentication) {
         return authentication.getAuthorities().stream()
                 .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
+    }
+
+    private String obtenerEmailAutenticado(Jwt jwt) {
+        if (jwt == null || jwt.getSubject() == null || jwt.getSubject().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+                    "No se pudo identificar al usuario autenticado.");
+        }
+        return jwt.getSubject();
     }
 }
